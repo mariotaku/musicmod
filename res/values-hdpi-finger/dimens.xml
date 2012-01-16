@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<dimen name="album_art_height">240dip</dimen>
+	<dimen name="album_art_width">240dip</dimen>
+	<dimen name="gridview_bitmap_height">160dip</dimen>
+	<dimen name="gridview_bitmap_width">160dip</dimen>
+</resources>

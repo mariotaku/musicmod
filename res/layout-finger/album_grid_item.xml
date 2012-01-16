@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--		  Copyright (C) 2011 The MusicMod Project
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+			http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="@dimen/gridview_item_width"
+	android:layout_height="@dimen/gridview_item_height"
+	android:gravity="center">
+
+	 <!-- icon is used for albumart, the grabber in edit playlist mode, and the playlist icon in the list of playlists -->
+	<ImageView android:id="@+id/album_art"
+		android:src="@drawable/albumart_mp_unknown"
+		android:scaleType="centerInside"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"/>
+	
+	<LinearLayout
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:layout_gravity="bottom"
+		android:padding="@dimen/list_text_space"
+		android:background="#A0000000"
+		android:orientation="vertical">
+
+		<TextView
+			android:id="@+id/album_name"
+			android:text="@string/album"
+			android:textAppearance="?android:attr/textAppearanceMedium"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_gravity="bottom"
+			android:ellipsize="marquee"
+			android:singleLine="true"
+			android:drawableRight="@drawable/ic_indicator_nowplaying_small"/>
+	
+		<TextView
+			android:id="@+id/artist_name"
+			android:text="@string/artist"
+			android:ellipsize="end"
+			android:textAppearance="?android:attr/textAppearanceSmall"
+			android:singleLine="true"
+			android:scrollHorizontally="true"
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_gravity="bottom"/>
+			
+	</LinearLayout>
+	
+</FrameLayout>

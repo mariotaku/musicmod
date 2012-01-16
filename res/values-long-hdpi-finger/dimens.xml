@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<dimen name="album_art_height">256dip</dimen>
+	<dimen name="album_art_width">256dip</dimen>
+	<dimen name="lyrics_scroll_fading_edge">80dip</dimen>
+</resources>

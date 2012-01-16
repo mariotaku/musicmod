@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+	<item android:id="@+id/party_shuffle" android:title="@string/party_shuffle" android:icon="@drawable/ic_menu_party_shuffle"/>
+	<item android:id="@+id/shuffle_all" android:title="@string/shuffle_all" android:icon="@drawable/ic_menu_shuffle"/>
+	<item android:id="@+id/save_as_playlist" android:title="@string/save_as_playlist" android:icon="@android:drawable/ic_menu_save"/>
+	<item android:id="@+id/clear_playlist" android:title="@string/clear_playlist" android:icon="@drawable/ic_menu_clear_playlist"/>
+	<item android:id="@+id/settings" android:title="@string/settings" android:icon="@android:drawable/ic_menu_preferences"/>
+</menu>

@@ -1,0 +1,324 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2007 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+  
+          http://www.apache.org/licenses/LICENSE-2.0
+  
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+        package="org.musicmod.android">
+
+    <original-package android:name="org.musicmod.android" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.BROADCAST_STICKY" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+   	<uses-permission android:name="android.permission.RECORD_AUDIO"/>
+	<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
+    <uses-sdk android:minSdkVersion="8"/>
+
+    <application android:icon="@drawable/app_music"
+        android:label="@string/musicbrowserlabel"
+        android:taskAffinity="android.task.music"
+        android:allowTaskReparenting="true">
+        <meta-data
+            android:name="android.app.default_searchable"
+            android:value="org.musicmod.android.QueryBrowserActivity"
+        />
+        <activity android:name="org.musicmod.android.MusicBrowserActivity"
+            android:theme="@android:style/Theme.NoTitleBar"
+            android:exported="true"
+        >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MUSIC_PLAYER" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <receiver android:name="org.musicmod.android.MediaButtonIntentReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.MEDIA_BUTTON" />
+                <action android:name="android.media.AUDIO_BECOMING_NOISY" />
+            </intent-filter>
+        </receiver>
+        <!-- This is the "current music playing" panel, which has special
+             launch behavior.  We clear its task affinity, so it will not
+             be associated with the main media task and if launched
+             from a notification will not bring the rest of the media app
+             to the foreground.  We make it singleTask so that when others
+             launch it (such as media) we will launch in to our own task.
+             We set clearTaskOnLaunch because the user
+             can go to a playlist from this activity, so if they later return
+             to it we want it back in its initial state.  We exclude from
+             recents since this is accessible through a notification when
+             appropriate. -->
+        <activity android:name=".activity.MusicPlaybackActivity"
+                android:theme="@android:style/Theme.Light.NoTitleBar"
+                android:label="@string/mediaplaybacklabel"
+                android:taskAffinity=""
+               
+                android:clearTaskOnLaunch="true"
+                android:excludeFromRecents="true"
+                android:exported="true" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="content"/>
+                <data android:host="media"/>
+                <data android:mimeType="audio/*"/>
+                <data android:mimeType="application/ogg"/>
+                <data android:mimeType="application/x-ogg"/>
+                <data android:mimeType="application/itunes"/>
+                <data android:mimeType="application/x-flac"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="org.musicmod.android.PLAYBACK_VIEWER" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity android:name="AudioPreview" android:theme="@android:style/Theme.Dialog"
+                android:taskAffinity=""
+                android:excludeFromRecents="true" android:exported="true" >
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="file"/>
+                <data android:mimeType="audio/*"/>
+                <data android:mimeType="application/ogg"/>
+                <data android:mimeType="application/x-ogg"/>
+                <data android:mimeType="application/itunes"/>
+                <data android:mimeType="application/x-flac"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="http" />
+                <data android:mimeType="audio/*"/>
+                <data android:mimeType="application/ogg"/>
+                <data android:mimeType="application/x-ogg"/>
+                <data android:mimeType="application/itunes"/>
+                <data android:mimeType="application/x-flac"/>
+            </intent-filter>
+            <intent-filter
+                android:priority="-1">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="content" />
+                <data android:mimeType="audio/*"/>
+                <data android:mimeType="application/ogg"/>
+                <data android:mimeType="application/x-ogg"/>
+                <data android:mimeType="application/itunes"/>
+                <data android:mimeType="application/x-flac"/>
+            </intent-filter>
+        </activity>
+
+        <activity android:name="org.musicmod.android.ArtistAlbumBrowserActivity" android:exported="false" >
+            <intent-filter>
+                <action android:name="android.intent.action.PICK" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.dir/artistalbum"/>
+            </intent-filter>
+        </activity>
+        <activity android:name="org.musicmod.android.AlbumBrowserActivity" android:exported="false" >
+            <intent-filter>
+                <action android:name="android.intent.action.PICK" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.dir/album"/>
+            </intent-filter>
+        </activity>
+        <activity android:name="org.musicmod.android.NowPlayingActivity" android:exported="false" >
+            <intent-filter>
+                <action android:name="android.intent.action.PICK" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.dir/nowplaying"/>
+            </intent-filter>
+        </activity>
+        <activity android:name="org.musicmod.android.TrackBrowserActivity" android:exported="false" >
+            <intent-filter>
+                <action android:name="android.intent.action.EDIT" />
+                <action android:name="android.intent.action.PICK" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.dir/track"/>
+            </intent-filter>
+        </activity>
+        <activity android:name="org.musicmod.android.QueryBrowserActivity"
+                android:theme="@android:style/Theme.NoTitleBar"
+                android:exported="true" >
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+                <action android:name="android.intent.action.MEDIA_SEARCH" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable"
+            />
+        </activity>
+        <activity android:name="org.musicmod.android.PlaylistBrowserActivity"
+                android:label="@string/musicbrowserlabel" 
+                android:exported="true" >
+            <intent-filter>
+                <action android:name="android.intent.action.PICK" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.dir/playlist"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="vnd.android.cursor.dir/playlist"/>
+            </intent-filter>
+        </activity>
+        
+        <activity android:name="org.musicmod.android.MediaPickerActivity"
+                android:label="@string/mediapickerlabel" android:exported="false" >
+        </activity>
+        <activity android:name="org.musicmod.android.MusicPicker"
+                android:label="@string/music_picker_title" android:exported="true" >
+            <!-- First way to invoke us: someone asks to get content of
+                 any of the audio types we support. -->
+            <intent-filter>
+                <action android:name="android.intent.action.GET_CONTENT" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.OPENABLE" />
+                <data android:mimeType="audio/*"/>
+                <data android:mimeType="application/ogg"/>
+                <data android:mimeType="application/x-ogg"/>
+                <data android:mimeType="application/x-flac"/>
+            </intent-filter>
+            <!-- Second way to invoke us: someone asks to pick an item from
+                 some media Uri. -->
+            <intent-filter>
+                <action android:name="android.intent.action.PICK"/>
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.OPENABLE"/>
+                <data android:mimeType="vnd.android.cursor.dir/audio"/>
+            </intent-filter>
+        </activity>
+        
+        		<!-- Playlist pick dialog -->
+		<activity android:theme="@android:style/Theme.NoDisplay" android:name=".dialog.PlaylistPickerDialog" android:label="@string/playlists" android:icon="@drawable/ic_launcher_shortcut_music_playlist">
+			<intent-filter>
+				<action android:name="org.musicmod.android.ADD_TO_PLAYLIST"/>
+				<category android:name="android.intent.category.DEFAULT"/>
+			</intent-filter>
+			<intent-filter>
+				<action android:name="android.intent.action.CREATE_SHORTCUT"/>
+				<category android:name="android.intent.category.DEFAULT"/>
+			</intent-filter>
+		</activity>
+		<!-- Playlist create/rename dialog -->
+		<activity android:theme="@android:style/Theme.NoDisplay" android:name=".dialog.PlaylistDialog" android:label="@string/rename">
+			<intent-filter>
+				<action android:name="org.musicmod.android.CREATE_PLAYLIST"/>
+				<category android:name="android.intent.category.DEFAULT"/>
+			</intent-filter>
+			<intent-filter>
+				<action android:name="org.musicmod.android.RENAME_PLAYLIST"/>
+				<category android:name="android.intent.category.DEFAULT"/>
+			</intent-filter>
+		</activity>
+		<!-- Week selection dialog -->
+		<activity android:theme="@android:style/Theme.NoDisplay" android:name=".dialog.WeekSelectorDialog" android:label="@string/set_time">
+			<intent-filter>
+				<action android:name="org.musicmod.android.WEEK_SELECTOR"/>
+				<category android:name="android.intent.category.DEFAULT"/>
+			</intent-filter>
+		</activity>
+		<activity android:theme="@android:style/Theme.Dialog" android:name=".activity.ScanningProgress" android:label="@string/scanning"/>
+		<!-- Item delection dialog -->
+		<activity android:theme="@android:style/Theme.NoDisplay" android:name=".dialog.DeleteDialog" android:label="@string/delete">
+			<intent-filter>
+				<action android:name="org.musicmod.android.DELETE_ITEMS"/>
+				<category android:name="android.intent.category.DEFAULT"/>
+			</intent-filter>
+		</activity>
+		<activity android:theme="@android:style/Theme.NoDisplay" android:name=".dialog.SleepTimerDialog" android:label="@string/sleep_timer">
+			<intent-filter>
+				<action android:name="org.musicmod.android.SLEEP_TIMER"/>
+				<category android:name="android.intent.category.DEFAULT"/>
+			</intent-filter>
+		</activity>
+		<!-- Search albumart/lyrics dialog -->
+		<activity android:theme="@android:style/Theme.NoDisplay" android:name=".dialog.SearchDialog" android:label="@android:string/search_go">
+			<intent-filter>
+				<action android:name="org.musicmod.android.SEARCH_LYRICS"/>
+				<category android:name="android.intent.category.DEFAULT"/>
+			</intent-filter>
+			<intent-filter>
+				<action android:name="org.musicmod.android.SEARCH_ALBUMART"/>
+				<category android:name="android.intent.category.DEFAULT"/>
+			</intent-filter>
+		</activity>
+		<activity android:theme="@android:style/Theme.NoDisplay" android:name=".activity.PlayShortcut" android:label="@string/play_selection">
+			<intent-filter>
+				<action android:name="org.musicmod.android.PLAY_SHORTCUT"/>
+				<category android:name="android.intent.category.DEFAULT"/>
+			</intent-filter>
+		</activity>
+        
+        <activity android:name="org.musicmod.android.CreatePlaylist"
+            android:theme="@android:style/Theme.Dialog" android:exported="false" />
+        <activity android:name="org.musicmod.android.RenamePlaylist"
+            android:theme="@android:style/Theme.Dialog" android:exported="false" />
+        <activity android:name="org.musicmod.android.DeleteItems"
+            android:theme="@android:style/Theme.Dialog" android:exported="false" />
+        <activity android:name="org.musicmod.android.ScanningProgress"
+            android:theme="@android:style/Theme.Dialog" android:exported="false" />
+        <activity android:name=".activity.MusicSettingsActivity" android:label="@string/settings" >
+			<intent-filter>
+				<action android:name="org.musicmod.android.MUSIC_SETTINGS"/>
+				<category android:name="android.intent.category.DEFAULT"/>
+			</intent-filter>
+		</activity>
+        <activity android:name=".activity.AppearanceSettingsActivity" android:label="@string/settings">
+			<intent-filter>
+				<action android:name="org.musicmod.android.APPEARANCE_SETTINGS"/>
+				<category android:name="android.intent.category.DEFAULT"/>
+			</intent-filter>
+		</activity>
+        
+        <activity android:name=".activity.EqualizerActivity" android:label="@string/equalizer" android:theme="@android:style/Theme.Dialog">
+			<intent-filter>
+				<action android:name="org.musicmod.android.EQUALIZER"/>
+				<category android:name="android.intent.category.DEFAULT"/>
+			</intent-filter>
+		</activity>
+        <activity android:name=".activity.PluginsManagerActivity" android:label="@string/plugins_manager" android:launchMode="singleTask">
+			<intent-filter>
+				<action android:name="org.musicmod.android.PLUGINS_MANAGER"/>
+				<category android:name="android.intent.category.DEFAULT"/>
+			</intent-filter>
+		</activity>
+        <service android:name=".MusicPlaybackService"
+            android:exported="false" />
+        <receiver android:name="org.musicmod.android.MediaAppWidgetProvider4x1" android:label="Music (4x1)">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/appwidget4x1_info" />
+        </receiver>
+        <receiver android:name=".MediaAppWidgetProvider4x2" android:label="Music (4x2)">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/appwidget4x2_info" />
+        </receiver>
+    </application>
+</manifest>

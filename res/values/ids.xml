@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<item type="id" name="open_url"/>
+	<item type="id" name="add_to_playlist"/>
+	<item type="id" name="sleep_timer"/>
+	<item type="id" name="save_as_playlist"/>
+	<item type="id" name="clear_playlist"/>
+	<item type="id" name="playlist_selected"/>
+	<item type="id" name="new_playlist"/>
+	<item type="id" name="play_selection"/>
+	<item type="id" name="goto_playback"/>
+	<item type="id" name="goto_start"/>
+	<item type="id" name="party_shuffle"/>
+	<item type="id" name="shuffle_all"/>
+	<item type="id" name="play_all"/>
+	<item type="id" name="delete_items"/>
+	<item type="id" name="equalizer"/>
+	<item type="id" name="equalizer_presets"/>
+	<item type="id" name="equalizer_reset"/>
+	<item type="id" name="scan_done"/>
+	<item type="id" name="queue"/>
+	<item type="id" name="settings"/>
+	<item type="id" name="search"/>
+	<item type="id" name="remove"/>
+</resources>

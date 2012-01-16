@@ -1,0 +1,13 @@
+									The MusicMod Project
+
+	This project is based on following open-source project.
+
+* Music Mod							http://development.piratemedia.tv/ (Main code)
+* Toralyrics							http://code.google.com/p/toralyrics (Lyrics parser and splitter)
+* juniversalchardet					http://code.google.com/p/juniversalchardet/ (Charset detector)
+* LiteListen							http://code.google.com/p/litelisten (Download lyrics from qianqian.com server)
+* PMix									http://code.google.com/p/pmix (Last.fm library to fetching album art)
+* Cubed								https://github.com/fabrantes/rockonnggl (Last.fm Scrobble API)
+* NewQuickAction3D					https://github.com/lorensiuswlt/NewQuickAction3D (Gallery3D like quickactio )
+* android-ColorPickerPreference	https://github.com/attenzione/android-ColorPickerPreference/
+* shake-toolbox						http://code.google.com/p/shake-toolbox/ (Shake detector)

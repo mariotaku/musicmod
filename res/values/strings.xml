@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+/*
+** Copyright 2007, The Android Open Source Project
+**
+** Licensed under the Apache License, Version 2.0 (the "License"); 
+** you may not use this file except in compliance with the License. 
+** You may obtain a copy of the License at 
+**
+**	 http://www.apache.org/licenses/LICENSE-2.0 
+**
+** Unless required by applicable law or agreed to in writing, software 
+** distributed under the License is distributed on an "AS IS" BASIS, 
+** WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. 
+** See the License for the specific language governing permissions and 
+** limitations under the License.
+*/
+-->
+
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+	<string translatable="false" name="durationformatshort"><xliff:g id="format">%2$d:%5$02d</xliff:g></string>
+	<string translatable="false" name="durationformatlong"><xliff:g id="format">%1$d:%3$02d:%5$02d</xliff:g></string>
+	<string name="goto_start">Library</string>
+	<string name="goto_playback">Playback</string>
+	<string name="party_shuffle">Party shuffle</string>
+	<string name="party_shuffle_off">Party shuffle off</string>
+	<string name="delete_item">Delete</string>
+	<string name="shuffle_all">Shuffle all</string>
+	<string name="play_all">Play all</string>
+	<string name="delete_artist_desc">All songs by <xliff:g id="artist">%s</xliff:g> will be permanently deleted from your device.</string>
+	<string name="delete_album_desc">The entire album \"<xliff:g id="album">%s</xliff:g>\" will be permanently deleted from your device.</string>
+	<string name="delete_song_desc">\"<xliff:g id="song">%s</xliff:g>\" will be permanently deleted from your device.</string>
+	<string name="scanning">Scanning for media…</string>
+	<string name="nowplaying_title">Now playing</string>
+	<string name="partyshuffle_title">Party shuffle</string>
+	<string name="artists_title">Artists</string>
+	<string name="albums_menu">Albums</string>
+	<string name="albums_title">Albums</string>
+	<string name="tracks_menu">Songs</string>
+	<string name="tracks_title">Songs</string>
+	<string name="playlists_menu">Playlists</string>
+	<string name="all_media">All media</string>
+	<string name="no_tracks">No songs</string>
+	<string name="no_playlists">No playlists</string>
+	<string name="delete">Delete</string>
+	<string name="edit">Edit</string>
+	<string name="rename">Rename</string>
+	<string name="playlist_deleted">Playlist deleted.</string>
+	<string name="playlist_renamed">Playlist renamed.</string>
+	<string name="recentlyadded">Recently added</string>
+	<string name="recentlyadded_title">Recently added</string>
+	<string name="podcasts_listitem">Podcasts</string>
+	<string name="podcasts_title">Podcasts</string>
+	<string name="sdcard_missing_title">No SD card</string>
+	<string name="sdcard_missing_title_nosdcard">No USB storage</string>
+	<string name="sdcard_missing">Your phone does not have an SD card inserted.</string>
+	<string name="sdcard_missing_nosdcard">Your phone does not have USB storage.</string>
+	<string name="sdcard_busy_title">SD card unavailable</string>
+	<string name="sdcard_busy_title_nosdcard">USB storage unavailable</string>
+	<string name="sdcard_busy">Sorry, your SD card is busy.</string>
+	<string name="sdcard_busy_nosdcard">Sorry, your USB storage is busy.</string>
+	<string name="sdcard_error_title">SD card error</string>
+	<string name="sdcard_error_title_nosdcard">USB storage error</string>
+	<string name="sdcard_error">An error was encountered on your SD card.</string>
+	<string name="sdcard_error_nosdcard">An error was encountered on your USB storage.</string>
+	<string name="unknown_artist_name">Unknown artist</string>
+	<string name="unknown_album_name">Unknown album</string>
+	<string name="shuffle_on_notif">Shuffle is on.</string>
+	<string name="shuffle_off_notif">Shuffle is off.</string>
+	<string name="repeat_off_notif">Repeat is off.</string>
+	<string name="repeat_current_notif">Repeating current song.</string>
+	<string name="repeat_all_notif">Repeating all songs.</string>
+	<string name="ringtone_menu">Use as phone ringtone</string>
+	<string name="ringtone_menu_short">Use as ringtone</string>
+	<string name="ringtone_set">\"<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\" set as phone ringtone.</string>
+	<string name="play_selection">Play</string>
+	<string name="add_to_playlist">Add to playlist</string>
+	<string name="queue">Current playlist</string>
+	<string name="new_playlist">New</string>
+	<string name="new_playlist_name_template">New playlist <xliff:g id="number">%d</xliff:g></string>
+	<string name="emptyplaylist">Selected playlist is empty.</string>
+	<string name="create_playlist_create_text">Save</string>
+	<string name="create_playlist_overwrite_text">Overwrite</string>
+	<string name="service_start_error_title">Playback problem</string>
+	<string name="service_start_error_msg">Sorry, the song could not be played.</string>
+	<string name="service_start_error_button">OK</string>
+	<string name="weekpicker_set">Done</string>
+	<string name="weekpicker_title">Set time</string>
+	<string name="save_as_playlist">Save as playlist</string>
+	<string name="clear_playlist">Clear playlist</string>
+	<string name="musicbrowserlabel">Music</string>
+	<string name="musicshortcutlabel">Music playlist</string>
+	<string name="mediaplaybacklabel">Music</string>
+	<string name="mediapickerlabel">Music</string>
+	<string name="playback_failed">Sorry, the player does not support this type of audio file.</string>
+	<string name="cancel">Cancel</string>
+	<string name="remove_from_playlist">Remove from playlist</string>
+	<string name="streamloadingtext">Connecting to <xliff:g id="host">%s</xliff:g></string>
+	<string name="mediasearch">Search for <xliff:g id="term" example="Beethoven">%s</xliff:g> using:</string>
+	<string name="working_artists">Artists\u2026</string>
+	<string name="working_albums">Albums\u2026</string>
+	<string name="working_songs">Songs\u2026</string>
+	<string name="working_playlists">Playlists\u2026</string>
+	<string name="loading">Loading</string>
+	<string name="sort_by_track">Tracks</string>
+	<string name="sort_by_album">Albums</string>
+	<string name="sort_by_artist">Artists</string>
+	<string name="music_picker_title">Select music track</string>
+	<string name="gadget_track">Track <xliff:g id="track_number">%d</xliff:g></string>
+	<string name="fail_to_start_stream">Failed to play the requested stream.</string>
+	<string name="search_settings_description">Artists, albums, and tracks</string>
+	<string name="search_hint">Search Music</string>
+	<string name="fast_scroll_alphabet">\u0020ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
+	<string name="widget_initial_text">Touch to select music.</string>
+	<string name="effectspanel">Sound effects</string>
+	<string name="settings">Settings</string>
+	<string name="enable_focus_loss_ducking_title">Focus loss ducking</string>
+	<string name="enable_focus_loss_ducking_summary">Instead of pausing playback, lower playback volume during audible notifications</string>
+	<string name="sleep_timer_disabled">Sleep timer disabled</string>
+	<string name="sleep_timer_enabled">Sleep timer enabled</string>
+	<string name="notification_sleep_timer">Music playback will stop at <xliff:g id="time">%s</xliff:g></string>
+	<string translatable="false" name="albumsongseparator">\n</string>
+	<string translatable="false" name="notification_artist_album"><xliff:g id="album">%2$s</xliff:g> - <xliff:g id="artist">%1$s</xliff:g></string>
+	<string name="test">Test</string>
+	<string name="save">Save</string>
+	<string name="overwrite">Overwrite</string>
+	<string name="delete_music">Delete Music</string>
+	<string name="delete_lyrics">Delete Lyrics</string>
+	<string name="delete_confirm">The following items will be permanently deleted:<xliff:g id="content">%s</xliff:g></string>
+	<string name="delete_artist_tracks">All songs by <xliff:g id="artist">%s</xliff:g></string>
+	<string name="delete_artist_lyrics">All lyrics from songs by <xliff:g id="artist">%s</xliff:g></string>
+	<string name="delete_album_tracks">Songs in the entire album \"<xliff:g id="album">%s</xliff:g>\"</string>
+	<string name="delete_album_lyrics">Lyrics from album \"<xliff:g id="album">%s</xliff:g>\"</string>
+	<string name="delete_song_track">Song \"<xliff:g id="song">%s</xliff:g>\"</string>
+	<string name="delete_song_lyrics">Lyrics of \"<xliff:g id="song">%s</xliff:g>\"</string>
+	<string name="now_playing">Now playing</string>
+	<string name="artists">Artists</string>
+	<string name="albums">Albums</string>
+	<string name="tracks">Songs</string>
+	<string name="artist">Artist</string>
+	<string name="album">Album</string>
+	<string name="track">Song</string>
+	<string name="playlists">Playlists</string>
+	<string name="recently_added">Recently added</string>
+	<string name="error_bad_parameters">ERROR! Bad parameters!</string>
+	<string name="sleep_timer">Sleep timer</string>
+	<string name="disabled">Disabled</string>
+	<string name="create_playlist_prompt">Playlist name</string>
+	<string name="rename_playlist_prompt">Rename \"<xliff:g id="playlist">%s</xliff:g>\" to</string>
+	<string name="service_start_error">Playback problem</string>
+	<string name="set_time">Set time</string>
+	<string name="music_picker">Select music track</string>
+	<string name="music_widget_label_4x1">MusicMod Music Player (4x1)</string>
+	<string name="music_widget_label_2x2">MusicMod Music Player (2x2)</string>
+	<string name="base_settings">Base settings</string>
+	<string name="appearances_settings">Appearances settings</string>
+	<string name="other_settings">Other settings</string>
+	<string name="ui_color">UI Color</string>
+	<string name="ui_color_auto">Change automatically</string>
+	<string name="ui_color_auto_summaryon">Color will change to current album cover\'s main color</string>
+	<string name="ui_color_auto_summaryoff">Color will change to customized color</string>
+	<string name="ui_color_customize">Customize color</string>
+	<string name="ui_color_customize_summary">Choose UI color</string>
+	<string name="pick_color">Pick a color</string>
+	<string name="press_color_to_apply">Press on Color to apply</string>
+	<string name="visualizer">Visualizer</string>
+	<string name="visualizer_type">Type</string>
+	<string name="visualizer_type_summary">Type of visualizer on the screen</string>
+	<string name="visualizer_antialias">Anti-alias</string>
+	<string name="visualizer_antialias_summaryon">Better, but slower</string>
+	<string name="visualizer_antialias_summaryoff">Fast, but lower quality</string>
+	<string name="visualizer_refreshrate">Refresh rate</string>
+	<string name="visualizer_refreshrate_summary">Refresh rate of visualizer</string>
+	<string name="visualizer_accuracy">Accuracy</string>
+	<string name="visualizer_accuracy_summary">Accuracy of visualizer</string>
+	<string name="unpause_on_headset_plug">Unpause on connect</string>
+	<string name="unpause_on_headset_plug_summary">Unpause the player when a headset is connected</string>
+	<string name="duck_attenuation">Audio focus loss action</string>
+	<string name="duck_attenuation_summary">Select action to take upon transient loss of audio focus (short alerts from other apps)</string>
+	<string name="rescan_media">Rescan media</string>
+	<string name="rescan_media_summary">Rescan media in SD card</string>
+	<string name="shaking_enabled">Enable shaking action</string>
+	<string name="shaking_enabled_summary">Enable quick actions when device shaking</string>
+	<string name="shaking_behavior">Shaking behavior</string>
+	<string name="shaking_behavior_summary">Choose behavior when device shaking</string>
+	<string name="shaking_calibration">Shaking calibration</string>
+	<string name="shaking_calibration_summary">Adjust shaking threshold</string>
+	<string name="shaking_calibration_manual">Long press following button, shake you device as the way you like after device vibrate, then release the button.\nATTENTION! HOLD YOUR DEVICE TIGHTLY WHILE SHAKING!</string>
+	<string name="credits_cat">Credits</string>
+	<string name="credits">About and Credits</string>
+	<string name="app_name">MusicMod Music Player</string>
+	<string name="version">Version</string>
+	<string name="musicmod_original_version">1.7.5.2</string>
+	<string name="haptic_feedback">Haptic feedback</string>
+	<string name="haptic_feedback_summary">Vibrate when shake detected</string>
+	<string name="play_toast">Play</string>
+	<string name="pause_toast">Pause</string>
+	<string name="next_toast">Next track</string>
+	<string name="prev_toast">Previous track</string>
+	<string name="fast_scroll_music_alphabet"> 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
+	<string name="equalizer">Equalizer</string>
+	<string name="equalizer_presets">Presets</string>
+	<string name="equalizer_reset">Reset</string>
+	<string name="enable_scrobbling">Last.fm Scrobbling</string>
+	<string name="enable_scrobbling_summary">Scobble music to last.fm</string>
+	<string name="lyrics_not_exist">Lyrics not exist</string>
+	<string name="lyrics_invalid">Lyrics not readable</string>
+	<string name="search_albumart">Search Album art</string>
+	<string name="search_lyrics">Search Lyrics</string>
+	<string name="search_artist">Artist name</string>
+	<string name="search_album">Album name</string>
+	<string name="search_track">Track name</string>
+	<string name="download_lyrics">Download Lyrics</string>
+	<string name="searching_please_wait">Searching, please wait.</string>
+	<string name="downloading_please_wait">Downloading, please wait.</string>
+	<string name="confirm_overwrite">Confirm overwrite</string>
+	<string name="albumart_already_exist">Album Art already exist, overwrite?</string>
+	<string name="lyrics_already_exist">Lyrics already exist, overwrite?</string>
+	<string name="search_noresult">No result found. Try different keywords.</string>
+	<string name="lyrics_wakelock">Screen on while lyrics displaying</string>
+	<string name="lyrics_wakelock_summary">Keep the screen on while lyrics displaying</string>
+	<string name="blur_background">Blur background</string>
+	<string name="blur_background_summary">Experimental! May slow down your device and takes no effect on 3.0+ devices!</string>
+	<string name="gentle_sleeptimer">Gentle sleeptimer</string>
+	<string name="gentle_sleeptimer_summaryon">Playback will continue until current song finished when sleep timer timed up</string>
+	<string name="gentle_sleeptimer_summaryoff">Playback will stop immediately when sleep timer timed up</string>
+	<string name="plugins_manager">Plugins manager</string>
+	<string name="no_plugin_found">No plugin found</string>
+	<string name="plugin_not_supported">Plugin not supported.</string>
+	<string name="uninstall">Uninstall</string>
+	<string name="open_configure">Open/Configure</string>
+	<string name="app_developer">Mariotaku Lee</string>
+	<string name="app_version">1.3.6</string>
+	<string name="special_thanks_to">Speical thanks to</string>
+	<string name="special_thanks_to_summary">\@JavranC: Testing\n\@oliver661: Testing\n\@leytwit: Japanese translation</string>
+</resources>

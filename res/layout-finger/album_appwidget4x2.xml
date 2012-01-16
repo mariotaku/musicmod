@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2009 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="180dip"
+    android:orientation="horizontal"
+    android:background="@drawable/appwidget_bg"
+    android:gravity="center">
+
+    <LinearLayout android:id="@+id/controls"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="60dip"
+        android:layout_alignParentBottom="true">
+
+        <ImageButton android:id="@+id/control_prev"
+            android:layout_width="0dip"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:src="@drawable/btn_playback_ic_prev"
+            android:background="@drawable/appwidget_button_lowerleft"
+            android:scaleType="center" />
+
+        <ImageButton android:id="@+id/control_play"
+            android:layout_width="0dip"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:src="@drawable/btn_playback_ic_play"
+            android:background="@drawable/appwidget_button_center"
+            android:scaleType="center" />
+
+        <ImageButton android:id="@+id/control_next"
+            android:layout_width="0dip"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:src="@drawable/btn_playback_ic_next"
+            android:background="@drawable/appwidget_button_lowerright"
+            android:scaleType="center" />
+
+    </LinearLayout>
+
+    <ImageView android:id="@+id/controls_info_divider"
+        android:layout_width="match_parent"
+        android:layout_height="1dip"
+        android:layout_above="@id/controls"
+        android:src="@drawable/appwidget_divider"
+        android:scaleType="fitXY" />
+
+    <ImageView android:id="@+id/albumart"
+        android:layout_width="100dip"
+        android:layout_height="100dip"
+        android:layout_above="@id/controls_info_divider"
+        android:adjustViewBounds="true"
+        android:scaleType="fitCenter"
+        android:padding="6dip" />
+
+    <ImageButton android:id="@+id/control_repeat"
+        android:layout_width="40dip"
+        android:layout_height="32dip"
+        android:layout_toRightOf="@id/albumart"
+        android:src="@drawable/ic_mp_repeat_off_btn"
+        android:background="@drawable/appwidget_button_center" />
+
+    <ImageButton android:id="@+id/control_shuffle"
+        android:layout_width="40dip"
+        android:layout_height="32dip"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="6dip"
+        android:src="@drawable/ic_mp_shuffle_off_btn"
+        android:background="@drawable/appwidget_button_center" />
+
+    <LinearLayout android:id="@+id/info"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_toRightOf="@id/albumart"
+        android:layout_above="@id/controls_info_divider"
+        android:layout_below="@id/control_repeat"
+        android:layout_marginRight="6dip"
+        android:gravity="center"
+        android:paddingBottom="10dip">
+
+        <TextView android:id="@+id/artistname"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#FFFFFFFF"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:singleLine="true"
+            android:ellipsize="end" />
+
+        <TextView android:id="@+id/albumname"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#FFFFFFFF"
+            android:textSize="13sp"
+            android:singleLine="true"
+            android:ellipsize="end" />
+
+        <TextView android:id="@+id/trackname"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#FFFFFFFF"
+            android:textSize="13sp"
+            android:singleLine="true"
+            android:ellipsize="end" />
+
+    </LinearLayout>
+
+</RelativeLayout>
