@@ -162,7 +162,7 @@ public class MediaAppWidgetProvider4x1 extends AppWidgetProvider implements Cons
 			if (uri != null) {
 				views.setImageViewUri(R.id.albumart, uri);
 			} else {
-				views.setImageViewResource(R.id.albumart, R.drawable.albumart_mp_unknown);
+				views.setImageViewResource(R.id.albumart, R.drawable.ic_mp_albumart_unknown);
 			}
 		}
 

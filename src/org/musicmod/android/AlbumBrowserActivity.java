@@ -81,6 +81,7 @@ public class AlbumBrowserActivity extends GridActivity implements View.OnCreateC
 	private ServiceToken mToken;
 	private boolean mShowFadeAnimation = false;
 	private GridView mGridView;
+	private static final int KEY_POSITION = 1;
 
 	public AlbumBrowserActivity() {
 
@@ -513,13 +514,13 @@ public class AlbumBrowserActivity extends GridActivity implements View.OnCreateC
 			TextView album_name;
 			TextView artist_name;
 			ImageView album_art;
-			
+
 			public ViewHolder(View view) {
 				album_name = (TextView) view.findViewById(R.id.album_name);
 				artist_name = (TextView) view.findViewById(R.id.artist_name);
 				album_art = (ImageView) view.findViewById(R.id.album_art);
 			}
-			
+
 		}
 
 		private class QueryHandler extends AsyncQueryHandler {
@@ -546,7 +547,7 @@ public class AlbumBrowserActivity extends GridActivity implements View.OnCreateC
 
 			Resources r = context.getResources();
 
-			Bitmap b = BitmapFactory.decodeResource(r, R.drawable.albumart_mp_unknown);
+			Bitmap b = BitmapFactory.decodeResource(r, R.drawable.ic_mp_albumart_unknown);
 			mDefaultAlbumIcon = new BitmapDrawable(context.getResources(), b);
 			// no filter or dither, it's a lot faster and we can't tell the
 			// difference
@@ -593,14 +594,13 @@ public class AlbumBrowserActivity extends GridActivity implements View.OnCreateC
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
-			
+
 			View view = super.getView(position, convertView, parent);
-			
+
 			mAlbumCursor.moveToPosition(position);
-			
+
 			ViewHolder viewholder = (ViewHolder) view.getTag();
-			viewholder.artist_name.setText(String.valueOf(position));
-			
+
 			String album_name = mAlbumCursor.getString(mAlbumIndex);
 			if (album_name == null || MediaStore.UNKNOWN_STRING.equals(album_name)) {
 				viewholder.album_name.setText(R.string.unknown_album_name);
@@ -621,7 +621,12 @@ public class AlbumBrowserActivity extends GridActivity implements View.OnCreateC
 			int width = getResources().getDimensionPixelSize(R.dimen.gridview_bitmap_width);
 			int height = getResources().getDimensionPixelSize(R.dimen.gridview_bitmap_height);
 
-			new AsyncAlbumArtLoader(viewholder.album_art, mShowFadeAnimation).execute(aid, width, height);
+			viewholder.album_art.setImageBitmap(MusicUtils.getCachedArtwork(
+					getApplicationContext(), aid, width, height));
+
+			// viewholder.album_art.setTag(aid);
+			// new AsyncAlbumArtLoader(viewholder.album_art, mShowFadeAnimation,
+			// aid, width, height).execute();
 
 			long currentalbumid = MusicUtils.getCurrentAlbumId();
 			if (currentalbumid == aid) {
@@ -630,7 +635,7 @@ public class AlbumBrowserActivity extends GridActivity implements View.OnCreateC
 			} else {
 				viewholder.album_name.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
 			}
-			
+
 			return view;
 		}
 
@@ -698,15 +703,25 @@ public class AlbumBrowserActivity extends GridActivity implements View.OnCreateC
 
 		boolean enable_animation = false;
 		private ImageView imageview;
+		private long album_id;
+		private int width, height;
 
-		public AsyncAlbumArtLoader(ImageView imageview, Boolean animation) {
+		public AsyncAlbumArtLoader(ImageView imageview, Boolean animation, long album_id,
+				int width, int height) {
 
 			enable_animation = animation;
 			this.imageview = imageview;
+			this.album_id = album_id;
+			this.width = width;
+			this.height = height;
 		}
 
 		@Override
 		protected void onPreExecute() {
+
+			if (imageview.getTag() == null || (Long) imageview.getTag() != album_id) {
+				return;
+			}
 
 			if (enable_animation) {
 				imageview.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(),
@@ -718,17 +733,24 @@ public class AlbumBrowserActivity extends GridActivity implements View.OnCreateC
 		@Override
 		protected Bitmap doInBackground(Object... params) {
 
-			return MusicUtils.getCachedArtwork(getApplicationContext(), (Long) params[0],
-					(Integer) params[1], (Integer) params[2]);
+			if (imageview.getTag() == null || (Long) imageview.getTag() != album_id) {
+				return null;
+			}
+
+			return MusicUtils.getCachedArtwork(getApplicationContext(), album_id, width, height);
 		}
 
 		@Override
 		protected void onPostExecute(Bitmap result) {
 
+			if (imageview.getTag() == null || (Long) imageview.getTag() != album_id) {
+				return;
+			}
+
 			if (result != null) {
 				imageview.setImageBitmap(result);
 			} else {
-				imageview.setImageResource(R.drawable.albumart_mp_unknown_list);
+				imageview.setImageResource(R.drawable.ic_mp_albumart_unknown);
 			}
 			if (enable_animation) {
 				imageview.setVisibility(View.VISIBLE);
@@ -738,5 +760,5 @@ public class AlbumBrowserActivity extends GridActivity implements View.OnCreateC
 
 		}
 	}
-	
+
 }

@@ -42,7 +42,6 @@ import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.ImageView;
@@ -76,7 +75,6 @@ public class PlaylistBrowserActivity extends ListActivity implements
 	private static int mLastListPosCourse = -1;
 	private static int mLastListPosFine = -1;
 
-	private boolean mCreateShortcut;
 	private ServiceToken mToken;
 
 	public PlaylistBrowserActivity() {
@@ -92,7 +90,6 @@ public class PlaylistBrowserActivity extends ListActivity implements
 		final Intent intent = getIntent();
 		final String action = intent.getAction();
 		if (Intent.ACTION_CREATE_SHORTCUT.equals(action)) {
-			mCreateShortcut = true;
 		}
 
 		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
@@ -276,13 +273,10 @@ public class PlaylistBrowserActivity extends ListActivity implements
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 
-		if (!mCreateShortcut) {
-			menu.add(0, PARTY_SHUFFLE, 0, R.string.party_shuffle); // icon will
-																	// be set in
-																	// onPrepareOptionsMenu()
+			menu.add(0, PARTY_SHUFFLE, 0, R.string.party_shuffle); 
 			menu.add(0, SETTINGS, 0, R.string.settings).setIcon(
 					android.R.drawable.ic_menu_preferences);
-		}
+			
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -312,10 +306,6 @@ public class PlaylistBrowserActivity extends ListActivity implements
 	}
 
 	public void onCreateContextMenu(ContextMenu menu, View view, ContextMenuInfo menuInfoIn) {
-
-		if (mCreateShortcut) {
-			return;
-		}
 
 		AdapterContextMenuInfo mi = (AdapterContextMenuInfo) menuInfoIn;
 
@@ -396,23 +386,6 @@ public class PlaylistBrowserActivity extends ListActivity implements
 	@Override
 	protected void onListItemClick(ListView l, View v, int position, long id) {
 
-		if (mCreateShortcut) {
-			final Intent shortcut = new Intent();
-			shortcut.setAction(Intent.ACTION_VIEW);
-			shortcut.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/playlist");
-			shortcut.putExtra(INTENT_KEY_PLAYLIST, String.valueOf(id));
-
-			final Intent intent = new Intent();
-			intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcut);
-			intent.putExtra(Intent.EXTRA_SHORTCUT_NAME,
-					((TextView) v.findViewById(R.id.playlist_name)).getText());
-			intent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, Intent.ShortcutIconResource
-					.fromContext(this, R.drawable.ic_launcher_shortcut_music_playlist));
-
-			setResult(RESULT_OK, intent);
-			finish();
-			return;
-		}
 		if (id == RECENTLY_ADDED_PLAYLIST) {
 			Intent intent = new Intent(Intent.ACTION_PICK);
 			intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/track");
@@ -533,12 +506,6 @@ public class PlaylistBrowserActivity extends ListActivity implements
 			return c;
 		}
 		MatrixCursor autoplaylistscursor = new MatrixCursor(mCols);
-		if (mCreateShortcut) {
-			ArrayList<Object> all = new ArrayList<Object>(2);
-			all.add(ALL_SONGS_PLAYLIST);
-			all.add(getString(R.string.play_all));
-			autoplaylistscursor.addRow(all);
-		}
 		ArrayList<Object> recent = new ArrayList<Object>(2);
 		recent.add(RECENTLY_ADDED_PLAYLIST);
 		recent.add(getString(R.string.recentlyadded));
@@ -630,9 +597,9 @@ public class PlaylistBrowserActivity extends ListActivity implements
 
 			ImageView iv = (ImageView) view.findViewById(R.id.playlist_icon);
 			if (id == RECENTLY_ADDED_PLAYLIST) {
-				iv.setImageResource(R.drawable.ic_mp_playlist_recently_added_list);
+				iv.setImageResource(R.drawable.ic_mp_list_playlist_recent);
 			} else {
-				iv.setImageResource(R.drawable.ic_mp_playlist_list);
+				iv.setImageResource(R.drawable.ic_mp_list_playlist);
 			}
 
 		}

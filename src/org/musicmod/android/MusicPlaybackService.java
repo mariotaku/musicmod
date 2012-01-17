@@ -273,7 +273,14 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 
 	}
 
-	// TODO lyrics handler
+	/**
+	 * Lyrics Handler
+	 * 
+	 * load lyrics automatically, most accurate and fastest ever.<br>
+	 * Usage: send a empty message {@link #NEW_LYRICS_LOADED} when new song played.
+	 * 
+	 *  @author mariotaku
+	 */
 	private Handler mLyricsHandler = new Handler() {
 
 		private List<String> mLyricsList = new ArrayList<String>();
@@ -1114,9 +1121,9 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 		CharSequence contentTitle = getString(R.string.sleep_timer_enabled);
 		CharSequence contentText = getString(R.string.notification_sleep_timer, time);
 		PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(), 0);
-		Notification notification = new Notification(R.drawable.stat_notify_musicplayer, null, 0);
+		Notification notification = new Notification(R.drawable.ic_stat_playback, null, 0);
 		notification.flags = Notification.FLAG_ONGOING_EVENT;
-		notification.icon = R.drawable.stat_notify_sleeptimer;
+		notification.icon = R.drawable.ic_stat_sleeptimer;
 		notification.setLatestEventInfo(this, contentTitle, contentText, contentIntent);
 
 		mGentleSleepTimer = gentle;
@@ -1489,9 +1496,9 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 			contentIntent = PendingIntent.getActivity(this, 0, new Intent(INTENT_PLAYBACK_VIEWER),
 					0);
 
-			Notification status = new Notification(R.drawable.stat_notify_musicplayer, null, 0);
+			Notification status = new Notification(R.drawable.ic_stat_playback, null, 0);
 			status.flags = Notification.FLAG_ONGOING_EVENT;
-			status.icon = R.drawable.stat_notify_musicplayer;
+			status.icon = R.drawable.ic_stat_playback;
 			status.setLatestEventInfo(this, contentTitle, contentText, contentIntent);
 			mNotification.notify(PLAYBACKSERVICE_STATUS, status);
 
@@ -1638,12 +1645,6 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 			}
 
 			if (mShuffleMode == SHUFFLE_NORMAL) {
-				// Pick random next track from the not-yet-played ones
-				// TODO: make it work right after adding/removing items in the
-				// queue.
-
-				// Store the current file in the history, but keep the history
-				// at a reasonable size
 				if (mPlayPos >= 0) {
 					mHistory.add(mPlayPos);
 				}

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--		  Copyright (C) 2011 The MusicMod Project
+<!--
+		  Copyright (C) 2011 The MusicMod Project
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -18,49 +19,52 @@
 	android:layout_width="match_parent"
 	android:layout_height="@dimen/top_buttons_height"
 	android:layout_gravity="top"
-	android:orientation="horizontal"
-	android:gravity="center">
-	
-	<ImageButton android:id="@+id/shuffle"
-		android:src="@drawable/ic_mp_shuffle_off_btn"
+	android:gravity="center"
+	android:orientation="horizontal">
+
+	<ImageButton
+		android:id="@+id/shuffle"
 		android:layout_width="@dimen/top_buttons_width"
 		android:layout_height="@dimen/top_buttons_height"
 		android:layout_weight="0"
-		android:background="@drawable/button_bg"/>
-	
+		android:background="@drawable/btn_mp_playback"
+		android:src="@drawable/ic_mp_shuffle_off_btn"/>
+
 	<ImageView
 		android:layout_width="wrap_content"
 		android:layout_height="match_parent"
 		android:layout_weight="0"
-		android:src="@drawable/button_divider_vertical"/>
+		android:src="@drawable/divider_mp_btn_vertical"/>
 
-	<Button android:id="@+id/trackname"
-		android:textSize="@dimen/textsize_track_title"
-		android:textColor="@color/text_color_default"
+	<Button
+		android:id="@+id/trackname"
+		android:layout_width="wrap_content"
+		android:layout_height="match_parent"
+		android:layout_weight="5"
+		android:background="@drawable/btn_mp_playback"
+		android:ellipsize="marquee"
+		android:gravity="center"
+		android:paddingRight="16dip"
 		android:shadowColor="@color/shadow_color_default"
 		android:shadowDx="0"
 		android:shadowDy="0"
 		android:shadowRadius="3"
 		android:singleLine="true"
-		android:ellipsize="marquee"
-		android:paddingRight="16dip"
-		android:gravity="center"
-		android:layout_width="wrap_content"
-		android:layout_height="match_parent"
-		android:layout_weight="5"
-		android:background="@drawable/button_bg"/>
-	
+		android:textColor="@color/text_color_default"
+		android:textSize="@dimen/textsize_track_title"/>
+
 	<ImageView
 		android:layout_width="wrap_content"
 		android:layout_height="match_parent"
 		android:layout_weight="0"
-		android:src="@drawable/button_divider_vertical"/>
+		android:src="@drawable/divider_mp_btn_vertical"/>
 
-	<ImageButton android:id="@+id/repeat"
-		android:src="@drawable/ic_mp_repeat_off_btn"
+	<ImageButton
+		android:id="@+id/repeat"
 		android:layout_width="@dimen/top_buttons_width"
 		android:layout_height="@dimen/top_buttons_height"
 		android:layout_weight="0"
-		android:background="@drawable/button_bg"/>
-	
+		android:background="@drawable/btn_mp_playback"
+		android:src="@drawable/ic_mp_repeat_off_btn"/>
+
 </LinearLayout>

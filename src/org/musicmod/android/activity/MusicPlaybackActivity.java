@@ -192,7 +192,7 @@ public class MusicPlaybackActivity extends Activity implements Constants, View.O
 
 		mTrackNameButton = (Button) findViewById(R.id.trackname);
 		mTrackNameButton.setBackgroundDrawable(new ButtonStateDrawable(
-				new Drawable[] { getResources().getDrawable(R.drawable.button_bg) }));
+				new Drawable[] { getResources().getDrawable(R.drawable.btn_mp_playback) }));
 		mTrackNameButton.setOnLongClickListener(this);
 
 		mLyricsView = (LinearLayout) findViewById(R.id.lyrics_view);
@@ -212,19 +212,19 @@ public class MusicPlaybackActivity extends Activity implements Constants, View.O
 
 		mPrevButton = (RepeatingImageButton) findViewById(R.id.prev);
 		mPrevButton.setBackgroundDrawable(new ButtonStateDrawable(new Drawable[] { getResources()
-				.getDrawable(R.drawable.button_bg) }));
+				.getDrawable(R.drawable.btn_mp_playback) }));
 		mPrevButton.setOnClickListener(mPrevListener);
 		mPrevButton.setRepeatListener(mRewListener, 260);
 
 		mPauseButton = (ImageButton) findViewById(R.id.pause);
 		mPauseButton.setBackgroundDrawable(new ButtonStateDrawable(new Drawable[] { getResources()
-				.getDrawable(R.drawable.button_bg) }));
+				.getDrawable(R.drawable.btn_mp_playback) }));
 		mPauseButton.requestFocus();
 		mPauseButton.setOnClickListener(mPauseListener);
 
 		mNextButton = (RepeatingImageButton) findViewById(R.id.next);
 		mNextButton.setBackgroundDrawable(new ButtonStateDrawable(new Drawable[] { getResources()
-				.getDrawable(R.drawable.button_bg) }));
+				.getDrawable(R.drawable.btn_mp_playback) }));
 		mNextButton.setOnClickListener(mNextListener);
 		mNextButton.setRepeatListener(mFfwdListener, 260);
 
@@ -232,12 +232,12 @@ public class MusicPlaybackActivity extends Activity implements Constants, View.O
 
 		mShuffleButton = ((ImageButton) findViewById(R.id.shuffle));
 		mShuffleButton.setBackgroundDrawable(new ButtonStateDrawable(
-				new Drawable[] { getResources().getDrawable(R.drawable.button_bg) }));
+				new Drawable[] { getResources().getDrawable(R.drawable.btn_mp_playback) }));
 		mShuffleButton.setOnClickListener(mShuffleListener);
 
 		mRepeatButton = ((ImageButton) findViewById(R.id.repeat));
 		mRepeatButton.setBackgroundDrawable(new ButtonStateDrawable(new Drawable[] { getResources()
-				.getDrawable(R.drawable.button_bg) }));
+				.getDrawable(R.drawable.btn_mp_playback) }));
 		mRepeatButton.setOnClickListener(mRepeatListener);
 
 		mVisualizerViewFftSpectrum = new VisualizerViewFftSpectrum(this);
@@ -1478,7 +1478,7 @@ public class MusicPlaybackActivity extends Activity implements Constants, View.O
 			if (result != null) {
 				mImageView.setImageBitmap(result);
 			} else {
-				mImageView.setImageResource(R.drawable.albumart_mp_unknown);
+				mImageView.setImageResource(R.drawable.ic_mp_albumart_unknown);
 			}
 			if (enable_animation) {
 				mImageView.setVisibility(View.VISIBLE);

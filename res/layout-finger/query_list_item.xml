@@ -19,19 +19,15 @@
 	android:layout_height="?android:attr/listPreferredItemHeight"
     android:gravity="center_vertical">
 
-    <TextView
-        android:id="@+id/track_duration"
-        android:textSize="12sp"
-        android:textColor="?android:attr/textColorTertiary"
-        android:textStyle="bold"
-        android:paddingLeft="4dip"
-        android:paddingRight="11dip"
+    <ImageView
+        android:id="@+id/result_type_icon"
+        android:layout_marginTop="10dip"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:singleLine="true" />
-
+        android:layout_marginRight="12dip" />
+    
     <TextView
-        android:id="@+id/track_name"
+        android:id="@+id/result_name"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:layout_width="wrap_content"
         android:paddingLeft="9dip"
@@ -40,7 +36,7 @@
         android:singleLine="true" />
 
     <TextView
-        android:id="@+id/artist_name"
+        android:id="@+id/result_summary"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:singleLine="true"
         android:ellipsize="end"
@@ -48,12 +44,5 @@
         android:scrollHorizontally="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
-
-    <ImageView
-        android:id="@+id/play_indicator"
-        android:layout_marginTop="10dip"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="12dip" />
 
 </LinearLayout>

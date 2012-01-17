@@ -19,9 +19,8 @@
 	android:layout_height="@dimen/gridview_item_height"
 	android:gravity="center">
 
-	 <!-- icon is used for albumart, the grabber in edit playlist mode, and the playlist icon in the list of playlists -->
 	<ImageView android:id="@+id/album_art"
-		android:src="@drawable/albumart_mp_unknown"
+		android:src="@drawable/ic_mp_albumart_unknown"
 		android:scaleType="centerInside"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"/>

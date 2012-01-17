@@ -140,7 +140,7 @@ public class QueryBrowserActivity extends ListActivity implements Constants, Ser
 		mTrackList = getListView();
 		mTrackList.setTextFilterEnabled(true);
 		if (mAdapter == null) {
-			mAdapter = new QueryListAdapter(getApplication(), this, R.layout.track_list_item, null, // cursor
+			mAdapter = new QueryListAdapter(getApplication(), this, R.layout.query_list_item, null, // cursor
 					new String[] {}, new int[] {});
 			setListAdapter(mAdapter);
 			if (TextUtils.isEmpty(mFilterString)) {
@@ -357,10 +357,10 @@ public class QueryBrowserActivity extends ListActivity implements Constants, Ser
 		@Override
 		public void bindView(View view, Context context, Cursor cursor) {
 
-			TextView tv1 = (TextView) view.findViewById(R.id.line1);
-			TextView tv2 = (TextView) view.findViewById(R.id.line2);
-			ImageView iv = (ImageView) view.findViewById(R.id.icon);
-			ViewGroup.LayoutParams p = iv.getLayoutParams();
+			TextView result_name = (TextView) view.findViewById(R.id.result_name);
+			TextView result_summary = (TextView) view.findViewById(R.id.result_summary);
+			ImageView result_type_icon = (ImageView) view.findViewById(R.id.result_type_icon);
+			ViewGroup.LayoutParams p = result_type_icon.getLayoutParams();
 			if (p == null) {
 				// seen this happen, not sure why
 				DatabaseUtils.dumpCursor(cursor);
@@ -376,7 +376,7 @@ public class QueryBrowserActivity extends ListActivity implements Constants, Ser
 				mimetype = "audio/";
 			}
 			if (mimetype.equals("artist")) {
-				iv.setImageResource(R.drawable.ic_mp_artist_list);
+				result_type_icon.setImageResource(R.drawable.ic_mp_list_artist);
 				String name = cursor.getString(cursor
 						.getColumnIndexOrThrow(MediaStore.Audio.Artists.ARTIST));
 				String displayname = name;
@@ -385,7 +385,7 @@ public class QueryBrowserActivity extends ListActivity implements Constants, Ser
 					displayname = context.getString(R.string.unknown_artist_name);
 					isunknown = true;
 				}
-				tv1.setText(displayname);
+				result_name.setText(displayname);
 
 				int numalbums = cursor.getInt(cursor.getColumnIndexOrThrow("data1"));
 				int numsongs = cursor.getInt(cursor.getColumnIndexOrThrow("data2"));
@@ -393,17 +393,17 @@ public class QueryBrowserActivity extends ListActivity implements Constants, Ser
 				String songs_albums = MusicUtils.makeAlbumsSongsLabel(context, numalbums, numsongs,
 						isunknown);
 
-				tv2.setText(songs_albums);
+				result_summary.setText(songs_albums);
 
 			} else if (mimetype.equals("album")) {
-				iv.setImageResource(R.drawable.albumart_mp_unknown_list);
+				result_type_icon.setImageResource(R.drawable.ic_mp_list_album);
 				String name = cursor.getString(cursor
 						.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM));
 				String displayname = name;
 				if (name == null || name.equals(MediaStore.UNKNOWN_STRING)) {
 					displayname = context.getString(R.string.unknown_album_name);
 				}
-				tv1.setText(displayname);
+				result_name.setText(displayname);
 
 				name = cursor.getString(cursor
 						.getColumnIndexOrThrow(MediaStore.Audio.Artists.ARTIST));
@@ -411,14 +411,14 @@ public class QueryBrowserActivity extends ListActivity implements Constants, Ser
 				if (name == null || name.equals(MediaStore.UNKNOWN_STRING)) {
 					displayname = context.getString(R.string.unknown_artist_name);
 				}
-				tv2.setText(displayname);
+				result_summary.setText(displayname);
 
 			} else if (mimetype.startsWith("audio/") || mimetype.equals("application/ogg")
 					|| mimetype.equals("application/x-ogg")) {
-				iv.setImageResource(R.drawable.ic_mp_song_list);
+				result_type_icon.setImageResource(R.drawable.ic_mp_list_song);
 				String name = cursor.getString(cursor
 						.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
-				tv1.setText(name);
+				result_name.setText(name);
 
 				String displayname = cursor.getString(cursor
 						.getColumnIndexOrThrow(MediaStore.Audio.Artists.ARTIST));
@@ -430,7 +430,7 @@ public class QueryBrowserActivity extends ListActivity implements Constants, Ser
 				if (name == null || name.equals(MediaStore.UNKNOWN_STRING)) {
 					name = context.getString(R.string.unknown_album_name);
 				}
-				tv2.setText(displayname + " - " + name);
+				result_summary.setText(displayname + " - " + name);
 			}
 		}
 

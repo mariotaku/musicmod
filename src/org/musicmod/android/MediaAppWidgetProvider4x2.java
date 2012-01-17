@@ -79,7 +79,7 @@ public class MediaAppWidgetProvider4x2 extends AppWidgetProvider implements Cons
 		views.setViewVisibility(R.id.albumname, View.GONE);
 		views.setViewVisibility(R.id.trackname, View.GONE);
 		views.setTextViewText(R.id.artistname, res.getText(R.string.widget_initial_text));
-		views.setImageViewResource(R.id.albumart, R.drawable.albumart_mp_unknown);
+		views.setImageViewResource(R.id.albumart, R.drawable.ic_mp_albumart_unknown);
 
 		linkButtons(context, views, false /* not playing */);
 		pushUpdate(context, appWidgetIds, views);
@@ -155,7 +155,7 @@ public class MediaAppWidgetProvider4x2 extends AppWidgetProvider implements Cons
 			views.setViewVisibility(R.id.albumname, View.GONE);
 			views.setViewVisibility(R.id.trackname, View.GONE);
 			views.setTextViewText(R.id.artistname, errorState);
-			views.setImageViewResource(R.id.albumart, R.drawable.albumart_mp_unknown);
+			views.setImageViewResource(R.id.albumart, R.drawable.ic_mp_albumart_unknown);
 		} else {
 			// No error, so show normal titles and artwork
 			views.setViewVisibility(R.id.albumname, View.VISIBLE);
@@ -168,7 +168,7 @@ public class MediaAppWidgetProvider4x2 extends AppWidgetProvider implements Cons
 			if (uri != null) {
 				views.setImageViewUri(R.id.albumart, uri);
 			} else {
-				views.setImageViewResource(R.id.albumart, R.drawable.albumart_mp_unknown);
+				views.setImageViewResource(R.id.albumart, R.drawable.ic_mp_albumart_unknown);
 			}
 		}
 

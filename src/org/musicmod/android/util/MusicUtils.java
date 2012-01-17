@@ -1300,7 +1300,7 @@ public class MusicUtils implements Constants {
 		BitmapFactory.Options opts = new BitmapFactory.Options();
 		opts.inPreferredConfig = Bitmap.Config.ARGB_8888;
 		return BitmapFactory.decodeStream(
-				context.getResources().openRawResource(R.drawable.albumart_mp_unknown), null, opts);
+				context.getResources().openRawResource(R.drawable.ic_mp_albumart_unknown), null, opts);
 	}
 
 	public static Uri getArtworkUri(Context context, long song_id, long album_id) {

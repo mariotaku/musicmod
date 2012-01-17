@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--		  Copyright (C) 2011 The MusicMod Project
+<!--
+		  Copyright (C) 2011 The MusicMod Project
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -13,22 +14,19 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	android:orientation="vertical"
-	android:background="@drawable/background"
-	android:baselineAligned="false">
-	
-    <LinearLayout
+	android:baselineAligned="false"
+	android:orientation="vertical">
+
+	<LinearLayout
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_weight="0"
 		android:gravity="top">
 
 		<include layout="@layout/nowplaying_top_bar"/>
-
 	</LinearLayout>
 
 	<LinearLayout
@@ -43,52 +41,52 @@
 			android:layout_gravity="left|center"
 			android:gravity="center">
 
-		    <ImageButton
+			<ImageButton
 				android:id="@+id/curplaylist"
 				android:layout_width="match_parent"
 				android:layout_height="match_parent"
 				android:layout_gravity="center"
-				android:src="@drawable/albumart_mp_empty"
-				android:background="@drawable/album_border"
-				android:adjustViewBounds="true"/>
-		    
+				android:adjustViewBounds="true"
+				android:background="@drawable/ic_mp_albumart_border"
+				android:src="@drawable/ic_mp_albumart_empty"/>
+
 			<ImageView
 				android:id="@+id/album"
 				android:layout_width="match_parent"
 				android:layout_height="match_parent"
 				android:layout_gravity="center"
-				android:src="@drawable/albumart_mp_unknown"
-				android:background="@drawable/album_placeholder"
-				android:adjustViewBounds="true"/>
-			
+				android:adjustViewBounds="true"
+				android:background="@drawable/ic_mp_albumart_placeholder"
+				android:src="@drawable/ic_mp_albumart_unknown"/>
+
 			<ImageView
 				android:layout_width="match_parent"
 				android:layout_height="match_parent"
 				android:layout_gravity="center"
-				android:src="@drawable/albumart_mp_empty"
-				android:background="@drawable/album_mask"
-				android:adjustViewBounds="true"/>
-
+				android:adjustViewBounds="true"
+				android:background="@drawable/ic_mp_albumart_mask"
+				android:src="@drawable/ic_mp_albumart_empty"/>
 		</FrameLayout>
 
 		<FrameLayout
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
 			android:layout_gravity="right"
-			android:orientation="vertical"
-			android:gravity="center">
+			android:gravity="center"
+			android:orientation="vertical">
 
 			<FrameLayout
 				android:layout_width="match_parent"
 				android:layout_height="match_parent"
 				android:layout_gravity="bottom"
-				android:orientation="vertical"
-				android:gravity="center">
+				android:gravity="center"
+				android:orientation="vertical">
 
 				<include layout="@layout/visualizer_view"/>
-				<include layout="@layout/info_view"/>
-				<include layout="@layout/lyrics_view"/>
 
+				<include layout="@layout/info_view"/>
+
+				<include layout="@layout/lyrics_view"/>
 			</FrameLayout>
 
 			<LinearLayout
@@ -96,19 +94,15 @@
 				android:layout_height="match_parent">
 
 				<include layout="@layout/volume_slider"/>
-
 			</LinearLayout>
-		    
-		    <LinearLayout
+
+			<LinearLayout
 				android:layout_width="match_parent"
 				android:layout_height="match_parent">
-				
- 			   <include layout="@layout/nowplaying_progress"/>
-				
+
+				<include layout="@layout/nowplaying_progress"/>
 			</LinearLayout>
-
 		</FrameLayout>
-
 	</LinearLayout>
 
 	<LinearLayout
@@ -118,7 +112,6 @@
 		android:gravity="bottom">
 
 		<include layout="@layout/nowplaying_control"/>
-
 	</LinearLayout>
 
 </LinearLayout>

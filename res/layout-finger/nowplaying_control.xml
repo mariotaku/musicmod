@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--		  Copyright (C) 2011 The MusicMod Project
+<!--
+		  Copyright (C) 2011 The MusicMod Project
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -13,48 +14,47 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
-
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="match_parent"
 	android:layout_height="@dimen/player_control_height"
 	android:layout_gravity="bottom"
-	android:orientation="horizontal"
-	android:gravity="center">
+	android:gravity="center"
+	android:orientation="horizontal">
 
 	<org.musicmod.android.widget.RepeatingImageButton
 		android:id="@+id/prev"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		android:layout_weight="3"
-		android:src="@drawable/btn_playback_ic_prev"
-		android:background="@drawable/button_bg"/>
-	
+		android:background="@drawable/btn_mp_playback"
+		android:src="@drawable/btn_playback_ic_prev"/>
+
 	<ImageView
 		android:layout_width="wrap_content"
 		android:layout_height="match_parent"
 		android:layout_weight="0"
-		android:src="@drawable/button_divider_vertical"/>
+		android:src="@drawable/divider_mp_btn_vertical"/>
 
 	<ImageButton
 		android:id="@+id/pause"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		android:layout_weight="2"
-		android:src="@drawable/btn_playback_ic_play"
-		android:background="@drawable/button_bg"/>
+		android:background="@drawable/btn_mp_playback"
+		android:src="@drawable/btn_playback_ic_play"/>
 
 	<ImageView
 		android:layout_width="wrap_content"
 		android:layout_height="match_parent"
 		android:layout_weight="0"
-		android:src="@drawable/button_divider_vertical"/>
-	
+		android:src="@drawable/divider_mp_btn_vertical"/>
+
 	<org.musicmod.android.widget.RepeatingImageButton
 		android:id="@+id/next"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		android:layout_weight="3"
-		android:src="@drawable/btn_playback_ic_next"
-		android:background="@drawable/button_bg"/>
+		android:background="@drawable/btn_mp_playback"
+		android:src="@drawable/btn_playback_ic_next"/>
 
 </LinearLayout>

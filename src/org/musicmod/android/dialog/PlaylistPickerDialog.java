@@ -79,7 +79,7 @@ public class PlaylistPickerDialog extends Activity implements DialogInterface.On
 			intent.putExtra(Intent.EXTRA_SHORTCUT_INTENT, shortcut);
 			intent.putExtra(Intent.EXTRA_SHORTCUT_NAME, listName);
 			intent.putExtra(Intent.EXTRA_SHORTCUT_ICON_RESOURCE, Intent.ShortcutIconResource
-					.fromContext(this, R.drawable.ic_launcher_shortcut_music_playlist));
+					.fromContext(this, R.drawable.ic_launcher_shortcut_playlist));
 			setResult(RESULT_OK, intent);
 		} else {
 			if (listId >= 0) {
