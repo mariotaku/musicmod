@@ -16,7 +16,8 @@
 
 package org.musicmod.android;
 
-import org.musicmod.android.activity.MusicPlaybackActivity;
+import org.musicmod.android.app.MusicBrowserActivity;
+import org.musicmod.android.app.MusicPlaybackActivity;
 import org.musicmod.android.util.MusicUtils;
 
 import android.app.PendingIntent;

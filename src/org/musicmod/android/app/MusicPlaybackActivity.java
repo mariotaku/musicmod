@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-package org.musicmod.android.activity;
+package org.musicmod.android.app;
 
 import org.musicmod.android.Constants;
 import org.musicmod.android.IMusicPlaybackService;
 import org.musicmod.android.MusicPlaybackService;
-import org.musicmod.android.MusicBrowserActivity;
 import org.musicmod.android.R;
 import org.musicmod.android.util.ColorAnalyser;
 import org.musicmod.android.util.MusicUtils;

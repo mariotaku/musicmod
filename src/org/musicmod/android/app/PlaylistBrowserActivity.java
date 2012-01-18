@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package org.musicmod.android;
+package org.musicmod.android.app;
 
-import android.app.ListActivity;
 import android.content.AsyncQueryHandler;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -37,6 +36,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.provider.MediaStore;
+import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.Menu;
@@ -44,6 +44,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
@@ -54,13 +56,15 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import java.text.Collator;
 import java.util.ArrayList;
 
+import org.musicmod.android.Constants;
+import org.musicmod.android.R;
 import org.musicmod.android.activity.MusicSettingsActivity;
 import org.musicmod.android.util.MusicUtils;
 import org.musicmod.android.util.ServiceToken;
 import org.musicmod.android.util.SharedPrefs;
 
-public class PlaylistBrowserActivity extends ListActivity implements
-		View.OnCreateContextMenuListener, Constants {
+public class PlaylistBrowserActivity extends FragmentActivity implements
+		View.OnCreateContextMenuListener, OnItemClickListener, Constants {
 
 	private static final String TAG = "PlaylistBrowserActivity";
 	private static final int DELETE_PLAYLIST = CHILD_MENU_BASE + 1;
@@ -71,11 +75,11 @@ public class PlaylistBrowserActivity extends ListActivity implements
 	private static final long ALL_SONGS_PLAYLIST = -2;
 	private static final long PODCASTS_PLAYLIST = -3;
 	private PlaylistListAdapter mAdapter;
-	boolean mAdapterSent;
 	private static int mLastListPosCourse = -1;
 	private static int mLastListPosFine = -1;
 
 	private ServiceToken mToken;
+	ListView mPlaylistView;
 
 	public PlaylistBrowserActivity() {
 
@@ -131,11 +135,12 @@ public class PlaylistBrowserActivity extends ListActivity implements
 		f.addDataScheme("file");
 		registerReceiver(mScanListener, f);
 
-		setContentView(R.layout.media_picker_activity);
+		setContentView(R.layout.playlists_browser);
 		MusicUtils.updateButtonBar(this, R.id.playlisttab);
-		ListView lv = getListView();
-		lv.setOnCreateContextMenuListener(this);
-		lv.setTextFilterEnabled(true);
+		mPlaylistView = (ListView) findViewById(R.id.playlists_listview);
+		mPlaylistView.setOnCreateContextMenuListener(this);
+		mPlaylistView.setOnItemClickListener(this);
+		mPlaylistView.setTextFilterEnabled(true);
 
 		mAdapter = (PlaylistListAdapter) getLastNonConfigurationInstance();
 		if (mAdapter == null) {
@@ -143,12 +148,12 @@ public class PlaylistBrowserActivity extends ListActivity implements
 			mAdapter = new PlaylistListAdapter(getApplication(), this, R.layout.playlist_list_item,
 					mPlaylistCursor, new String[] { MediaStore.Audio.Playlists.NAME },
 					new int[] { android.R.id.text1 });
-			setListAdapter(mAdapter);
+			mPlaylistView.setAdapter(mAdapter);
 			setTitle(R.string.working_playlists);
 			getPlaylistCursor(mAdapter.getQueryHandler(), null);
 		} else {
 			mAdapter.setActivity(this);
-			setListAdapter(mAdapter);
+			mPlaylistView.setAdapter(mAdapter);
 			mPlaylistCursor = mAdapter.getCursor();
 			// If mPlaylistCursor is null, this can be because it doesn't have
 			// a cursor yet (because the initial query that sets its cursor
@@ -166,20 +171,11 @@ public class PlaylistBrowserActivity extends ListActivity implements
 	}
 
 	@Override
-	public Object onRetainNonConfigurationInstance() {
-
-		PlaylistListAdapter a = mAdapter;
-		mAdapterSent = true;
-		return a;
-	}
-
-	@Override
 	public void onDestroy() {
 
-		ListView lv = getListView();
-		if (lv != null) {
-			mLastListPosCourse = lv.getFirstVisiblePosition();
-			View cv = lv.getChildAt(0);
+		if (mPlaylistView != null) {
+			mLastListPosCourse = mPlaylistView.getFirstVisiblePosition();
+			View cv = mPlaylistView.getChildAt(0);
 			if (cv != null) {
 				mLastListPosFine = cv.getTop();
 			}
@@ -192,13 +188,13 @@ public class PlaylistBrowserActivity extends ListActivity implements
 		// instead of closing the cursor directly keeps the framework from
 		// accessing
 		// the closed cursor later.
-		if (!mAdapterSent && mAdapter != null) {
+		if (mAdapter != null) {
 			mAdapter.changeCursor(null);
 		}
 		// Because we pass the adapter to the next activity, we need to make
 		// sure it doesn't keep a reference to this activity. We can do this
 		// by clearing its DatasetObservers, which setListAdapter(null) does.
-		setListAdapter(null);
+		mPlaylistView.setAdapter(null);
 		mAdapter = null;
 		unregisterReceiver(mScanListener);
 		super.onDestroy();
@@ -257,7 +253,7 @@ public class PlaylistBrowserActivity extends ListActivity implements
 
 		// restore previous position
 		if (mLastListPosCourse >= 0) {
-			getListView().setSelectionFromTop(mLastListPosCourse, mLastListPosFine);
+			mPlaylistView.setSelectionFromTop(mLastListPosCourse, mLastListPosFine);
 			mLastListPosCourse = -1;
 		}
 		MusicUtils.hideDatabaseError(this);
@@ -273,10 +269,9 @@ public class PlaylistBrowserActivity extends ListActivity implements
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 
-			menu.add(0, PARTY_SHUFFLE, 0, R.string.party_shuffle); 
-			menu.add(0, SETTINGS, 0, R.string.settings).setIcon(
-					android.R.drawable.ic_menu_preferences);
-			
+		menu.add(0, PARTY_SHUFFLE, 0, R.string.party_shuffle);
+		menu.add(0, SETTINGS, 0, R.string.settings).setIcon(android.R.drawable.ic_menu_preferences);
+
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -384,7 +379,7 @@ public class PlaylistBrowserActivity extends ListActivity implements
 	}
 
 	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
+	public void onItemClick(AdapterView<?> adapterview, View view, int position, long id) {
 
 		if (id == RECENTLY_ADDED_PLAYLIST) {
 			Intent intent = new Intent(Intent.ACTION_PICK);
@@ -406,30 +401,7 @@ public class PlaylistBrowserActivity extends ListActivity implements
 
 	private void playRecentlyAdded() {
 
-		// do a query for all songs added in the last X weeks
-		int X = new SharedPrefs(this).getIntPref(PREF_KEY_NUMWEEKS, 2) * (3600 * 24 * 7);
-		final String[] ccols = new String[] { MediaStore.Audio.Media._ID };
-		String where = MediaStore.MediaColumns.DATE_ADDED + ">"
-				+ (System.currentTimeMillis() / 1000 - X);
-		Cursor cursor = MusicUtils.query(this, MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, ccols,
-				where, null, MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
-
-		if (cursor == null) {
-			// Todo: show a message
-			return;
-		}
-		try {
-			int len = cursor.getCount();
-			long[] list = new long[len];
-			for (int i = 0; i < len; i++) {
-				cursor.moveToNext();
-				list[i] = cursor.getLong(0);
-			}
-			MusicUtils.playAll(this, list, 0);
-		} catch (SQLiteException ex) {
-		} finally {
-			cursor.close();
-		}
+		MusicUtils.playRecentlyAdded(getApplicationContext());
 	}
 
 	private void playPodcasts() {
@@ -595,13 +567,6 @@ public class PlaylistBrowserActivity extends ListActivity implements
 
 			long id = cursor.getLong(mIdIdx);
 
-			ImageView iv = (ImageView) view.findViewById(R.id.playlist_icon);
-			if (id == RECENTLY_ADDED_PLAYLIST) {
-				iv.setImageResource(R.drawable.ic_mp_list_playlist_recent);
-			} else {
-				iv.setImageResource(R.drawable.ic_mp_list_playlist);
-			}
-
 		}
 
 		@Override
@@ -634,4 +599,5 @@ public class PlaylistBrowserActivity extends ListActivity implements
 	}
 
 	private Cursor mPlaylistCursor;
+
 }

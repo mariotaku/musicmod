@@ -72,7 +72,7 @@ import org.musicmod.android.IMusicPlaybackService;
 import org.musicmod.android.MusicPlaybackService;
 import org.musicmod.android.R;
 import org.musicmod.android.ScanningProgress;
-import org.musicmod.android.activity.MusicPlaybackActivity;
+import org.musicmod.android.app.MusicPlaybackActivity;
 
 public class MusicUtils implements Constants {
 
@@ -1300,7 +1300,8 @@ public class MusicUtils implements Constants {
 		BitmapFactory.Options opts = new BitmapFactory.Options();
 		opts.inPreferredConfig = Bitmap.Config.ARGB_8888;
 		return BitmapFactory.decodeStream(
-				context.getResources().openRawResource(R.drawable.ic_mp_albumart_unknown), null, opts);
+				context.getResources().openRawResource(R.drawable.ic_mp_albumart_unknown), null,
+				opts);
 	}
 
 	public static Uri getArtworkUri(Context context, long song_id, long album_id) {

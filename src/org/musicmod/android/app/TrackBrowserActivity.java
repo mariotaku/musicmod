@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.musicmod.android;
+package org.musicmod.android.app;
 
 import android.app.ListActivity;
 import android.app.SearchManager;
@@ -62,6 +62,15 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 
 import java.util.Arrays;
 
+import org.musicmod.android.Constants;
+import org.musicmod.android.IMusicPlaybackService;
+import org.musicmod.android.MusicPlaybackService;
+import org.musicmod.android.R;
+import org.musicmod.android.R.drawable;
+import org.musicmod.android.R.id;
+import org.musicmod.android.R.layout;
+import org.musicmod.android.R.menu;
+import org.musicmod.android.R.string;
 import org.musicmod.android.activity.MusicSettingsActivity;
 import org.musicmod.android.util.MusicUtils;
 import org.musicmod.android.util.ServiceToken;

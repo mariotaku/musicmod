@@ -277,9 +277,10 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 	 * Lyrics Handler
 	 * 
 	 * load lyrics automatically, most accurate and fastest ever.<br>
-	 * Usage: send a empty message {@link #NEW_LYRICS_LOADED} when new song played.
+	 * Usage: send a empty message {@link #NEW_LYRICS_LOADED} when new song
+	 * played.
 	 * 
-	 *  @author mariotaku
+	 * @author mariotaku
 	 */
 	private Handler mLyricsHandler = new Handler() {
 

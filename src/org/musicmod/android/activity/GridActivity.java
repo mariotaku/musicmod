@@ -182,11 +182,21 @@ public class GridActivity extends Activity {
 	 * 
 	 * 
 	 * 
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
 	 * }
 	 */
 	protected ListAdapter mAdapter;
 	/**
 	 * This field should be made private, so it is hidden from the SDK. {@hide
+	 * 
+	 * 
+	 * 
+	 * 
+	 * 
 	 * 
 	 * 
 	 * 

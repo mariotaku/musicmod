@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-package org.musicmod.android;
+package org.musicmod.android.app;
 
-import android.app.ExpandableListActivity;
 import android.app.SearchManager;
 import android.content.AsyncQueryHandler;
 import android.content.BroadcastReceiver;
@@ -41,6 +40,7 @@ import android.os.Message;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
+import android.support.v4.app.FragmentActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.ContextMenu;
@@ -59,12 +59,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 
+import org.musicmod.android.Constants;
+import org.musicmod.android.R;
 import org.musicmod.android.activity.MusicSettingsActivity;
 import org.musicmod.android.util.MusicUtils;
 import org.musicmod.android.util.ServiceToken;
 
-public class ArtistAlbumBrowserActivity extends ExpandableListActivity implements
-		View.OnCreateContextMenuListener, Constants, ServiceConnection {
+public class ArtistTab extends FragmentActivity implements View.OnCreateContextMenuListener,
+		Constants, ServiceConnection {
 
 	private String mCurrentArtistId;
 	private String mCurrentArtistName;
@@ -74,12 +76,12 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity implement
 	boolean mIsUnknownArtist;
 	boolean mIsUnknownAlbum;
 	private ArtistAlbumListAdapter mArtistAdapter;
-	private boolean mAdapterSent;
 	private final static int SEARCH = CHILD_MENU_BASE;
 	private static int mLastListPosCourse = -1;
 	private static int mLastListPosFine = -1;
 	private ServiceToken mToken;
 	private boolean mShowFadeAnimation = false;
+	private ExpandableListView mArtistListView;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -109,19 +111,19 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity implement
 
 		setContentView(R.layout.artist_album_browser);
 		MusicUtils.updateButtonBar(this, R.id.artisttab);
-		ExpandableListView lv = getExpandableListView();
-		lv.setOnCreateContextMenuListener(this);
-		lv.setTextFilterEnabled(true);
+		mArtistListView = (ExpandableListView) findViewById(R.id.artist_expandable_list);
+		mArtistListView.setOnCreateContextMenuListener(this);
+		mArtistListView.setTextFilterEnabled(true);
 
 		mArtistAdapter = (ArtistAlbumListAdapter) getLastNonConfigurationInstance();
 
 		if (mArtistAdapter == null) {
 			mArtistAdapter = new ArtistAlbumListAdapter(null, getApplication(), false);
-			setListAdapter(mArtistAdapter);
+			mArtistListView.setAdapter(mArtistAdapter);
 			setTitle(R.string.working_artists);
 			getArtistCursor(mArtistAdapter.getQueryHandler(), null);
 		} else {
-			setListAdapter(mArtistAdapter);
+			mArtistListView.setAdapter(mArtistAdapter);
 			mArtistCursor = mArtistAdapter.getCursor();
 			if (mArtistCursor != null) {
 				init(mArtistCursor);
@@ -129,13 +131,6 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity implement
 				getArtistCursor(mArtistAdapter.getQueryHandler(), null);
 			}
 		}
-	}
-
-	@Override
-	public Object onRetainNonConfigurationInstance() {
-
-		mAdapterSent = true;
-		return mArtistAdapter;
 	}
 
 	@Override
@@ -154,10 +149,9 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity implement
 	@Override
 	public void onDestroy() {
 
-		ExpandableListView lv = getExpandableListView();
-		if (lv != null) {
-			mLastListPosCourse = lv.getFirstVisiblePosition();
-			View cv = lv.getChildAt(0);
+		if (mArtistListView != null) {
+			mLastListPosCourse = mArtistListView.getFirstVisiblePosition();
+			View cv = mArtistListView.getChildAt(0);
 			if (cv != null) {
 				mLastListPosFine = cv.getTop();
 			}
@@ -171,16 +165,15 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity implement
 		// instead of closing the cursor directly keeps the framework from
 		// accessing
 		// the closed cursor later.
-		if (!mAdapterSent && mArtistAdapter != null) {
+		if (mArtistAdapter != null) {
 			mArtistAdapter.changeCursor(null);
 		}
 		// Because we pass the adapter to the next activity, we need to make
 		// sure it doesn't keep a reference to this activity. We can do this
 		// by clearing its DatasetObservers, which setListAdapter(null) does.
-		setListAdapter(null);
 		mArtistAdapter = null;
 		unregisterReceiver(mScanListener);
-		setListAdapter(null);
+		mArtistListView.setAdapter(mArtistAdapter);
 		super.onDestroy();
 	}
 
@@ -222,8 +215,8 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity implement
 		@Override
 		public void onReceive(Context context, Intent intent) {
 
-			getExpandableListView().invalidateViews();
-			MusicUtils.updateNowPlaying(ArtistAlbumBrowserActivity.this);
+			mArtistListView.invalidateViews();
+			MusicUtils.updateNowPlaying(ArtistTab.this);
 		}
 	};
 
@@ -232,7 +225,7 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity implement
 		@Override
 		public void onReceive(Context context, Intent intent) {
 
-			MusicUtils.setSpinnerState(ArtistAlbumBrowserActivity.this);
+			MusicUtils.setSpinnerState(ArtistTab.this);
 			mReScanHandler.sendEmptyMessage(0);
 			if (intent.getAction().equals(Intent.ACTION_MEDIA_UNMOUNTED)) {
 				MusicUtils.clearAlbumArtCache();
@@ -275,8 +268,7 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity implement
 
 		// restore previous position
 		if (mLastListPosCourse >= 0) {
-			ExpandableListView elv = getExpandableListView();
-			elv.setSelectionFromTop(mLastListPosCourse, mLastListPosFine);
+			mArtistListView.setSelectionFromTop(mLastListPosCourse, mLastListPosFine);
 			mLastListPosCourse = -1;
 		}
 
@@ -338,7 +330,7 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity implement
 				Log.d("Artist/Album", "no group");
 				return;
 			}
-			gpos = gpos - getExpandableListView().getHeaderViewsCount();
+			gpos = gpos - mArtistListView.getHeaderViewsCount();
 			mArtistCursor.moveToPosition(gpos);
 			mCurrentArtistId = mArtistCursor.getString(mArtistCursor
 					.getColumnIndexOrThrow(MediaStore.Audio.Artists._ID));
@@ -580,7 +572,7 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity implement
 
 		private ArtistAlbumListAdapter(Cursor cursor, Context context, boolean autoRequery) {
 
-			super(cursor,context, autoRequery);
+			super(cursor, context, autoRequery);
 			mQueryHandler = new QueryHandler(context.getContentResolver());
 
 			getColumnIndices(cursor);
@@ -769,7 +761,7 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity implement
 		private int mAlbumArtIndex;
 		private final String mUnknownAlbum;
 		private final String mUnknownArtist;
-		private ArtistAlbumBrowserActivity mActivity;
+		private ArtistTab mActivity;
 		private String mConstraint = null;
 		private boolean mConstraintIsValid = false;
 
@@ -825,7 +817,7 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity implement
 
 		@Override
 		public void bindView(View view, Context context, Cursor cursor) {
-			
+
 			ViewHolderItem viewholder = (ViewHolderItem) view.getTag();
 
 			String name = cursor.getString(mAlbumIndex);

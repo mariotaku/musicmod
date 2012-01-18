@@ -43,7 +43,7 @@
 			android:value="org.musicmod.android.QueryBrowserActivity"/>
 
 		<activity
-			android:name="org.musicmod.android.MusicBrowserActivity"
+			android:name=".app.MusicBrowserActivity"
 			android:exported="true"
 			android:theme="@android:style/Theme.NoTitleBar">
 			<intent-filter>
@@ -75,7 +75,7 @@
              appropriate.
 		-->
 		<activity
-			android:name=".activity.MusicPlaybackActivity"
+			android:name=".app.MusicPlaybackActivity"
 			android:clearTaskOnLaunch="true"
 			android:excludeFromRecents="true"
 			android:exported="true"
@@ -134,7 +134,7 @@
 			</intent-filter>
 		</activity>
 		<activity
-			android:name="org.musicmod.android.ArtistAlbumBrowserActivity"
+			android:name=".app.ArtistTab"
 			android:exported="false">
 			<intent-filter>
 				<action android:name="android.intent.action.PICK"/>
@@ -145,7 +145,7 @@
 			</intent-filter>
 		</activity>
 		<activity
-			android:name="org.musicmod.android.AlbumBrowserActivity"
+			android:name=".app.AlbumTab"
 			android:exported="false">
 			<intent-filter>
 				<action android:name="android.intent.action.PICK"/>
@@ -167,7 +167,7 @@
 			</intent-filter>
 		</activity>
 		<activity
-			android:name="org.musicmod.android.TrackBrowserActivity"
+			android:name=".app.TrackBrowserActivity"
 			android:exported="false">
 			<intent-filter>
 				<action android:name="android.intent.action.EDIT"/>
@@ -194,7 +194,7 @@
 				android:resource="@xml/searchable"/>
 		</activity>
 		<activity
-			android:name="org.musicmod.android.PlaylistBrowserActivity"
+			android:name=".app.PlaylistBrowserActivity"
 			android:exported="true"
 			android:label="@string/musicbrowserlabel">
 			<intent-filter>
@@ -327,7 +327,7 @@
 			</intent-filter>
 		</activity>
 		<activity
-			android:name=".activity.EqualizerActivity"
+			android:name=".app.EqualizerActivity"
 			android:label="@string/equalizer"
 			android:theme="@android:style/Theme.Dialog">
 			<intent-filter>

@@ -16,6 +16,8 @@
 
 package org.musicmod.android;
 
+import org.musicmod.android.app.MusicBrowserActivity;
+
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;

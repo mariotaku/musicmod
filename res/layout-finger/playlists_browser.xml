@@ -21,14 +21,10 @@
 	android:gravity="center_vertical"
 	android:orientation="vertical">
 
-	<include layout="@layout/sd_error"/>
-
-	<include layout="@layout/buttonbar"/>
-
-	<org.musicmod.android.widget.TouchInterceptor
-		android:id="@android:id/list"
+	<ListView
+		android:id="@+id/playlists_listview"
 		android:layout_width="match_parent"
-		android:layout_height="match_parent"
+		android:layout_height="0dip"
 		android:layout_weight="1"
 		android:drawSelectorOnTop="false"
 		android:fastScrollEnabled="true"

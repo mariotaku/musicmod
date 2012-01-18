@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2007 The Android Open Source Project
+<!--
+     Copyright (C) 2007 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -15,24 +16,24 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center_vertical" >
+	android:layout_width="match_parent"
+	android:layout_height="match_parent"
+	android:gravity="center_vertical"
+	android:orientation="vertical">
 
-    <include layout="@layout/sd_error" />
+	<include layout="@layout/sd_error"/>
 
-    <include layout="@layout/buttonbar" />
+	<include layout="@layout/buttonbar"/>
 
-    <org.musicmod.android.widget.TouchInterceptor
-        android:id="@android:id/list"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:textSize="18sp"
-        android:drawSelectorOnTop="false"
-        android:fastScrollEnabled="true" /> 
+	<org.musicmod.android.widget.TouchInterceptor
+		android:id="@android:id/list"
+		android:layout_width="match_parent"
+		android:layout_height="0dip"
+		android:layout_weight="1"
+		android:drawSelectorOnTop="false"
+		android:fastScrollEnabled="true"
+		android:textSize="18sp"/>
 
-    <include layout="@layout/mediabrowser_nowplaying_bar" />
+	<include layout="@layout/mediabrowser_nowplaying_bar"/>
 
 </LinearLayout>
