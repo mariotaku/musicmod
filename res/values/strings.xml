@@ -18,8 +18,9 @@
 -->
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-	<string translatable="false" name="durationformatshort"><xliff:g id="format">%2$d:%5$02d</xliff:g></string>
-	<string translatable="false" name="durationformatlong"><xliff:g id="format">%1$d:%3$02d:%5$02d</xliff:g></string>
+
+	<string name="durationformatshort" translatable="false"><xliff:g id="format">%2$d:%5$02d</xliff:g></string>
+	<string name="durationformatlong" translatable="false"><xliff:g id="format">%1$d:%3$02d:%5$02d</xliff:g></string>
 	<string name="goto_start">Library</string>
 	<string name="goto_playback">Playback</string>
 	<string name="party_shuffle">Party shuffle</string>
@@ -63,8 +64,8 @@
 	<string name="sdcard_error_title_nosdcard">USB storage error</string>
 	<string name="sdcard_error">An error was encountered on your SD card.</string>
 	<string name="sdcard_error_nosdcard">An error was encountered on your USB storage.</string>
-	<string name="unknown_artist_name">Unknown artist</string>
-	<string name="unknown_album_name">Unknown album</string>
+	<string name="unknown_artist">Unknown artist</string>
+	<string name="unknown_album">Unknown album</string>
 	<string name="shuffle_on_notif">Shuffle is on.</string>
 	<string name="shuffle_off_notif">Shuffle is off.</string>
 	<string name="repeat_off_notif">Repeat is off.</string>
@@ -119,8 +120,8 @@
 	<string name="sleep_timer_disabled">Sleep timer disabled</string>
 	<string name="sleep_timer_enabled">Sleep timer enabled</string>
 	<string name="notification_sleep_timer">Music playback will stop at <xliff:g id="time">%s</xliff:g></string>
-	<string translatable="false" name="albumsongseparator">\n</string>
-	<string translatable="false" name="notification_artist_album"><xliff:g id="album">%2$s</xliff:g> - <xliff:g id="artist">%1$s</xliff:g></string>
+	<string name="albumsongseparator" translatable="false">\n</string>
+	<string name="notification_artist_album" translatable="false"><xliff:g id="album">%2$s</xliff:g> - <xliff:g id="artist">%1$s</xliff:g></string>
 	<string name="test">Test</string>
 	<string name="save">Save</string>
 	<string name="overwrite">Overwrite</string>
@@ -233,4 +234,5 @@
 	<string name="app_version">1.3.6</string>
 	<string name="special_thanks_to">Speical thanks to</string>
 	<string name="special_thanks_to_summary">\@JavranC: Testing\n\@oliver661: Testing\n\@leytwit: Japanese translation</string>
+
 </resources>

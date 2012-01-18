@@ -1485,11 +1485,11 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 			String artist = getArtistName();
 			contentTitle = getTrackName();
 			if (artist == null || artist.equals(MediaStore.UNKNOWN_STRING)) {
-				artist = getString(R.string.unknown_artist_name);
+				artist = getString(R.string.unknown_artist);
 			}
 			String album = getAlbumName();
 			if (album == null || album.equals(MediaStore.UNKNOWN_STRING)) {
-				album = getString(R.string.unknown_album_name);
+				album = getString(R.string.unknown_album);
 			}
 			contentText = getString(R.string.notification_artist_album, artist, album);
 

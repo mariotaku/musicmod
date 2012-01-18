@@ -26,11 +26,8 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.View.OnCreateContextMenuListener;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
-import android.widget.GridView;
 import android.widget.SimpleCursorTreeAdapter;
 import android.widget.SimpleExpandableListAdapter;
-import android.widget.AdapterView.AdapterContextMenuInfo;
-
 import java.util.Map;
 
 /**

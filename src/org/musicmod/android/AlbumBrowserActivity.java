@@ -16,8 +16,6 @@
 
 package org.musicmod.android;
 
-import java.util.ArrayList;
-
 import org.musicmod.android.activity.GridActivity;
 import org.musicmod.android.activity.MusicSettingsActivity;
 import org.musicmod.android.util.MusicUtils;
@@ -60,10 +58,10 @@ import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.AlphabetIndexer;
+import android.widget.CursorAdapter;
 import android.widget.ImageView;
 import android.widget.GridView;
 import android.widget.SectionIndexer;
-import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 
@@ -81,7 +79,6 @@ public class AlbumBrowserActivity extends GridActivity implements View.OnCreateC
 	private ServiceToken mToken;
 	private boolean mShowFadeAnimation = false;
 	private GridView mGridView;
-	private static final int KEY_POSITION = 1;
 
 	public AlbumBrowserActivity() {
 
@@ -121,13 +118,11 @@ public class AlbumBrowserActivity extends GridActivity implements View.OnCreateC
 
 		mAdapter = (AlbumListAdapter) getLastNonConfigurationInstance();
 		if (mAdapter == null) {
-			mAdapter = new AlbumListAdapter(getApplication(), this, R.layout.album_grid_item,
-					mAlbumCursor, new String[] {}, new int[] {});
+			mAdapter = new AlbumListAdapter(getApplicationContext(), mAlbumCursor, false);
 			setAdapter(mAdapter);
 			setTitle(R.string.working_albums);
 			getAlbumCursor(mAdapter.getQueryHandler(), null);
 		} else {
-			mAdapter.setActivity(this);
 			setAdapter(mAdapter);
 			mAlbumCursor = mAdapter.getCursor();
 			if (mAlbumCursor != null) {
@@ -280,7 +275,7 @@ public class AlbumBrowserActivity extends GridActivity implements View.OnCreateC
 			fancyName = mAlbumCursor.getString(mAlbumCursor
 					.getColumnIndex(MediaStore.Audio.Albums.ARTIST));
 			if (fancyName == null || fancyName.equals(MediaStore.UNKNOWN_STRING))
-				fancyName = getText(R.string.unknown_artist_name);
+				fancyName = getText(R.string.unknown_artist);
 		}
 
 		if (mArtistId != null && fancyName != null)
@@ -310,7 +305,7 @@ public class AlbumBrowserActivity extends GridActivity implements View.OnCreateC
 		mIsUnknownAlbum = mCurrentAlbumName == null
 				|| mCurrentAlbumName.equals(MediaStore.UNKNOWN_STRING);
 		if (mIsUnknownAlbum) {
-			menu.setHeaderTitle(getString(R.string.unknown_album_name));
+			menu.setHeaderTitle(getString(R.string.unknown_album));
 		} else {
 			menu.setHeaderTitle(mCurrentAlbumName);
 		}
@@ -496,7 +491,7 @@ public class AlbumBrowserActivity extends GridActivity implements View.OnCreateC
 		return ret;
 	}
 
-	private class AlbumListAdapter extends SimpleCursorAdapter implements SectionIndexer {
+	private class AlbumListAdapter extends CursorAdapter implements SectionIndexer {
 
 		private final BitmapDrawable mDefaultAlbumIcon;
 		private int mAlbumIndex;
@@ -504,7 +499,6 @@ public class AlbumBrowserActivity extends GridActivity implements View.OnCreateC
 		private int mAlbumIdIndex;
 		private final Resources mResources;
 		private AlphabetIndexer mIndexer;
-		private AlbumBrowserActivity mActivity;
 		private AsyncQueryHandler mQueryHandler;
 		private String mConstraint = null;
 		private boolean mConstraintIsValid = false;
@@ -533,16 +527,14 @@ public class AlbumBrowserActivity extends GridActivity implements View.OnCreateC
 			@Override
 			protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
 
-				mActivity.init(cursor);
+				AlbumBrowserActivity.this.init(cursor);
 			}
 		}
 
-		private AlbumListAdapter(Context context, AlbumBrowserActivity currentactivity, int layout,
-				Cursor cursor, String[] from, int[] to) {
+		private AlbumListAdapter(Context context, Cursor cursor, boolean autoRequery) {
 
-			super(context, layout, cursor, from, to);
+			super(context, cursor, autoRequery);
 
-			mActivity = currentactivity;
 			mQueryHandler = new QueryHandler(context.getContentResolver());
 
 			Resources r = context.getResources();
@@ -573,11 +565,6 @@ public class AlbumBrowserActivity extends GridActivity implements View.OnCreateC
 			}
 		}
 
-		public void setActivity(AlbumBrowserActivity newactivity) {
-
-			mActivity = newactivity;
-		}
-
 		public AsyncQueryHandler getQueryHandler() {
 
 			return mQueryHandler;
@@ -586,31 +573,74 @@ public class AlbumBrowserActivity extends GridActivity implements View.OnCreateC
 		@Override
 		public View newView(Context context, Cursor cursor, ViewGroup parent) {
 
-			View view = super.newView(context, cursor, parent);
+			View view = getLayoutInflater().inflate(R.layout.album_grid_item, null);
 			ViewHolder viewholder = new ViewHolder(view);
 			view.setTag(viewholder);
 			return view;
 		}
 
+//		@Override
+//		public View getView(int position, View convertView, ViewGroup parent) {
+//
+//			View view = super.getView(position, convertView, parent);
+//
+//			mAlbumCursor.moveToPosition(position);
+//
+//			ViewHolder viewholder = (ViewHolder) view.getTag();
+//
+//			String album_name = mAlbumCursor.getString(mAlbumIndex);
+//			if (album_name == null || MediaStore.UNKNOWN_STRING.equals(album_name)) {
+//				viewholder.album_name.setText(R.string.unknown_album_name);
+//			} else {
+//				viewholder.album_name.setText(album_name);
+//			}
+//
+//			String artist_name = mAlbumCursor.getString(mArtistIndex);
+//			if (album_name == null || MediaStore.UNKNOWN_STRING.equals(album_name)) {
+//				viewholder.artist_name.setText(R.string.unknown_artist_name);
+//			} else {
+//				viewholder.artist_name.setText(artist_name);
+//			}
+//
+//			// We don't actually need the path to the thumbnail file,
+//			// we just use it to see if there is album art or not
+//			long aid = mAlbumCursor.getLong(mAlbumIdIndex);
+//			int width = getResources().getDimensionPixelSize(R.dimen.gridview_bitmap_width);
+//			int height = getResources().getDimensionPixelSize(R.dimen.gridview_bitmap_height);
+//
+//			viewholder.album_art.setImageBitmap(MusicUtils.getCachedArtwork(
+//					getApplicationContext(), aid, width, height));
+//
+//			// viewholder.album_art.setTag(aid);
+//			// new AsyncAlbumArtLoader(viewholder.album_art, mShowFadeAnimation,
+//			// aid, width, height).execute();
+//
+//			long currentalbumid = MusicUtils.getCurrentAlbumId();
+//			if (currentalbumid == aid) {
+//				viewholder.album_name.setCompoundDrawablesWithIntrinsicBounds(0, 0,
+//						R.drawable.ic_indicator_nowplaying_small, 0);
+//			} else {
+//				viewholder.album_name.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+//			}
+//
+//			return view;
+//		}
+
 		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-
-			View view = super.getView(position, convertView, parent);
-
-			mAlbumCursor.moveToPosition(position);
-
+		public void bindView(View view, Context context, Cursor cursor) {
+			
 			ViewHolder viewholder = (ViewHolder) view.getTag();
 
-			String album_name = mAlbumCursor.getString(mAlbumIndex);
+			String album_name = cursor.getString(mAlbumIndex);
 			if (album_name == null || MediaStore.UNKNOWN_STRING.equals(album_name)) {
-				viewholder.album_name.setText(R.string.unknown_album_name);
+				viewholder.album_name.setText(R.string.unknown_album);
 			} else {
 				viewholder.album_name.setText(album_name);
 			}
 
 			String artist_name = mAlbumCursor.getString(mArtistIndex);
 			if (album_name == null || MediaStore.UNKNOWN_STRING.equals(album_name)) {
-				viewholder.artist_name.setText(R.string.unknown_artist_name);
+				viewholder.artist_name.setText(R.string.unknown_artist);
 			} else {
 				viewholder.artist_name.setText(artist_name);
 			}
@@ -636,18 +666,17 @@ public class AlbumBrowserActivity extends GridActivity implements View.OnCreateC
 				viewholder.album_name.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
 			}
 
-			return view;
 		}
-
+		
 		@Override
 		public void changeCursor(Cursor cursor) {
 
-			if (mActivity.isFinishing() && cursor != null) {
+			if (isFinishing() && cursor != null) {
 				cursor.close();
 				cursor = null;
 			}
-			if (cursor != mActivity.mAlbumCursor) {
-				mActivity.mAlbumCursor = cursor;
+			if (cursor != mAlbumCursor) {
+				mAlbumCursor = cursor;
 				getColumnIndices(cursor);
 				super.changeCursor(cursor);
 			}
@@ -661,7 +690,7 @@ public class AlbumBrowserActivity extends GridActivity implements View.OnCreateC
 					&& ((s == null && mConstraint == null) || (s != null && s.equals(mConstraint)))) {
 				return getCursor();
 			}
-			Cursor c = mActivity.getAlbumCursor(null, s);
+			Cursor c = getAlbumCursor(null, s);
 			mConstraint = s;
 			mConstraintIsValid = true;
 			return c;
@@ -681,6 +710,7 @@ public class AlbumBrowserActivity extends GridActivity implements View.OnCreateC
 
 			return 0;
 		}
+
 	}
 
 	private Cursor mAlbumCursor;

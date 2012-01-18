@@ -44,7 +44,6 @@ import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.ContextMenu;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.SubMenu;
@@ -52,15 +51,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.widget.AlphabetIndexer;
-import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
+import android.widget.CursorAdapter;
+import android.widget.CursorTreeAdapter;
 import android.widget.ExpandableListView;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.SectionIndexer;
-import android.widget.SimpleCursorAdapter;
-import android.widget.SimpleCursorTreeAdapter;
 import android.widget.TextView;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 
@@ -79,7 +74,6 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity implement
 	boolean mIsUnknownArtist;
 	boolean mIsUnknownAlbum;
 	private ArtistAlbumListAdapter mArtistAdapter;
-	private AlbumChildAdapter mAlbumAdapter;
 	private boolean mAdapterSent;
 	private final static int SEARCH = CHILD_MENU_BASE;
 	private static int mLastListPosCourse = -1;
@@ -122,15 +116,11 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity implement
 		mArtistAdapter = (ArtistAlbumListAdapter) getLastNonConfigurationInstance();
 
 		if (mArtistAdapter == null) {
-			mArtistAdapter = new ArtistAlbumListAdapter(getApplication(), this,
-					null, // cursor
-					R.layout.artist_list_item_group, new String[] {}, new int[] {},
-					R.layout.artist_list_item_child, new String[] {}, new int[] {});
+			mArtistAdapter = new ArtistAlbumListAdapter(null, getApplication(), false);
 			setListAdapter(mArtistAdapter);
 			setTitle(R.string.working_artists);
 			getArtistCursor(mArtistAdapter.getQueryHandler(), null);
 		} else {
-			mArtistAdapter.setActivity(this);
 			setListAdapter(mArtistAdapter);
 			mArtistCursor = mArtistAdapter.getCursor();
 			if (mArtistCursor != null) {
@@ -359,7 +349,7 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity implement
 					|| mCurrentArtistName.equals(MediaStore.UNKNOWN_STRING);
 			mIsUnknownAlbum = true;
 			if (mIsUnknownArtist) {
-				menu.setHeaderTitle(getString(R.string.unknown_artist_name));
+				menu.setHeaderTitle(getString(R.string.unknown_artist));
 			} else {
 				menu.setHeaderTitle(mCurrentArtistName);
 				menu.add(0, SEARCH, 0, android.R.string.search_go);
@@ -543,16 +533,12 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity implement
 		return ret;
 	}
 
-	private class ArtistAlbumListAdapter extends SimpleCursorTreeAdapter implements SectionIndexer {
+	private class ArtistAlbumListAdapter extends CursorTreeAdapter {
 
 		private int mGroupArtistIdIdx;
 		private int mGroupArtistIdx;
 		private int mGroupAlbumIdx;
 		private int mGroupSongIdx;
-		private final Resources mResources;
-		private final String mUnknownArtist;
-		private AlphabetIndexer mIndexer;
-		private ArtistAlbumBrowserActivity mActivity;
 		private AsyncQueryHandler mQueryHandler;
 		private String mConstraint = null;
 		private boolean mConstraintIsValid = false;
@@ -588,22 +574,16 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity implement
 
 			@Override
 			protected void onQueryComplete(int token, Object cookie, Cursor cursor) {
-				mActivity.init(cursor);
+				init(cursor);
 			}
 		}
 
-		private ArtistAlbumListAdapter(Context context, ArtistAlbumBrowserActivity currentactivity,
-				Cursor cursor, int group_layout, String[] group_from, int[] group_to,
-				int child_layout, String[] child_from, int[] child_to) {
+		private ArtistAlbumListAdapter(Cursor cursor, Context context, boolean autoRequery) {
 
-			super(context, cursor, group_layout, group_from, group_to, child_layout, child_from,
-					child_to);
-			mActivity = currentactivity;
+			super(cursor,context, autoRequery);
 			mQueryHandler = new QueryHandler(context.getContentResolver());
 
 			getColumnIndices(cursor);
-			mResources = context.getResources();
-			mUnknownArtist = context.getString(R.string.unknown_artist_name);
 		}
 
 		private void getColumnIndices(Cursor cursor) {
@@ -615,18 +595,7 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity implement
 						.getColumnIndexOrThrow(MediaStore.Audio.Artists.NUMBER_OF_ALBUMS);
 				mGroupSongIdx = cursor
 						.getColumnIndexOrThrow(MediaStore.Audio.Artists.NUMBER_OF_TRACKS);
-				if (mIndexer != null) {
-					mIndexer.setCursor(cursor);
-				} else {
-					mIndexer = new AlphabetIndexer(cursor, mGroupArtistIdx,
-							mResources.getString(R.string.fast_scroll_alphabet));
-				}
 			}
-		}
-
-		public void setActivity(ArtistAlbumBrowserActivity newactivity) {
-
-			mActivity = newactivity;
 		}
 
 		public AsyncQueryHandler getQueryHandler() {
@@ -638,7 +607,7 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity implement
 		public View newGroupView(Context context, Cursor cursor, boolean isExpanded,
 				ViewGroup parent) {
 
-			View view = super.newGroupView(context, cursor, isExpanded, parent);
+			View view = getLayoutInflater().inflate(R.layout.artist_list_item_group, null);
 			ViewHolderGroup viewholder = new ViewHolderGroup(view);
 			view.setTag(viewholder);
 			return view;
@@ -651,9 +620,9 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity implement
 
 			String artist = cursor.getString(mGroupArtistIdx);
 			String displayartist = artist;
-			boolean unknown = artist == null || artist.equals(MediaStore.UNKNOWN_STRING);
+			boolean unknown = artist == null || MediaStore.UNKNOWN_STRING.equals(artist);
 			if (unknown) {
-				displayartist = mUnknownArtist;
+				vh.artist_name.setText(R.string.unknown_artist);
 			}
 			vh.artist_name.setText(displayartist);
 
@@ -677,7 +646,7 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity implement
 		public View newChildView(Context context, Cursor cursor, boolean isLastChild,
 				ViewGroup parent) {
 
-			View view = super.newChildView(context, cursor, isLastChild, parent);
+			View view = getLayoutInflater().inflate(R.layout.artist_list_item_child, null);
 			ViewHolderChild viewholder = new ViewHolderChild(view);
 			view.setTag(viewholder);
 			return view;
@@ -687,9 +656,7 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity implement
 		public void bindChildView(View view, Context context, Cursor cursor, boolean isLastChild) {
 
 			ViewHolderChild viewholder = (ViewHolderChild) view.getTag();
-			viewholder.gridview.setAdapter(new AlbumChildAdapter(getApplicationContext(),
-					mActivity, R.layout.album_grid_item, mAlbumCursor, new String[] {},
-					new int[] {}));
+			viewholder.gridview.setAdapter(new AlbumChildAdapter(context, cursor, false));
 
 		}
 
@@ -709,7 +676,7 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity implement
 					MediaStore.Audio.Albums.ALBUM, MediaStore.Audio.Albums.NUMBER_OF_SONGS,
 					MediaStore.Audio.Albums.NUMBER_OF_SONGS_FOR_ARTIST,
 					MediaStore.Audio.Albums.ALBUM_ART };
-			Cursor c = MusicUtils.query(mActivity,
+			Cursor c = MusicUtils.query(getApplicationContext(),
 					MediaStore.Audio.Artists.Albums.getContentUri("external", id), cols, null,
 					null, MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
 
@@ -722,8 +689,8 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity implement
 
 					super(c);
 					mArtistName = artist;
-					if (mArtistName == null || mArtistName.equals(MediaStore.UNKNOWN_STRING)) {
-						mArtistName = mUnknownArtist;
+					if (mArtistName == null || MediaStore.UNKNOWN_STRING.equals(mArtistName)) {
+						mArtistName = getString(R.string.unknown_artist);
 					}
 					mMagicColumnIdx = c.getColumnCount();
 				}
@@ -767,12 +734,12 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity implement
 		@Override
 		public void changeCursor(Cursor cursor) {
 
-			if (mActivity.isFinishing() && cursor != null) {
+			if (isFinishing() && cursor != null) {
 				cursor.close();
 				cursor = null;
 			}
-			if (cursor != mActivity.mArtistCursor) {
-				mActivity.mArtistCursor = cursor;
+			if (cursor != mArtistCursor) {
+				mArtistCursor = cursor;
 				getColumnIndices(cursor);
 				super.changeCursor(cursor);
 			}
@@ -786,29 +753,15 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity implement
 					&& ((s == null && mConstraint == null) || (s != null && s.equals(mConstraint)))) {
 				return getCursor();
 			}
-			Cursor c = mActivity.getArtistCursor(null, s);
+			Cursor c = getArtistCursor(null, s);
 			mConstraint = s;
 			mConstraintIsValid = true;
 			return c;
 		}
 
-		public Object[] getSections() {
-
-			return mIndexer.getSections();
-		}
-
-		public int getPositionForSection(int sectionIndex) {
-
-			return mIndexer.getPositionForSection(sectionIndex);
-		}
-
-		public int getSectionForPosition(int position) {
-
-			return 0;
-		}
 	}
 
-	private class AlbumChildAdapter extends SimpleCursorAdapter {
+	private class AlbumChildAdapter extends CursorAdapter {
 
 		private final BitmapDrawable mDefaultAlbumIcon;
 		private int mAlbumIndex;
@@ -833,15 +786,12 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity implement
 			}
 		}
 
-		private AlbumChildAdapter(Context context, ArtistAlbumBrowserActivity currentactivity,
-				int layout, Cursor cursor, String[] from, int[] to) {
+		private AlbumChildAdapter(Context context, Cursor cursor, boolean autoRequery) {
 
-			super(context, layout, cursor, from, to);
+			super(context, cursor, autoRequery);
 
-			mActivity = currentactivity;
-
-			mUnknownAlbum = context.getString(R.string.unknown_album_name);
-			mUnknownArtist = context.getString(R.string.unknown_artist_name);
+			mUnknownAlbum = context.getString(R.string.unknown_album);
+			mUnknownArtist = context.getString(R.string.unknown_artist);
 
 			Resources r = context.getResources();
 
@@ -867,7 +817,7 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity implement
 		@Override
 		public View newView(Context context, Cursor cursor, ViewGroup parent) {
 
-			View view = super.newView(context, cursor, parent);
+			View view = getLayoutInflater().inflate(R.layout.album_grid_item, null);
 			ViewHolderItem mViewHolder = new ViewHolderItem(view);
 			view.setTag(mViewHolder);
 			return view;
@@ -875,7 +825,7 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity implement
 
 		@Override
 		public void bindView(View view, Context context, Cursor cursor) {
-
+			
 			ViewHolderItem viewholder = (ViewHolderItem) view.getTag();
 
 			String name = cursor.getString(mAlbumIndex);
@@ -960,47 +910,5 @@ public class ArtistAlbumBrowserActivity extends ExpandableListActivity implement
 	public void onServiceDisconnected(ComponentName name) {
 
 		finish();
-	}
-
-	private class ImageAdapter extends BaseAdapter {
-
-		private Context mContext;
-
-		public ImageAdapter(Context c) {
-			mContext = c;
-		}
-
-		public int getCount() {
-			return mThumbIds.length;
-		}
-
-		public Object getItem(int position) {
-			return null;
-		}
-
-		public long getItemId(int position) {
-			return 0;
-		}
-
-		// create a new ImageView for each item referenced by the Adapter
-		public View getView(int position, View convertView, ViewGroup parent) {
-			ImageView imageView;
-			if (convertView == null) { // if it's not recycled, initialize some
-										// attributes
-				imageView = new ImageView(mContext);
-				imageView.setLayoutParams(new GridView.LayoutParams(85, 85));
-				imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-				imageView.setPadding(8, 8, 8, 8);
-			} else {
-				imageView = (ImageView) convertView;
-			}
-
-			imageView.setImageResource(mThumbIds[position]);
-			return imageView;
-		}
-
-		// references to our images
-		private Integer[] mThumbIds = { R.drawable.ic_launcher_music,
-				R.drawable.ic_launcher_shortcut_playlist };
 	}
 }

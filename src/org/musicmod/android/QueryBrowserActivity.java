@@ -382,7 +382,7 @@ public class QueryBrowserActivity extends ListActivity implements Constants, Ser
 				String displayname = name;
 				boolean isunknown = false;
 				if (name == null || name.equals(MediaStore.UNKNOWN_STRING)) {
-					displayname = context.getString(R.string.unknown_artist_name);
+					displayname = context.getString(R.string.unknown_artist);
 					isunknown = true;
 				}
 				result_name.setText(displayname);
@@ -401,7 +401,7 @@ public class QueryBrowserActivity extends ListActivity implements Constants, Ser
 						.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM));
 				String displayname = name;
 				if (name == null || name.equals(MediaStore.UNKNOWN_STRING)) {
-					displayname = context.getString(R.string.unknown_album_name);
+					displayname = context.getString(R.string.unknown_album);
 				}
 				result_name.setText(displayname);
 
@@ -409,7 +409,7 @@ public class QueryBrowserActivity extends ListActivity implements Constants, Ser
 						.getColumnIndexOrThrow(MediaStore.Audio.Artists.ARTIST));
 				displayname = name;
 				if (name == null || name.equals(MediaStore.UNKNOWN_STRING)) {
-					displayname = context.getString(R.string.unknown_artist_name);
+					displayname = context.getString(R.string.unknown_artist);
 				}
 				result_summary.setText(displayname);
 
@@ -423,12 +423,12 @@ public class QueryBrowserActivity extends ListActivity implements Constants, Ser
 				String displayname = cursor.getString(cursor
 						.getColumnIndexOrThrow(MediaStore.Audio.Artists.ARTIST));
 				if (displayname == null || displayname.equals(MediaStore.UNKNOWN_STRING)) {
-					displayname = context.getString(R.string.unknown_artist_name);
+					displayname = context.getString(R.string.unknown_artist);
 				}
 				name = cursor
 						.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM));
 				if (name == null || name.equals(MediaStore.UNKNOWN_STRING)) {
-					name = context.getString(R.string.unknown_album_name);
+					name = context.getString(R.string.unknown_album);
 				}
 				result_summary.setText(displayname + " - " + name);
 			}

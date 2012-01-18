@@ -368,17 +368,17 @@ public class MusicPlaybackActivity extends Activity implements Constants, View.O
 		i.putExtra(MediaStore.EXTRA_MEDIA_TITLE, track);
 
 		String query = track;
-		if (!getString(R.string.unknown_artist_name).equals(artist)
-				&& !getString(R.string.unknown_album_name).equals(album)) {
+		if (!getString(R.string.unknown_artist).equals(artist)
+				&& !getString(R.string.unknown_album).equals(album)) {
 			query = artist + " " + track;
 			i.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, album);
 			i.putExtra(MediaStore.EXTRA_MEDIA_ARTIST, artist);
-		} else if (getString(R.string.unknown_artist_name).equals(artist)
-				&& !getString(R.string.unknown_album_name).equals(album)) {
+		} else if (getString(R.string.unknown_artist).equals(artist)
+				&& !getString(R.string.unknown_album).equals(album)) {
 			query = album + " " + track;
 			i.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, album);
-		} else if (!getString(R.string.unknown_artist_name).equals(artist)
-				&& getString(R.string.unknown_album_name).equals(album)) {
+		} else if (!getString(R.string.unknown_artist).equals(artist)
+				&& getString(R.string.unknown_album).equals(album)) {
 			query = artist + " " + track;
 			i.putExtra(MediaStore.EXTRA_MEDIA_ARTIST, artist);
 		}
@@ -1411,12 +1411,12 @@ public class MusicPlaybackActivity extends Activity implements Constants, View.O
 
 			String artistName = mService.getArtistName();
 			if (MediaStore.UNKNOWN_STRING.equals(artistName)) {
-				artistName = getString(R.string.unknown_artist_name);
+				artistName = getString(R.string.unknown_artist);
 			}
 			mArtistNameView.setText(artistName);
 			String albumName = mService.getAlbumName();
 			if (MediaStore.UNKNOWN_STRING.equals(albumName)) {
-				albumName = getString(R.string.unknown_album_name);
+				albumName = getString(R.string.unknown_album);
 			}
 			mAlbumNameView.setText(albumName);
 			mTrackNameButton.setText(mService.getTrackName());

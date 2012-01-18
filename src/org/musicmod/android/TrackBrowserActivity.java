@@ -467,7 +467,7 @@ public class TrackBrowserActivity extends ListActivity implements View.OnCreateC
 					cursor.deactivate();
 				}
 				if (fancyName == null || fancyName.equals(MediaStore.UNKNOWN_STRING)) {
-					fancyName = getString(R.string.unknown_album_name);
+					fancyName = getString(R.string.unknown_album);
 				}
 			}
 		} else if (mPlaylist != null) {
@@ -1371,8 +1371,8 @@ public class TrackBrowserActivity extends ListActivity implements View.OnCreateC
 			getColumnIndices(cursor);
 			mIsNowPlaying = isnowplaying;
 			mDisableNowPlayingIndicator = disablenowplayingindicator;
-			mUnknownArtist = context.getString(R.string.unknown_artist_name);
-			mUnknownAlbum = context.getString(R.string.unknown_album_name);
+			mUnknownArtist = context.getString(R.string.unknown_artist);
+			mUnknownAlbum = context.getString(R.string.unknown_album);
 
 			mQueryHandler = new TrackQueryHandler(context.getContentResolver());
 		}

@@ -1483,7 +1483,7 @@ public class MusicUtils implements Constants {
 				title.setText(MusicUtils.sService.getTrackName());
 				String artistName = MusicUtils.sService.getArtistName();
 				if (MediaStore.UNKNOWN_STRING.equals(artistName)) {
-					artistName = a.getString(R.string.unknown_artist_name);
+					artistName = a.getString(R.string.unknown_artist);
 				}
 				artist.setText(artistName);
 				// mNowPlayingView.setOnFocusChangeListener(mFocuser);
