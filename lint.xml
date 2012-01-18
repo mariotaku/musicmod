@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<lint>
-    <issue id="MergeRootFrame">
-        <ignore path="res/layout-finger/album_grid_item.xml" />
-    </issue>
-</lint>
