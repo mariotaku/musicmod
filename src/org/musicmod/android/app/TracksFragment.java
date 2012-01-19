@@ -65,16 +65,15 @@ public class TracksFragment extends Fragment implements LoaderManager.LoaderCall
 		// sample only has one Loader, so we don't care about the ID.
 		// First, pick the base URI to use depending on whether we are
 		// currently filtering.
-		Uri baseUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+		Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
 		if (mCurFilter != null) {
-			baseUri = baseUri.buildUpon().appendQueryParameter("filter", Uri.encode(mCurFilter))
-					.build();
+			uri = uri.buildUpon().appendQueryParameter("filter", Uri.encode(mCurFilter)).build();
 		}
 		where.append(" AND " + MediaStore.Audio.Media.IS_MUSIC + "=1");
 
 		// Now create and return a CursorLoader that will take care of
 		// creating a Cursor for the data being displayed.
-		return new CursorLoader(getActivity(), baseUri, cols, where.toString(), null,
+		return new CursorLoader(getActivity(), uri, cols, where.toString(), null,
 				MediaStore.Audio.Media.DEFAULT_SORT_ORDER);
 	}
 

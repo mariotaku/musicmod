@@ -29,6 +29,8 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
 	private AlbumsAdapter mAdapter;
 	private String mCurFilter;
 
+	private int mIdIdx, mAlbumIdx, mArtistIdx;
+
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
@@ -81,6 +83,11 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
 	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 		// Swap the new cursor in. (The framework will take care of closing
 		// the old cursor once we return.)
+
+		mIdIdx = data.getColumnIndexOrThrow(MediaStore.Audio.Albums._ID);
+		mAlbumIdx = data.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM);
+		mArtistIdx = data.getColumnIndexOrThrow(MediaStore.Audio.Albums.ARTIST);
+
 		mAdapter.swapCursor(data);
 
 		// The list should now be shown.
@@ -144,14 +151,14 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
 
 			ViewHolder viewholder = (ViewHolder) view.getTag();
 
-			String album_name = cursor.getString(1);
+			String album_name = cursor.getString(mAlbumIdx);
 			if (album_name == null || MediaStore.UNKNOWN_STRING.equals(album_name)) {
 				viewholder.album_name.setText(R.string.unknown_album);
 			} else {
 				viewholder.album_name.setText(album_name);
 			}
 
-			String artist_name = cursor.getString(2);
+			String artist_name = cursor.getString(mArtistIdx);
 			if (album_name == null || MediaStore.UNKNOWN_STRING.equals(album_name)) {
 				viewholder.artist_name.setText(R.string.unknown_artist);
 			} else {
@@ -160,7 +167,7 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
 
 			// We don't actually need the path to the thumbnail file,
 			// we just use it to see if there is album art or not
-			long aid = cursor.getLong(0);
+			long aid = cursor.getLong(mIdIdx);
 			int width = getResources().getDimensionPixelSize(R.dimen.gridview_bitmap_width);
 			int height = getResources().getDimensionPixelSize(R.dimen.gridview_bitmap_height);
 

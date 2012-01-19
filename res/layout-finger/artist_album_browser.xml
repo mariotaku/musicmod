@@ -21,10 +21,6 @@
 	android:gravity="center_vertical"
 	android:orientation="vertical">
 
-	<include layout="@layout/sd_error"/>
-
-	<include layout="@layout/buttonbar"/>
-
 	<ExpandableListView
 		android:id="@+id/artist_expandable_list"
 		android:layout_width="match_parent"
@@ -35,7 +31,5 @@
 		android:indicatorLeft="8dip"
 		android:indicatorRight="52dip"
 		android:textSize="18sp"/>
-
-	<include layout="@layout/mediabrowser_nowplaying_bar"/>
 
 </LinearLayout>

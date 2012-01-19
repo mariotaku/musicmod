@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--		  Copyright (C) 2011 The MusicMod Project
+<!--
+		  Copyright (C) 2011 The MusicMod Project
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -18,42 +19,42 @@
 	android:layout_height="@dimen/gridview_item_height"
 	android:gravity="center">
 
-	<ImageView android:id="@+id/album_art"
-		android:src="@drawable/ic_mp_albumart_unknown"
-		android:scaleType="centerInside"
+	<ImageView
+		android:id="@+id/album_art"
 		android:layout_width="match_parent"
-		android:layout_height="match_parent"/>
-	
+		android:layout_height="match_parent"
+		android:scaleType="centerInside"
+		android:src="@drawable/ic_mp_albumart_unknown"/>
+
 	<LinearLayout
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_gravity="bottom"
-		android:padding="@dimen/list_text_space"
 		android:background="#A0000000"
-		android:orientation="vertical">
+		android:orientation="vertical"
+		android:padding="@dimen/default_element_spacing">
 
 		<TextView
 			android:id="@+id/album_name"
-			android:text="@string/album"
-			android:textAppearance="?android:attr/textAppearanceMedium"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_gravity="bottom"
+			android:drawableRight="@drawable/ic_indicator_nowplaying_small"
 			android:ellipsize="marquee"
 			android:singleLine="true"
-			android:drawableRight="@drawable/ic_indicator_nowplaying_small"/>
-	
+			android:text="@string/album"
+			android:textAppearance="?android:attr/textAppearanceMedium"/>
+
 		<TextView
 			android:id="@+id/artist_name"
-			android:text="@string/artist"
-			android:ellipsize="end"
-			android:textAppearance="?android:attr/textAppearanceSmall"
-			android:singleLine="true"
-			android:scrollHorizontally="true"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:layout_gravity="bottom"/>
-			
+			android:layout_gravity="bottom"
+			android:ellipsize="end"
+			android:scrollHorizontally="true"
+			android:singleLine="true"
+			android:text="@string/artist"
+			android:textAppearance="?android:attr/textAppearanceSmall"/>
 	</LinearLayout>
-	
+
 </FrameLayout>

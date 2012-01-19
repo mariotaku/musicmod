@@ -78,9 +78,9 @@ public class PlaylistsFragment extends Fragment implements LoaderManager.LoaderC
 		// sample only has one Loader, so we don't care about the ID.
 		// First, pick the base URI to use depending on whether we are
 		// currently filtering.
-		Uri baseUri = MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI;
+		Uri uri = MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI;
 		// if (mCurFilter != null) {
-		// baseUri = baseUri.buildUpon().appendQueryParameter("filter",
+		// uri = uri.buildUpon().appendQueryParameter("filter",
 		// Uri.encode(mCurFilter))
 		// .build();
 		// }
@@ -88,7 +88,7 @@ public class PlaylistsFragment extends Fragment implements LoaderManager.LoaderC
 
 		// Now create and return a CursorLoader that will take care of
 		// creating a Cursor for the data being displayed.
-		return new CursorLoader(getActivity(), baseUri, cols, null, null,
+		return new CursorLoader(getActivity(), uri, cols, null, null,
 				MediaStore.Audio.Playlists.DEFAULT_SORT_ORDER);
 	}
 

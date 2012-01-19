@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2009 The Android Open Source Project
+<!--
+     Copyright (C) 2009 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -15,9 +16,13 @@
 -->
 
 <resources>
-    <!-- height of a normal list item in edit playlist mode -->
-    <dimen name="normal_height">66dip</dimen>
-    <!-- height of an expanded list item in edit playlist mode -->
-    <dimen name="expanded_height">132dip</dimen>
-    <dimen name="list_text_space">4dip</dimen>
+
+	<!-- height of a normal list item in edit playlist mode -->
+	<dimen name="normal_height">66dip</dimen>
+	<!-- height of an expanded list item in edit playlist mode -->
+	<dimen name="expanded_height">132dip</dimen>
+	<dimen name="default_list_height">64dip</dimen>
+	<dimen name="default_element_height">48dip</dimen>
+	<dimen name="default_element_spacing">4dip</dimen>
+
 </resources>

@@ -19,27 +19,33 @@ package org.musicmod.android.app;
 import java.util.ArrayList;
 
 import org.musicmod.android.Constants;
+import org.musicmod.android.IMusicPlaybackService;
 import org.musicmod.android.R;
+import org.musicmod.android.util.MusicUtils;
+import org.musicmod.android.util.ServiceToken;
 
+import android.content.ComponentName;
 import android.content.Context;
+import android.content.ServiceConnection;
+import android.media.AudioManager;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v4.app.ActionBar;
 import android.support.v4.app.ActionBar.Tab;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.Menu;
 import android.support.v4.view.ViewPager;
+import android.view.MenuItem;
 
-public class MusicBrowserActivity extends FragmentActivity implements Constants {
+public class MusicBrowserActivity extends FragmentActivity implements Constants, ServiceConnection {
 
 	private ViewPager mViewPager;
 	private TabsAdapter mTabsAdapter;
-
-	public MusicBrowserActivity() {
-
-	}
+	private ServiceToken mToken;
+	private IMusicPlaybackService mService;
 
 	/**
 	 * Called when the activity is first created.
@@ -48,11 +54,13 @@ public class MusicBrowserActivity extends FragmentActivity implements Constants 
 	public void onCreate(Bundle icicle) {
 
 		super.onCreate(icicle);
-
+		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 		setContentView(R.layout.music_browser);
 
 		getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
+		ActionBar.Tab mArtistsTab = getSupportActionBar().newTab().setText(
+				getString(R.string.artists).toUpperCase());
 		ActionBar.Tab mAlbumsTab = getSupportActionBar().newTab().setText(
 				getString(R.string.albums).toUpperCase());
 		ActionBar.Tab mTracksTab = getSupportActionBar().newTab().setText(
@@ -63,23 +71,34 @@ public class MusicBrowserActivity extends FragmentActivity implements Constants 
 		mViewPager = (ViewPager) findViewById(R.id.pager);
 		mTabsAdapter = new TabsAdapter(this, getSupportActionBar(), mViewPager);
 
+		mTabsAdapter.addTab(mArtistsTab, ArtistsFragment.class);
 		mTabsAdapter.addTab(mAlbumsTab, AlbumsFragment.class);
 		mTabsAdapter.addTab(mTracksTab, TracksFragment.class);
 		mTabsAdapter.addTab(mPlaylistsTab, PlaylistsFragment.class);
 
 	}
 
-	/**
-	 * This is a helper class that implements the management of tabs and all
-	 * details of connecting a ViewPager with associated TabHost. It relies on a
-	 * trick. Normally a tab host has a simple API for supplying a View or
-	 * Intent that each tab will show. This is not sufficient for switching
-	 * between pages. So instead we make the content part of the tab host 0dp
-	 * high (it is not shown) and the TabsAdapter supplies its own dummy view to
-	 * show as the tab content. It listens to changes in tabs, and takes care of
-	 * switch to the correct paged in the ViewPager whenever the selected tab
-	 * changes.
-	 */
+	@Override
+	public void onStart() {
+		super.onStart();
+		mToken = MusicUtils.bindToService(this, this);
+	}
+
+	@Override
+	public void onStop() {
+		MusicUtils.unbindFromService(mToken);
+		mService = null;
+		super.onStop();
+	}
+
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+
+		getMenuInflater().inflate(R.menu.music_browser, menu);
+		menu.findItem(R.id.goto_playback).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+		return super.onCreateOptionsMenu(menu);
+	}
+	
 	public static class TabsAdapter extends FragmentPagerAdapter implements
 			ViewPager.OnPageChangeListener, ActionBar.TabListener {
 
@@ -138,5 +157,16 @@ public class MusicBrowserActivity extends FragmentActivity implements Constants 
 		@Override
 		public void onTabUnselected(Tab tab, FragmentTransaction ft) {
 		}
+	}
+
+	@Override
+	public void onServiceConnected(ComponentName name, IBinder service) {
+		mService = IMusicPlaybackService.Stub.asInterface(service);
+	}
+
+	@Override
+	public void onServiceDisconnected(ComponentName name) {
+		mService = null;
+		finish();
 	}
 }
