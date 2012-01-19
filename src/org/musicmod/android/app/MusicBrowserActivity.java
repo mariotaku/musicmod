@@ -23,18 +23,17 @@ import org.musicmod.android.R;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.support.v4.app.ActionBar;
+import android.support.v4.app.ActionBar.Tab;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TabHost;
-import android.widget.TabWidget;
 
 public class MusicBrowserActivity extends FragmentActivity implements Constants {
 
-	private TabHost mTabHost;
 	private ViewPager mViewPager;
 	private TabsAdapter mTabsAdapter;
 
@@ -51,19 +50,22 @@ public class MusicBrowserActivity extends FragmentActivity implements Constants 
 		super.onCreate(icicle);
 
 		setContentView(R.layout.music_browser);
-		mTabHost = (TabHost) findViewById(android.R.id.tabhost);
-		mTabHost.setup();
+
+		getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+
+		ActionBar.Tab mAlbumsTab = getSupportActionBar().newTab().setText(
+				getString(R.string.albums).toUpperCase());
+		ActionBar.Tab mTracksTab = getSupportActionBar().newTab().setText(
+				getString(R.string.tracks).toUpperCase());
+		ActionBar.Tab mPlaylistsTab = getSupportActionBar().newTab().setText(
+				getString(R.string.playlists).toUpperCase());
 
 		mViewPager = (ViewPager) findViewById(R.id.pager);
+		mTabsAdapter = new TabsAdapter(this, getSupportActionBar(), mViewPager);
 
-		mTabsAdapter = new TabsAdapter(this, mTabHost, mViewPager);
-
-		mTabsAdapter.addTab(mTabHost.newTabSpec("albums").setIndicator("Albums"),
-				AlbumsFragment.class, null);
-		mTabsAdapter.addTab(mTabHost.newTabSpec("tracks").setIndicator("Songs"),
-				TracksFragment.class, null);
-		mTabsAdapter.addTab(mTabHost.newTabSpec("playlists").setIndicator("Playlist"),
-				PlaylistsFragment.class, null);
+		mTabsAdapter.addTab(mAlbumsTab, AlbumsFragment.class);
+		mTabsAdapter.addTab(mTracksTab, TracksFragment.class);
+		mTabsAdapter.addTab(mPlaylistsTab, PlaylistsFragment.class);
 
 	}
 
@@ -78,61 +80,26 @@ public class MusicBrowserActivity extends FragmentActivity implements Constants 
 	 * switch to the correct paged in the ViewPager whenever the selected tab
 	 * changes.
 	 */
-	public class TabsAdapter extends FragmentPagerAdapter implements TabHost.OnTabChangeListener,
-			ViewPager.OnPageChangeListener {
+	public static class TabsAdapter extends FragmentPagerAdapter implements
+			ViewPager.OnPageChangeListener, ActionBar.TabListener {
 
 		private final Context mContext;
-		private final TabHost mTabHost;
+		private final ActionBar mActionBar;
 		private final ViewPager mViewPager;
-		private final ArrayList<TabInfo> mTabs = new ArrayList<TabInfo>();
+		private final ArrayList<String> mTabs = new ArrayList<String>();
 
-		final class TabInfo {
-
-			private final String tag;
-			private final Class<?> clss;
-			private final Bundle args;
-
-			TabInfo(String _tag, Class<?> _class, Bundle _args) {
-				tag = _tag;
-				clss = _class;
-				args = _args;
-			}
-		}
-
-		class DummyTabFactory implements TabHost.TabContentFactory {
-
-			private final Context mContext;
-
-			public DummyTabFactory(Context context) {
-				mContext = context;
-			}
-
-			@Override
-			public View createTabContent(String tag) {
-				View v = new View(mContext);
-				v.setMinimumWidth(0);
-				v.setMinimumHeight(0);
-				return v;
-			}
-		}
-
-		public TabsAdapter(FragmentActivity activity, TabHost tabHost, ViewPager pager) {
+		public TabsAdapter(FragmentActivity activity, ActionBar actionBar, ViewPager pager) {
 			super(activity.getSupportFragmentManager());
 			mContext = activity;
-			mTabHost = tabHost;
+			mActionBar = actionBar;
 			mViewPager = pager;
-			mTabHost.setOnTabChangedListener(this);
 			mViewPager.setAdapter(this);
 			mViewPager.setOnPageChangeListener(this);
 		}
 
-		public void addTab(TabHost.TabSpec tabSpec, Class<?> clss, Bundle args) {
-			tabSpec.setContent(new DummyTabFactory(mContext));
-			String tag = tabSpec.getTag();
-
-			TabInfo info = new TabInfo(tag, clss, args);
-			mTabs.add(info);
-			mTabHost.addTab(tabSpec);
+		public void addTab(ActionBar.Tab tab, Class<?> clss) {
+			mTabs.add(clss.getName());
+			mActionBar.addTab(tab.setTabListener(this));
 			notifyDataSetChanged();
 		}
 
@@ -143,14 +110,7 @@ public class MusicBrowserActivity extends FragmentActivity implements Constants 
 
 		@Override
 		public Fragment getItem(int position) {
-			TabInfo info = mTabs.get(position);
-			return Fragment.instantiate(mContext, info.clss.getName(), info.args);
-		}
-
-		@Override
-		public void onTabChanged(String tabId) {
-			int position = mTabHost.getCurrentTab();
-			mViewPager.setCurrentItem(position);
+			return Fragment.instantiate(mContext, mTabs.get(position), null);
 		}
 
 		@Override
@@ -159,20 +119,24 @@ public class MusicBrowserActivity extends FragmentActivity implements Constants 
 
 		@Override
 		public void onPageSelected(int position) {
-			// Unfortunately when TabHost changes the current tab, it kindly
-			// also takes care of putting focus on it when not in touch mode.
-			// The jerk.
-			// This hack tries to prevent this from pulling focus out of our
-			// ViewPager.
-			TabWidget widget = mTabHost.getTabWidget();
-			int oldFocusability = widget.getDescendantFocusability();
-			widget.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);
-			mTabHost.setCurrentTab(position);
-			widget.setDescendantFocusability(oldFocusability);
+			mActionBar.setSelectedNavigationItem(position);
 		}
 
 		@Override
 		public void onPageScrollStateChanged(int state) {
+		}
+
+		@Override
+		public void onTabSelected(Tab tab, FragmentTransaction ft) {
+			mViewPager.setCurrentItem(tab.getPosition());
+		}
+
+		@Override
+		public void onTabReselected(Tab tab, FragmentTransaction ft) {
+		}
+
+		@Override
+		public void onTabUnselected(Tab tab, FragmentTransaction ft) {
 		}
 	}
 }

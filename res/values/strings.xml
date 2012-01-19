@@ -34,12 +34,6 @@
 	<string name="scanning">Scanning for media…</string>
 	<string name="nowplaying_title">Now playing</string>
 	<string name="partyshuffle_title">Party shuffle</string>
-	<string name="artists_title">Artists</string>
-	<string name="albums_menu">Albums</string>
-	<string name="albums_title">Albums</string>
-	<string name="tracks_menu">Songs</string>
-	<string name="tracks_title">Songs</string>
-	<string name="playlists_menu">Playlists</string>
 	<string name="all_media">All media</string>
 	<string name="no_tracks">No songs</string>
 	<string name="no_playlists">No playlists</string>
@@ -48,10 +42,10 @@
 	<string name="rename">Rename</string>
 	<string name="playlist_deleted">Playlist deleted.</string>
 	<string name="playlist_renamed">Playlist renamed.</string>
-	<string name="recentlyadded">Recently added</string>
-	<string name="recentlyadded_title">Recently added</string>
-	<string name="podcasts_listitem">Podcasts</string>
-	<string name="podcasts_title">Podcasts</string>
+	<string name="podcasts">Podcasts</string>
+	<string name="favorites">Favorites</string>
+	<string name="my_playlists">My Playlists</string>
+	<string name="smart_playlists">Smart Playlists</string>
 	<string name="sdcard_missing_title">No SD card</string>
 	<string name="sdcard_missing_title_nosdcard">No USB storage</string>
 	<string name="sdcard_missing">Your phone does not have an SD card inserted.</string>

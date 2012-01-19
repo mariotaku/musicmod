@@ -1444,30 +1444,32 @@ public class MusicUtils implements Constants {
 		Intent intent = new Intent(Intent.ACTION_PICK);
 		intent.setPackage("org.musicmod.android");
 		switch (id) {
-			case R.id.artisttab:
-				intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/artistalbum");
-				break;
-			case R.id.albumtab:
-				intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/album");
-				break;
-			case R.id.songtab:
-				intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/track");
-				break;
-			case R.id.playlisttab:
-				intent.setDataAndType(Uri.EMPTY, MediaStore.Audio.Playlists.CONTENT_TYPE);
-				break;
-			case R.id.nowplayingtab:
-				intent = new Intent(a, MusicPlaybackActivity.class);
-				a.startActivity(intent);
-				// fall through and return
+		// case R.id.artisttab:
+		// intent.setDataAndType(Uri.EMPTY,
+		// "vnd.android.cursor.dir/artistalbum");
+		// break;
+		// case R.id.albumtab:
+		// intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/album");
+		// break;
+		// case R.id.songtab:
+		// intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/track");
+		// break;
+		// case R.id.playlisttab:
+		// intent.setDataAndType(Uri.EMPTY,
+		// MediaStore.Audio.Playlists.CONTENT_TYPE);
+		// break;
+		// case R.id.nowplayingtab:
+		// intent = new Intent(a, MusicPlaybackActivity.class);
+		// a.startActivity(intent);
+		// // fall through and return
 			default:
 				return;
 		}
-		intent.putExtra("withtabs", true);
-		intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		a.startActivity(intent);
-		a.finish();
-		a.overridePendingTransition(0, 0);
+		// intent.putExtra("withtabs", true);
+		// intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		// a.startActivity(intent);
+		// a.finish();
+		// a.overridePendingTransition(0, 0);
 	}
 
 	public static void updateNowPlaying(Activity a) {

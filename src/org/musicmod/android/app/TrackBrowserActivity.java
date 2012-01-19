@@ -487,9 +487,9 @@ public class TrackBrowserActivity extends ListActivity implements View.OnCreateC
 					fancyName = getText(R.string.nowplaying_title);
 				}
 			} else if (mPlaylist.equals("podcasts")) {
-				fancyName = getText(R.string.podcasts_title);
+				fancyName = getText(R.string.podcasts);
 			} else if (mPlaylist.equals("recentlyadded")) {
-				fancyName = getText(R.string.recentlyadded_title);
+				fancyName = getText(R.string.recently_added);
 			} else {
 				String[] cols = new String[] { MediaStore.Audio.Playlists.NAME };
 				Cursor cursor = MusicUtils.query(
@@ -522,7 +522,7 @@ public class TrackBrowserActivity extends ListActivity implements View.OnCreateC
 		if (fancyName != null) {
 			setTitle(fancyName);
 		} else {
-			setTitle(R.string.tracks_title);
+			setTitle(R.string.tracks);
 		}
 	}
 

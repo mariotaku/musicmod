@@ -38,13 +38,12 @@ public interface Constants {
 	public final static int PAGE_PLAYLIST = 3;
 
 	public final static long PLAYLIST_UNKNOWN = -1;
-	public final static long PLAYLIST_RECENTLY_ADDED = -2;
-	public final static long PLAYLIST_PODCASTS = -3;
-	public final static long PLAYLIST_ALL_SONGS = -4;
-	public final static long PLAYLIST_QUEUE = -5;
-	public final static long PLAYLIST_NEW = -6;
-
-	public final static long ID_PLAYLIST_RECENT = -1;
+	public final static long PLAYLIST_ALL_SONGS = -2;
+	public final static long PLAYLIST_QUEUE = -3;
+	public final static long PLAYLIST_NEW = -4;
+	public final static long PLAYLIST_RECENTLY_ADDED = -5;
+	public final static long PLAYLIST_FAVORITES = -6;
+	public final static long PLAYLIST_PODCASTS = -7;
 
 	public final static String TYPE_ARTIST_ALBUM = "artist_album";
 	public final static String TYPE_ALBUM = "album";
