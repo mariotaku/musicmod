@@ -65,7 +65,7 @@ import org.musicmod.android.util.LyricsParser;
 import org.musicmod.android.util.MusicUtils;
 import org.musicmod.android.util.ShakeListener;
 import org.musicmod.android.util.ShakeListener.OnShakeListener;
-import org.musicmod.android.util.SharedPrefs;
+import org.musicmod.android.util.PreferencesEditor;
 
 /**
  * Provides "background" audio playback capabilities, allowing the user to
@@ -133,7 +133,7 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 	// used to track current volume
 	private float mCurrentVolume = 1.0f;
 
-	private SharedPrefs mPrefs;
+	private PreferencesEditor mPrefs;
 	// We use this to distinguish between different cards when saving/restoring
 	// playlists.
 	// This will have to change if we want to support multiple simultaneous
@@ -218,7 +218,7 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 					// the code that handles fade-in
 					switch (msg.arg1) {
 						case AudioManager.AUDIOFOCUS_LOSS:
-							Log.v(LOG_TAG_MEDIA_SERVICE, "AudioFocus: received AUDIOFOCUS_LOSS");
+							Log.v(LOGTAG_SERVICE, "AudioFocus: received AUDIOFOCUS_LOSS");
 							if (isPlaying()) {
 								mPausedByTransientLossOfFocus = false;
 							}
@@ -229,8 +229,7 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 							mMediaplayerHandler.sendEmptyMessage(FADEDOWN);
 							break;
 						case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-							Log.v(LOG_TAG_MEDIA_SERVICE,
-									"AudioFocus: received AUDIOFOCUS_LOSS_TRANSIENT");
+							Log.v(LOGTAG_SERVICE, "AudioFocus: received AUDIOFOCUS_LOSS_TRANSIENT");
 							if (isPlaying()) {
 								if (mPrefs.getBooleanPref(
 										MusicSettingsActivity.KEY_ENABLE_FOCUS_LOSS_DUCKING, true)) {
@@ -244,7 +243,7 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 							}
 							break;
 						case AudioManager.AUDIOFOCUS_GAIN:
-							Log.v(LOG_TAG_MEDIA_SERVICE, "AudioFocus: received AUDIOFOCUS_GAIN");
+							Log.v(LOGTAG_SERVICE, "AudioFocus: received AUDIOFOCUS_GAIN");
 							if (isPlaying() || mPausedByTransientLossOfFocus) {
 								mPausedByTransientLossOfFocus = false;
 								mCurrentVolume = 0f;
@@ -256,7 +255,7 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 							}
 							break;
 						default:
-							Log.e(LOG_TAG_MEDIA_SERVICE, "Unknown audio focus change code");
+							Log.e(LOGTAG_SERVICE, "Unknown audio focus change code");
 					}
 					break;
 
@@ -415,7 +414,7 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 
 			switch (state) {
 				case TelephonyManager.CALL_STATE_RINGING:
-					Log.v(LOG_TAG_MEDIA_SERVICE, "PhoneState: received CALL_STATE_RINGING");
+					Log.v(LOGTAG_SERVICE, "PhoneState: received CALL_STATE_RINGING");
 					if (isPlaying()) {
 						mPausedByTransientLossOfFocus = true;
 						pause();
@@ -423,7 +422,7 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 					break;
 
 				case TelephonyManager.CALL_STATE_OFFHOOK:
-					Log.v(LOG_TAG_MEDIA_SERVICE, "PhoneState: received CALL_STATE_OFFHOOK");
+					Log.v(LOGTAG_SERVICE, "PhoneState: received CALL_STATE_OFFHOOK");
 					mPausedByTransientLossOfFocus = false;
 					if (isPlaying()) {
 						pause();
@@ -446,7 +445,7 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 		mAudioManager.registerMediaButtonEventReceiver(new ComponentName(getPackageName(),
 				MediaButtonIntentReceiver.class.getName()));
 
-		mPrefs = new SharedPrefs(getApplicationContext());
+		mPrefs = new PreferencesEditor(getApplicationContext());
 
 		mNotification = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 		mShakeDetector = new ShakeListener(this);
@@ -535,7 +534,7 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 		// Check that we're not being destroyed while something is still
 		// playing.
 		if (isPlaying()) {
-			Log.e(LOG_TAG_MEDIA_SERVICE, "Service being destroyed while still playing.");
+			Log.e(LOGTAG_SERVICE, "Service being destroyed while still playing.");
 		}
 
 		if (mEqualizer != null) {
@@ -724,8 +723,8 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 
 			long seekpos = mPrefs.getLongState(STATE_KEY_SEEKPOS, 0);
 			seek(seekpos >= 0 && seekpos < duration() ? seekpos : 0);
-			Log.d(LOG_TAG_MEDIA_SERVICE, "restored queue, currently at position " + position()
-					+ "/" + duration() + " (requested " + seekpos + ")");
+			Log.d(LOGTAG_SERVICE, "restored queue, currently at position " + position() + "/"
+					+ duration() + " (requested " + seekpos + ")");
 
 			int repmode = mPrefs.getIntState(STATE_KEY_REPEATMODE, REPEAT_NONE);
 			if (repmode != REPEAT_ALL && repmode != REPEAT_CURRENT) {
@@ -903,8 +902,6 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 	 */
 	public void closeExternalStorageFiles(String storagePath) {
 
-		// stop playback and clean up if the SD card is going to be unmounted.
-		sendScrobbleBroadcast(SCROBBLE_PLAYSTATE_COMPLETE);
 		stop(true);
 		notifyChange(BROADCAST_QUEUE_CHANGED);
 		notifyChange(BROADCAST_META_CHANGED);
@@ -999,13 +996,20 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 
 		if (BROADCAST_META_CHANGED.equals(what)) {
 			mLyricsHandler.sendEmptyMessage(NEW_LYRICS_LOADED);
+			if (isPlaying()) {
+				sendScrobbleBroadcast(SCROBBLE_PLAYSTATE_START);
+			} else {
+				sendScrobbleBroadcast(SCROBBLE_PLAYSTATE_COMPLETE);
+			}
 		}
 		if (BROADCAST_PLAYSTATE_CHANGED.equals(what)) {
 			notifyLyricsChange(BROADCAST_LYRICS_REFRESHED);
 			if (isPlaying()) {
 				mLyricsHandler.sendEmptyMessage(LYRICS_RESUMED);
+				sendScrobbleBroadcast(SCROBBLE_PLAYSTATE_RESUME);
 			} else {
 				mLyricsHandler.sendEmptyMessage(LYRICS_PAUSED);
+				sendScrobbleBroadcast(SCROBBLE_PLAYSTATE_PAUSE);
 			}
 		}
 
@@ -1276,7 +1280,6 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 			mHistory.clear();
 
 			saveBookmarkIfNeeded();
-			sendScrobbleBroadcast(SCROBBLE_PLAYSTATE_COMPLETE);
 			openCurrent();
 			if (oldId != getAudioId()) {
 				notifyChange(BROADCAST_META_CHANGED);
@@ -1373,7 +1376,6 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 				}
 			}
 		}
-		sendScrobbleBroadcast(SCROBBLE_PLAYSTATE_START);
 	}
 
 	/**
@@ -1438,7 +1440,7 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 					if (!mQuietMode) {
 						Toast.makeText(this, R.string.playback_failed, Toast.LENGTH_SHORT).show();
 					}
-					Log.d(LOG_TAG_MEDIA_SERVICE, "Failed to open file for playback");
+					Log.d(LOGTAG_SERVICE, "Failed to open file for playback");
 				}
 			} else {
 				mOpenFailedCounter = 0;
@@ -1451,8 +1453,7 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 	 */
 	public void play() {
 
-		CharSequence contentTitle;
-		CharSequence contentText;
+		CharSequence contentTitle, contentText = null;
 		PendingIntent contentIntent;
 
 		TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
@@ -1483,16 +1484,21 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 			mMediaplayerHandler.removeMessages(FADEDOWN);
 			mMediaplayerHandler.sendEmptyMessage(FADEUP);
 
-			String artist = getArtistName();
 			contentTitle = getTrackName();
-			if (artist == null || artist.equals(MediaStore.UNKNOWN_STRING)) {
-				artist = getString(R.string.unknown_artist);
-			}
+
+			String artist = getArtistName();
+			boolean isUnknownArtist = (artist == null || MediaStore.UNKNOWN_STRING.equals(artist));
+
 			String album = getAlbumName();
-			if (album == null || album.equals(MediaStore.UNKNOWN_STRING)) {
-				album = getString(R.string.unknown_album);
+			boolean isUnknownAlbum = (album == null || MediaStore.UNKNOWN_STRING.equals(album));
+
+			if (!isUnknownArtist && !isUnknownAlbum) {
+				contentText = getString(R.string.notification_artist_album, artist, album);
+			} else if (isUnknownArtist && !isUnknownAlbum) {
+				contentText = album;
+			} else if (!isUnknownArtist && isUnknownAlbum) {
+				contentText = artist;
 			}
-			contentText = getString(R.string.notification_artist_album, artist, album);
 
 			contentIntent = PendingIntent.getActivity(this, 0, new Intent(INTENT_PLAYBACK_VIEWER),
 					0);
@@ -1505,11 +1511,6 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 
 			if (!mIsSupposedToBePlaying) {
 				mIsSupposedToBePlaying = true;
-				if (!isPlaying()) {
-					sendScrobbleBroadcast(SCROBBLE_PLAYSTATE_RESUME);
-				} else {
-					sendScrobbleBroadcast(SCROBBLE_PLAYSTATE_START);
-				}
 				notifyChange(BROADCAST_PLAYSTATE_CHANGED);
 			}
 
@@ -1561,7 +1562,6 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 				mPlayer.pause();
 				gotoIdleState();
 				mIsSupposedToBePlaying = false;
-				sendScrobbleBroadcast(SCROBBLE_PLAYSTATE_PAUSE);
 				notifyChange(BROADCAST_PLAYSTATE_CHANGED);
 				saveBookmarkIfNeeded();
 			}
@@ -1622,7 +1622,6 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 				}
 			}
 			saveBookmarkIfNeeded();
-			sendScrobbleBroadcast(SCROBBLE_PLAYSTATE_COMPLETE);
 			stop(false);
 			openCurrent();
 			play();
@@ -1641,7 +1640,7 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 			}
 
 			if (mPlayListLen <= 0) {
-				Log.d(LOG_TAG_MEDIA_SERVICE, "No play queue");
+				Log.d(LOGTAG_SERVICE, "No play queue");
 				return;
 			}
 
@@ -1710,7 +1709,6 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 					if (mRepeatMode == REPEAT_NONE && !force) {
 						// all done
 						gotoIdleState();
-						sendScrobbleBroadcast(SCROBBLE_PLAYSTATE_COMPLETE);
 						mIsSupposedToBePlaying = false;
 						notifyChange(BROADCAST_PLAYSTATE_CHANGED);
 						return;
@@ -1722,7 +1720,6 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 				}
 			}
 			saveBookmarkIfNeeded();
-			sendScrobbleBroadcast(SCROBBLE_PLAYSTATE_COMPLETE);
 			stop(false);
 			openCurrent();
 			play();
@@ -1829,7 +1826,6 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 			notify = true;
 		}
 		if (notify) {
-			sendScrobbleBroadcast(SCROBBLE_PLAYSTATE_COMPLETE);
 			notifyChange(BROADCAST_QUEUE_CHANGED);
 		}
 	}
@@ -1845,7 +1841,7 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 
 		int histsize = mHistory.size();
 		if (histsize < lookbacksize) {
-			Log.d(LOG_TAG_MEDIA_SERVICE, "lookback too big");
+			Log.d(LOGTAG_SERVICE, "lookback too big");
 			lookbacksize = histsize;
 		}
 		int maxidx = histsize - 1;
@@ -1958,7 +1954,6 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 						mPlayPos = 0;
 					}
 					boolean wasPlaying = isPlaying();
-					sendScrobbleBroadcast(SCROBBLE_PLAYSTATE_COMPLETE);
 					stop(false);
 					openCurrent();
 					if (wasPlaying) {
@@ -2158,7 +2153,6 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 	public void setQueuePosition(int pos) {
 
 		synchronized (this) {
-			sendScrobbleBroadcast(SCROBBLE_PLAYSTATE_COMPLETE);
 			stop(false);
 			mPlayPos = pos;
 			openCurrent();

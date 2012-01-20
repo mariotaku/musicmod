@@ -45,15 +45,20 @@ public interface Constants {
 	public final static long PLAYLIST_FAVORITES = -6;
 	public final static long PLAYLIST_PODCASTS = -7;
 
+	public static final String INTERNAL_VOLUME = "internal";
+	public static final String EXTERNAL_VOLUME = "external";
+
+	public final static String PLAYLIST_NAME_FAVORITES = "MusicMod Favorites";
+
 	public final static String TYPE_ARTIST_ALBUM = "artist_album";
 	public final static String TYPE_ALBUM = "album";
 	public final static String TYPE_TRACK = "track";
 
-	public final static String LOG_TAG_MEDIA_SERVICE = "MusicMod.Service";
-	public final static String LOG_TAG_TEST = "MusicMod.Test";
-	public final static String LOG_TAG_MUSICUTILS = "MusicMod.MusicUtils";
-	public final static String LOG_TAG_MUSIC_WIDGET_4x1 = "MusicAppWidgetProvider4x1";
-	public final static String LOG_TAG_MUSIC_WIDGET_2x2 = "MusicAppWidgetProvider2x2";
+	public final static String LOGTAG_SERVICE = "MusicMod.Service";
+	public final static String LOGTAG_TEST = "MusicMod.Test";
+	public final static String LOGTAG_MUSICUTILS = "MusicMod.MusicUtils";
+	public final static String LOGTAG_WIDGET_4x1 = "MusicAppWidgetProvider4x1";
+	public final static String LOGTAG_WIDGET_2x2 = "MusicAppWidgetProvider2x2";
 
 	public final static String SCROBBLE_SLS_API = "com.adam.aslfms.notify.playstatechanged";
 
@@ -129,7 +134,7 @@ public interface Constants {
 	public final static int DEFAULT_VISUALIZER_ACCURACY = 1;
 	public final static boolean DEFAULT_VISUALIZER_ANTIALIAS = true;
 
-	public final static String STATE_KEY_ACTIVETAB = "activetab";
+	public final static String STATE_KEY_CURRENTTAB = "currenttab";
 	public final static String STATE_KEY_CURRPOS = "curpos";
 	public final static String STATE_KEY_CARDID = "cardid";
 	public final static String STATE_KEY_QUEUE = "queue";
@@ -195,6 +200,9 @@ public interface Constants {
 	public final static String INTENT_KEY_LIST = "list";
 	public final static String INTENT_KEY_RENAME = "rename";
 	public final static String INTENT_KEY_DEFAULT_NAME = "default_name";
+
+	public final static String INTENT_KEY_MIMETYPE = "mimeType";
+	public final static String INTENT_KEY_ACTION = "action";
 
 	public final static String MAP_KEY_NAME = "name";
 	public final static String MAP_KEY_ID = "id";

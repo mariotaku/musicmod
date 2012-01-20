@@ -6,11 +6,11 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 
-public class SharedPrefs implements Constants {
+public class PreferencesEditor implements Constants {
 
 	private Context context;
 
-	public SharedPrefs(Context context) {
+	public PreferencesEditor(Context context) {
 
 		this.context = context;
 	}

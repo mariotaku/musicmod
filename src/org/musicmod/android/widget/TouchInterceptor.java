@@ -17,7 +17,7 @@
 package org.musicmod.android.widget;
 
 import org.musicmod.android.R;
-import org.musicmod.android.util.SharedPrefs;
+import org.musicmod.android.util.PreferencesEditor;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -82,7 +82,7 @@ public class TouchInterceptor extends ListView {
 	public TouchInterceptor(Context context, AttributeSet attrs) {
 
 		super(context, attrs);
-		mRemoveMode = new SharedPrefs(context).getIntPref("deletemode", -1);
+		mRemoveMode = new PreferencesEditor(context).getIntPref("deletemode", -1);
 		mTouchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
 		Resources res = getResources();
 		mItemHeightNormal = res.getDimensionPixelSize(R.dimen.normal_height);

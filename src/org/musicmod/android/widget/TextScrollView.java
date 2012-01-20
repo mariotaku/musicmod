@@ -29,7 +29,7 @@ public class TextScrollView extends ScrollView implements OnLongClickListener {
 	private int mLastLineId = -1;
 	private String[] mContent;
 	private final int TIMEOUT = 1;
-	public ArrayList<OnLineSelectedListener> mListeners = new ArrayList<OnLineSelectedListener>();
+	public OnLineSelectedListener mListener;
 
 	public TextScrollView(Context context) {
 
@@ -50,14 +50,12 @@ public class TextScrollView extends ScrollView implements OnLongClickListener {
 
 	public void registerLineSelectedListener(OnLineSelectedListener listener) {
 
-		if (!mListeners.contains(listener)) {
-			mListeners.add(listener);
-		}
+			mListener = listener;
 	}
 
 	public void unregisterLineSelectedListener(OnLineSelectedListener listener) {
 
-		mListeners.remove(listener);
+		mListener = listener;
 	}
 
 	private void init(Context context) {
@@ -167,10 +165,10 @@ public class TextScrollView extends ScrollView implements OnLongClickListener {
 	@Override
 	public boolean onLongClick(View view) {
 
-		for (OnLineSelectedListener listener : mListeners) {
+		if (mListener != null) {
 			Object tag = view.getTag();
 			int id = tag != null ? Integer.valueOf(tag.toString()) : 0;
-			listener.onLineSelected(id);
+			mListener.onLineSelected(id);
 		}
 		return true;
 	}

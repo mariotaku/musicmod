@@ -53,14 +53,14 @@ public class EqualizerActivity extends Activity implements Constants {
 	private ScrollView mScrollView;
 	private LinearLayout mLinearLayout;
 	private int mAudioSessionId;
-	private SharedPrefs mPrefs;
+	private PreferencesEditor mPrefs;
 
 	@Override
 	public void onCreate(Bundle icicle) {
 
 		super.onCreate(icicle);
 
-		mPrefs = new SharedPrefs(getApplicationContext());
+		mPrefs = new PreferencesEditor(getApplicationContext());
 
 		requestWindowFeature(Window.FEATURE_NO_TITLE);
 

@@ -32,7 +32,6 @@
 	<string name="delete_album_desc">The entire album \"<xliff:g id="album">%s</xliff:g>\" will be permanently deleted from your device.</string>
 	<string name="delete_song_desc">\"<xliff:g id="song">%s</xliff:g>\" will be permanently deleted from your device.</string>
 	<string name="scanning">Scanning for media…</string>
-	<string name="nowplaying_title">Now playing</string>
 	<string name="partyshuffle_title">Party shuffle</string>
 	<string name="all_media">All media</string>
 	<string name="no_tracks">No songs</string>
@@ -115,7 +114,7 @@
 	<string name="sleep_timer_enabled">Sleep timer enabled</string>
 	<string name="notification_sleep_timer">Music playback will stop at <xliff:g id="time">%s</xliff:g></string>
 	<string name="albumsongseparator" translatable="false">\n</string>
-	<string name="notification_artist_album" translatable="false"><xliff:g id="album">%2$s</xliff:g> - <xliff:g id="artist">%1$s</xliff:g></string>
+	<string name="notification_artist_album" translatable="false"><xliff:g id="artist">%1$s</xliff:g> - <xliff:g id="album">%2$s</xliff:g></string>
 	<string name="test">Test</string>
 	<string name="save">Save</string>
 	<string name="overwrite">Overwrite</string>
@@ -129,13 +128,15 @@
 	<string name="delete_song_track">Song \"<xliff:g id="song">%s</xliff:g>\"</string>
 	<string name="delete_song_lyrics">Lyrics of \"<xliff:g id="song">%s</xliff:g>\"</string>
 	<string name="now_playing">Now playing</string>
+	<string name="music_library">Music library</string>
 	<string name="artists">Artists</string>
 	<string name="albums">Albums</string>
 	<string name="tracks">Songs</string>
+	<string name="playlists">Playlists</string>
 	<string name="artist">Artist</string>
 	<string name="album">Album</string>
 	<string name="track">Song</string>
-	<string name="playlists">Playlists</string>
+	<string name="playlist">Playlist</string>
 	<string name="recently_added">Recently added</string>
 	<string name="error_bad_parameters">ERROR! Bad parameters!</string>
 	<string name="sleep_timer">Sleep timer</string>

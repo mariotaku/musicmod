@@ -18,7 +18,7 @@ package org.musicmod.android.activity;
 
 import org.musicmod.android.Constants;
 import org.musicmod.android.R;
-import org.musicmod.android.util.SharedPrefs;
+import org.musicmod.android.util.PreferencesEditor;
 
 import net.margaritov.preference.colorpicker.ColorPickerPreference;
 
@@ -56,7 +56,7 @@ public class AppearanceSettingsActivity extends PreferenceActivity implements Co
 	private void toggleCostomizedColor() {
 
 		ColorPickerPreference customized_color = (ColorPickerPreference) findPreference(KEY_CUSTOMIZED_COLOR);
-		if (new SharedPrefs(this).getBooleanPref(KEY_AUTO_COLOR, true)) {
+		if (new PreferencesEditor(this).getBooleanPref(KEY_AUTO_COLOR, true)) {
 			customized_color.setEnabled(false);
 		} else {
 			customized_color.setEnabled(true);

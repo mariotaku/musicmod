@@ -19,7 +19,7 @@ package org.musicmod.android.dialog;
 import org.musicmod.android.Constants;
 import org.musicmod.android.R;
 import org.musicmod.android.util.MusicUtils;
-import org.musicmod.android.util.SharedPrefs;
+import org.musicmod.android.util.PreferencesEditor;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -102,7 +102,7 @@ public class SleepTimerDialog extends Activity implements OnSeekBarChangeListene
 
 							if (mTimerTime >= 1) {
 								long milliseconds = mTimerTime * 60 * 1000;
-								boolean gentle = new SharedPrefs(getApplicationContext())
+								boolean gentle = new PreferencesEditor(getApplicationContext())
 										.getBooleanPref(KEY_GENTLE_SLEEPTIMER, true);
 								MusicUtils.startSleepTimer(milliseconds, gentle);
 							} else {

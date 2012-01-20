@@ -50,7 +50,6 @@ import android.view.MenuItem;
 import android.view.SubMenu;
 import android.view.View;
 import android.view.Window;
-import android.widget.TabWidget;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -75,8 +74,6 @@ import org.musicmod.android.ScanningProgress;
 import org.musicmod.android.app.MusicPlaybackActivity;
 
 public class MusicUtils implements Constants {
-
-	private static final String TAG = "MusicUtils";
 
 	public static String makeAlbumsLabel(Context context, int numalbums, int numsongs,
 			boolean isUnknown) {
@@ -161,13 +158,13 @@ public class MusicUtils implements Constants {
 	public static void unbindFromService(ServiceToken token) {
 
 		if (token == null) {
-			Log.e("MusicUtils", "Trying to unbind with null token");
+			Log.e(LOGTAG_MUSICUTILS, "Trying to unbind with null token");
 			return;
 		}
 		ContextWrapper cw = token.mWrappedContext;
 		ServiceBinder sb = sConnectionMap.remove(cw);
 		if (sb == null) {
-			Log.e("MusicUtils", "Trying to unbind for unknown Context");
+			Log.e(LOGTAG_MUSICUTILS, "Trying to unbind for unknown Context");
 			return;
 		}
 		cw.unbindService(sb);
@@ -377,7 +374,8 @@ public class MusicUtils implements Constants {
 	public static void playRecentlyAdded(Context context) {
 
 		// do a query for all songs added in the last X weeks
-		int weekX = new SharedPrefs(context).getIntPref(PREF_KEY_NUMWEEKS, 2) * (3600 * 24 * 7);
+		int weekX = new PreferencesEditor(context).getIntPref(PREF_KEY_NUMWEEKS, 2)
+				* (3600 * 24 * 7);
 		final String[] ccols = new String[] { MediaStore.Audio.Media._ID };
 		String where = MediaStore.MediaColumns.DATE_ADDED + ">"
 				+ (System.currentTimeMillis() / 1000 - weekX);
@@ -423,6 +421,15 @@ public class MusicUtils implements Constants {
 			if (c != null) {
 				c.close();
 			}
+		}
+	}
+
+	public static void setQueuePosition(int index) {
+		if (sService == null) return;
+		try {
+			sService.setQueuePosition(index);
+		} catch (RemoteException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -585,7 +592,7 @@ public class MusicUtils implements Constants {
 					if (!f.delete()) {
 						// I'm not sure if we'd ever get here (deletion would
 						// have to fail, but no exception thrown)
-						Log.e("MusicUtils", "Failed to delete file " + name);
+						Log.e(LOGTAG_MUSICUTILS, "Failed to delete file " + name);
 					}
 					c.moveToNext();
 				} catch (SecurityException ex) {
@@ -634,7 +641,7 @@ public class MusicUtils implements Constants {
 					if (!f.delete()) {
 						// I'm not sure if we'd ever get here (deletion would
 						// have to fail, but no exception thrown)
-						Log.e("MusicUtils", "Failed to delete file " + lyrics);
+						Log.e(LOGTAG_MUSICUTILS, "Failed to delete file " + lyrics);
 					} else {
 						mDeletedLyricsCount += 1;
 					}
@@ -917,7 +924,7 @@ public class MusicUtils implements Constants {
 			a.startActivityForResult(intent, SCAN_DONE);
 		} else if (!TextUtils.equals(mLastSdStatus, status)) {
 			mLastSdStatus = status;
-			Log.d(TAG, "sd card: " + status);
+			Log.d(LOGTAG_MUSICUTILS, "sd card: " + status);
 		}
 
 		a.setTitle(title);
@@ -1032,7 +1039,7 @@ public class MusicUtils implements Constants {
 	private static void playAll(Context context, long[] list, int position, boolean force_shuffle) {
 
 		if (list.length == 0 || sService == null) {
-			Log.d("MusicUtils", "attempt to play empty song list");
+			Log.d(LOGTAG_MUSICUTILS, "attempt to play empty song list");
 			// Don't try to play empty playlists. Nothing good will come of it.
 			String message = context.getString(R.string.emptyplaylist, list.length);
 			Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
@@ -1063,8 +1070,8 @@ public class MusicUtils implements Constants {
 			sService.play();
 		} catch (RemoteException ex) {
 		} finally {
-			Intent intent = new Intent("org.musicmod.android.PLAYBACK_VIEWER")
-					.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			Intent intent = new Intent(INTENT_PLAYBACK_VIEWER)
+					.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 			context.startActivity(intent);
 		}
 	}
@@ -1366,110 +1373,6 @@ public class MusicUtils implements Constants {
 			//
 		}
 		return null;
-	}
-
-	static int sActiveTabIndex = -1;
-
-	public static boolean updateButtonBar(Activity a, int highlight) {
-
-		final TabWidget ll = (TabWidget) a.findViewById(R.id.buttonbar);
-		boolean withtabs = false;
-		Intent intent = a.getIntent();
-		if (intent != null) {
-			withtabs = intent.getBooleanExtra("withtabs", false);
-		}
-
-		if (highlight == 0 || !withtabs) {
-			ll.setVisibility(View.GONE);
-			return withtabs;
-		} else if (withtabs) {
-			ll.setVisibility(View.VISIBLE);
-		}
-		for (int i = ll.getChildCount() - 1; i >= 0; i--) {
-
-			View v = ll.getChildAt(i);
-			boolean isActive = (v.getId() == highlight);
-			if (isActive) {
-				ll.setCurrentTab(i);
-				sActiveTabIndex = i;
-			}
-			v.setTag(i);
-			v.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-
-				public void onFocusChange(View v, boolean hasFocus) {
-
-					if (hasFocus) {
-						for (int i = 0; i < ll.getTabCount(); i++) {
-							if (ll.getChildTabViewAt(i) == v) {
-								ll.setCurrentTab(i);
-								processTabClick((Activity) ll.getContext(), v,
-										ll.getChildAt(sActiveTabIndex).getId());
-								break;
-							}
-						}
-					}
-				}
-			});
-
-			v.setOnClickListener(new View.OnClickListener() {
-
-				public void onClick(View v) {
-
-					processTabClick((Activity) ll.getContext(), v, ll.getChildAt(sActiveTabIndex)
-							.getId());
-				}
-			});
-		}
-		return withtabs;
-	}
-
-	static void processTabClick(Activity a, View v, int current) {
-
-		int id = v.getId();
-		if (id == current) {
-			return;
-		}
-
-		final TabWidget ll = (TabWidget) a.findViewById(R.id.buttonbar);
-
-		activateTab(a, id);
-		if (id != R.id.nowplayingtab) {
-			ll.setCurrentTab((Integer) v.getTag());
-			new SharedPrefs(a).setIntState("activetab", id);
-		}
-	}
-
-	public static void activateTab(Activity a, int id) {
-
-		Intent intent = new Intent(Intent.ACTION_PICK);
-		intent.setPackage("org.musicmod.android");
-		switch (id) {
-		// case R.id.artisttab:
-		// intent.setDataAndType(Uri.EMPTY,
-		// "vnd.android.cursor.dir/artistalbum");
-		// break;
-		// case R.id.albumtab:
-		// intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/album");
-		// break;
-		// case R.id.songtab:
-		// intent.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/track");
-		// break;
-		// case R.id.playlisttab:
-		// intent.setDataAndType(Uri.EMPTY,
-		// MediaStore.Audio.Playlists.CONTENT_TYPE);
-		// break;
-		// case R.id.nowplayingtab:
-		// intent = new Intent(a, MusicPlaybackActivity.class);
-		// a.startActivity(intent);
-		// // fall through and return
-			default:
-				return;
-		}
-		// intent.putExtra("withtabs", true);
-		// intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		// a.startActivity(intent);
-		// a.finish();
-		// a.overridePendingTransition(0, 0);
 	}
 
 	public static void updateNowPlaying(Activity a) {

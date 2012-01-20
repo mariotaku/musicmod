@@ -1,9 +1,13 @@
 package org.musicmod.android.app;
 
+import org.musicmod.android.Constants;
 import org.musicmod.android.R;
 import org.musicmod.android.util.MusicUtils;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
@@ -12,7 +16,9 @@ import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.provider.MediaStore.Audio;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -20,14 +26,18 @@ import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.AdapterView.OnItemClickListener;
 
-public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor> {
+public class AlbumBrowserFragment extends Fragment implements Constants, OnItemClickListener,
+		LoaderManager.LoaderCallbacks<Cursor> {
 
 	private AlbumsAdapter mAdapter;
 	private String mCurFilter;
+	private GridView mGridView;
 
 	private int mIdIdx, mAlbumIdx, mArtistIdx;
 
@@ -41,14 +51,12 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
 		mAdapter = new AlbumsAdapter(getActivity(), null, false);
 
 		View fragmentView = getView();
-		GridView mGridView = (GridView) fragmentView.findViewById(R.id.album_gridview);
+		mGridView = (GridView) fragmentView.findViewById(R.id.album_gridview);
 		mGridView.setAdapter(mAdapter);
-		// mGridView.setOnItemClickListener(this);
+		mGridView.setOnItemClickListener(this);
 		// mGridView.setOnCreateContextMenuListener(this);
 		mGridView.setTextFilterEnabled(true);
 
-		// Prepare the loader. Either re-connect with an existing one,
-		// or start a new one.
 		getLoaderManager().initLoader(0, null, this);
 	}
 
@@ -58,31 +66,40 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
 		return view;
 	}
 
-	// TODO load cursor
+	@Override
+	public void onStart() {
+		super.onStart();
+
+		IntentFilter filter = new IntentFilter();
+		filter.addAction(BROADCAST_META_CHANGED);
+		filter.addAction(BROADCAST_QUEUE_CHANGED);
+		getActivity().registerReceiver(mMediaStatusReceiver, filter);
+	}
+
+	@Override
+	public void onStop() {
+		getActivity().unregisterReceiver(mMediaStatusReceiver);
+		super.onStop();
+	}
+
+	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
 		String[] cols = new String[] { MediaStore.Audio.Albums._ID, MediaStore.Audio.Albums.ALBUM,
 				MediaStore.Audio.Albums.ARTIST };
 
-		// This is called when a new Loader needs to be created. This
-		// sample only has one Loader, so we don't care about the ID.
-		// First, pick the base URI to use depending on whether we are
-		// currently filtering.
 		Uri baseUri = MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI;
 		if (mCurFilter != null) {
 			baseUri = baseUri.buildUpon().appendQueryParameter("filter", Uri.encode(mCurFilter))
 					.build();
 		}
 
-		// Now create and return a CursorLoader that will take care of
-		// creating a Cursor for the data being displayed.
 		return new CursorLoader(getActivity(), baseUri, cols, null, null,
 				MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
 	}
 
+	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-		// Swap the new cursor in. (The framework will take care of closing
-		// the old cursor once we return.)
 
 		mIdIdx = data.getColumnIndexOrThrow(MediaStore.Audio.Albums._ID);
 		mAlbumIdx = data.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM);
@@ -90,20 +107,55 @@ public class AlbumsFragment extends Fragment implements LoaderManager.LoaderCall
 
 		mAdapter.swapCursor(data);
 
-		// The list should now be shown.
-		// if (isResumed()) {
-		// setListShown(true);
-		// } else {
-		// setListShownNoAnimation(true);
-		// }
 	}
 
+	@Override
 	public void onLoaderReset(Loader<Cursor> loader) {
-		// This is called when the last Cursor provided to onLoadFinished()
-		// above is about to be closed. We need to make sure we are no
-		// longer using it.
+
 		mAdapter.swapCursor(null);
 	}
+
+	@Override
+	public void onItemClick(AdapterView<?> adapter, View view, int position, long id) {
+		showDetails(position, id);
+	}
+
+	private void showDetails(int index, long id) {
+
+		Bundle bundle = new Bundle();
+		bundle.putString(INTENT_KEY_MIMETYPE, MediaStore.Audio.Albums.CONTENT_TYPE);
+		bundle.putLong(Audio.Albums._ID, id);
+
+		View detailsFrame = getActivity().findViewById(R.id.frame_details);
+		boolean mDualPane = detailsFrame != null && detailsFrame.getVisibility() == View.VISIBLE && getResources().getBoolean(R.bool.dual_pane);
+
+		if (mDualPane) {
+			mGridView.setSelection(index);
+
+			TrackBrowserFragment fragment = new TrackBrowserFragment();
+			fragment.setArguments(bundle);
+
+			FragmentTransaction ft = getFragmentManager().beginTransaction();
+			ft.replace(R.id.frame_details, fragment);
+			ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+			ft.commit();
+
+		} else {
+			Intent intent = new Intent(Intent.ACTION_VIEW);
+			intent.setClass(getActivity(), TrackBrowserActivity.class);
+			intent.putExtras(bundle);
+			startActivity(intent);
+		}
+	}
+
+	private BroadcastReceiver mMediaStatusReceiver = new BroadcastReceiver() {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			mGridView.invalidateViews();
+		}
+
+	};
 
 	private class AlbumsAdapter extends CursorAdapter {
 

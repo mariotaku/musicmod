@@ -18,7 +18,7 @@ package org.musicmod.android.dialog;
 
 import org.musicmod.android.Constants;
 import org.musicmod.android.R;
-import org.musicmod.android.util.SharedPrefs;
+import org.musicmod.android.util.PreferencesEditor;
 import org.musicmod.android.view.VerticalTextSpinner;
 
 import android.app.Activity;
@@ -40,14 +40,14 @@ public class WeekSelectorDialog extends Activity implements OnClickListener, Con
 
 	private String action;
 	private VerticalTextSpinner mVerticalTextSpinner;
-	private SharedPrefs mPrefs;
+	private PreferencesEditor mPrefs;
 
 	@Override
 	public void onCreate(Bundle icicle) {
 
 		super.onCreate(icicle);
 
-		mPrefs = new SharedPrefs(this);
+		mPrefs = new PreferencesEditor(this);
 
 		setContentView(new LinearLayout(this));
 

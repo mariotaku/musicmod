@@ -23,7 +23,7 @@ import org.musicmod.android.R;
 import org.musicmod.android.util.ColorAnalyser;
 import org.musicmod.android.util.MusicUtils;
 import org.musicmod.android.util.ServiceToken;
-import org.musicmod.android.util.SharedPrefs;
+import org.musicmod.android.util.PreferencesEditor;
 import org.musicmod.android.util.VisualizerWrapper;
 import org.musicmod.android.util.VisualizerWrapper.OnDataChangedListener;
 import org.musicmod.android.view.VisualizerViewFftSpectrum;
@@ -104,7 +104,7 @@ public class MusicPlaybackActivity extends Activity implements Constants, View.O
 	private ServiceToken mToken;
 	private boolean mIntentDeRegistered = false;
 
-	private SharedPrefs mPrefs;
+	private PreferencesEditor mPrefs;
 
 	private int mUIColor = Color.WHITE;
 	private boolean mAutoColor = true;
@@ -138,7 +138,7 @@ public class MusicPlaybackActivity extends Activity implements Constants, View.O
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 		mGestureDetector = new GestureDetector(getApplicationContext(), mVolumeSlideListener);
 		mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-		mPrefs = new SharedPrefs(this);
+		mPrefs = new PreferencesEditor(this);
 		configureActivity();
 
 		mVisualizer = new VisualizerWrapper(50, false, false);
