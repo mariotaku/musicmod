@@ -30,7 +30,6 @@
 		android:gravity="center"
 		android:horizontalSpacing="@dimen/default_element_spacing"
 		android:numColumns="auto_fit"
-		android:stretchMode="none"
 		android:verticalSpacing="@dimen/default_element_spacing"/>
 
 </LinearLayout>

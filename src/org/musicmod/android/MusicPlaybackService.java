@@ -59,7 +59,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 
-import org.musicmod.android.activity.MusicSettingsActivity;
 import org.musicmod.android.util.EqualizerWrapper;
 import org.musicmod.android.util.LyricsParser;
 import org.musicmod.android.util.MusicUtils;
@@ -231,15 +230,7 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 						case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
 							Log.v(LOGTAG_SERVICE, "AudioFocus: received AUDIOFOCUS_LOSS_TRANSIENT");
 							if (isPlaying()) {
-								if (mPrefs.getBooleanPref(
-										MusicSettingsActivity.KEY_ENABLE_FOCUS_LOSS_DUCKING, true)) {
-									mPlayer.setVolume((float) Math.pow(10.0, -8 / 20.0));
-								} else {
-									mPausedByTransientLossOfFocus = true;
-									pause(); // don't move pause out because we
-												// have
-												// ducking
-								}
+								mPlayer.setVolume((float) Math.pow(10.0, -8 / 20.0));
 							}
 							break;
 						case AudioManager.AUDIOFOCUS_GAIN:

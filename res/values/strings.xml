@@ -64,8 +64,6 @@
 	<string name="repeat_off_notif">Repeat is off.</string>
 	<string name="repeat_current_notif">Repeating current song.</string>
 	<string name="repeat_all_notif">Repeating all songs.</string>
-	<string name="ringtone_menu">Use as phone ringtone</string>
-	<string name="ringtone_menu_short">Use as ringtone</string>
 	<string name="ringtone_set">\"<xliff:g id="name" example="Alarm Bell">%s</xliff:g>\" set as phone ringtone.</string>
 	<string name="play_selection">Play</string>
 	<string name="add_to_playlist">Add to playlist</string>
@@ -78,8 +76,6 @@
 	<string name="service_start_error_title">Playback problem</string>
 	<string name="service_start_error_msg">Sorry, the song could not be played.</string>
 	<string name="service_start_error_button">OK</string>
-	<string name="weekpicker_set">Done</string>
-	<string name="weekpicker_title">Set time</string>
 	<string name="save_as_playlist">Save as playlist</string>
 	<string name="clear_playlist">Clear playlist</string>
 	<string name="musicbrowserlabel">Music</string>

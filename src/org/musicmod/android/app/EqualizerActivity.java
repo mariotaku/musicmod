@@ -120,7 +120,7 @@ public class EqualizerActivity extends Activity implements Constants {
 	public boolean onCreateOptionsMenu(Menu menu) {
 
 		MenuInflater mInflater = getMenuInflater();
-		mInflater.inflate(R.menu.options_menu_equalizer, menu);
+		mInflater.inflate(R.menu.equalizer, menu);
 
 		return super.onCreateOptionsMenu(menu);
 	}

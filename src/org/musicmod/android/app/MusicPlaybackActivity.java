@@ -634,7 +634,7 @@ public class MusicPlaybackActivity extends Activity implements Constants, View.O
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 
-		getMenuInflater().inflate(R.menu.options_menu_playback, menu);
+		getMenuInflater().inflate(R.menu.now_playing, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
 

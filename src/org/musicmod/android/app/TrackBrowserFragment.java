@@ -305,7 +305,7 @@ public class TrackBrowserFragment extends Fragment implements
 		@Override
 		public View newView(Context context, Cursor cursor, ViewGroup parent) {
 
-			View view = LayoutInflater.from(context).inflate(R.layout.track_list_item, null);
+			View view = getLayoutInflater(getArguments()).inflate(R.layout.track_list_item, null);
 			ViewHolder viewholder = new ViewHolder(view);
 			view.setTag(viewholder);
 			return view;

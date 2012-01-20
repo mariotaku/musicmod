@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--		  Copyright (C) 2011 The MusicMod Project
+<!--
+		  Copyright (C) 2011 The MusicMod Project
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -15,60 +16,40 @@
 -->
 
 <resources>
-	
+
 	<string-array name="entries_visualizer_type">
 		<item>Wave</item>
 		<item>Bar</item>
 	</string-array>
-	
 	<string-array name="values_visualizer_type">
 		<item>1</item>
 		<item>2</item>
 	</string-array>
-	
 	<string-array name="entries_visualizer_refreshrate">
 		<item>High</item>
 		<item>Normal</item>
 		<item>Low</item>
 		<item>Very Low</item>
 	</string-array>
-	
 	<string-array name="values_visualizer_refreshrate">
 		<item>1</item>
 		<item>2</item>
 		<item>3</item>
 		<item>4</item>
 	</string-array>
-	
 	<string-array name="entries_visualizer_accuracy">
 		<item>High</item>
 		<item>Normal</item>
 		<item>Low</item>
 		<item>Very Low</item>
 	</string-array>
-	
 	<string-array name="values_visualizer_accuracy">
 		<item>1</item>
 		<item>2</item>
 		<item>3</item>
 		<item>4</item>
 	</string-array>
-	
-	<string-array name="values_color_palette">
-		<item>0</item>
-		<item>1</item>
-		<item>2</item>
-		<item>3</item>
-		<item>4</item>
-		<item>5</item>
-		<item>6</item>
-		<item>7</item>
-		<item>8</item>
-		<item>9</item>
-		<item>10</item>
-		<item>11</item>
-	</string-array>
-	
+
 	<!-- Time span edit options that appear when editing system playlist "Recently added" -->
 	<!-- Used to indicate the number of weeks the "recently added" playlist covers in a selector widget -->
 	<string-array name="weeklist">
@@ -85,15 +66,13 @@
 		<item>11 weeks</item>
 		<item>12 weeks</item>
 	</string-array>
-	
 	<string-array name="entries_shaking_behavior">
-			<item>Play/Pause</item>
-			<item>Next song</item>
+		<item>Play/Pause</item>
+		<item>Next song</item>
 	</string-array>
-
 	<string-array name="values_shaking_behavior">
-			<item>play_pause</item>
-			<item>next_song</item>
+		<item>play_pause</item>
+		<item>next_song</item>
 	</string-array>
 
 </resources>

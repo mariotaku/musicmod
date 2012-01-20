@@ -145,7 +145,6 @@ public interface Constants {
 
 	public final static String PREF_KEY_NUMWEEKS = "numweeks";
 
-	public final static String KEY_ENABLE_FOCUS_LOSS_DUCKING = "enable_focus_loss_ducking";
 	public final static String KEY_RESCAN_MEDIA = "rescan_media";
 	public final static String KEY_LYRICS_WAKELOCK = "lyrics_wakelock";
 	public final static String KEY_ALBUMART_SIZE = "albumart_size";

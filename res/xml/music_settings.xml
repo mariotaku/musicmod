@@ -18,30 +18,73 @@
 -->
 
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-    android:title="@string/settings"
-    android:key="settings">
+	android:key="settings"
+	android:title="@string/settings">
 
-	<CheckBoxPreference android:key="enable_focus_loss_ducking"
-		android:title="@string/enable_focus_loss_ducking_title"
-		android:summary="@string/enable_focus_loss_ducking_summary"
-		android:defaultValue="true" />
+	<Preference
+		android:key="rescan_media"
+		android:summary="@string/rescan_media_summary"
+		android:title="@string/rescan_media"/>
 
-	<Preference android:key="rescan_media"  android:title="@string/rescan_media" android:summary="@string/rescan_media_summary"/>
-	<CheckBoxPreference android:key="shake_enabled" android:defaultValue="false" android:title="@string/shaking_enabled" android:summary="@string/shaking_enabled_summary"/>
-	<ListPreference android:key="shaking_behavior" android:title="@string/shaking_behavior" android:summary="@string/shaking_behavior_summary" android:dialogTitle="@string/shaking_behavior" android:persistent="true" android:entries="@array/entries_shaking_behavior" android:entryValues="@array/values_shaking_behavior" android:defaultValue="next_song" android:dependency="shake_enabled"/>
-	<Preference android:key="shaking_calibration"  android:title="@string/shaking_calibration" android:summary="@string/shaking_calibration_summary" android:dependency="shake_enabled"/>
-	<CheckBoxPreference android:key="gentle_sleeptimer" android:title="@string/gentle_sleeptimer" android:summaryOn="@string/gentle_sleeptimer_summaryon" android:summaryOff="@string/gentle_sleeptimer_summaryoff" android:persistent="true" android:defaultValue="true"/>
-	<CheckBoxPreference android:key="enable_scrobbling" android:title="@string/enable_scrobbling" android:summary="@string/enable_scrobbling_summary" android:persistent="true" android:defaultValue="false"/>
+	<CheckBoxPreference
+		android:defaultValue="false"
+		android:key="shake_enabled"
+		android:summary="@string/shaking_enabled_summary"
+		android:title="@string/shaking_enabled"/>
 
-	<PreferenceScreen android:key="credits_cat" android:title="@string/credits_cat">
-		<Preference android:key="app_name" android:title="@string/app_name" android:summary="@string/app_developer"/>
-		<Preference android:key="app_version" android:title="@string/version" android:summary="@string/app_version"/>
-		<Preference android:key="app_credits" android:title="@string/special_thanks_to" android:summary="@string/special_thanks_to_summary"/>
+	<ListPreference
+		android:defaultValue="next_song"
+		android:dependency="shake_enabled"
+		android:dialogTitle="@string/shaking_behavior"
+		android:entries="@array/entries_shaking_behavior"
+		android:entryValues="@array/values_shaking_behavior"
+		android:key="shaking_behavior"
+		android:persistent="true"
+		android:summary="@string/shaking_behavior_summary"
+		android:title="@string/shaking_behavior"/>
+
+	<Preference
+		android:dependency="shake_enabled"
+		android:key="shaking_calibration"
+		android:summary="@string/shaking_calibration_summary"
+		android:title="@string/shaking_calibration"/>
+
+	<CheckBoxPreference
+		android:defaultValue="true"
+		android:key="gentle_sleeptimer"
+		android:persistent="true"
+		android:summaryOff="@string/gentle_sleeptimer_summaryoff"
+		android:summaryOn="@string/gentle_sleeptimer_summaryon"
+		android:title="@string/gentle_sleeptimer"/>
+	<CheckBoxPreference
+		android:defaultValue="false"
+		android:key="enable_scrobbling"
+		android:persistent="true"
+		android:summary="@string/enable_scrobbling_summary"
+		android:title="@string/enable_scrobbling"/>
+
+	<PreferenceScreen
+		android:key="credits_cat"
+		android:title="@string/credits_cat">
+		<Preference
+			android:key="app_name"
+			android:summary="@string/app_developer"
+			android:title="@string/app_name"/>
+		<Preference
+			android:key="app_version"
+			android:summary="@string/app_version"
+			android:title="@string/version"/>
+		<Preference
+			android:key="app_credits"
+			android:summary="@string/special_thanks_to_summary"
+			android:title="@string/special_thanks_to"/>
 	</PreferenceScreen>
-	<PreferenceScreen android:key="plugins_manager" android:title="@string/plugins_manager">
-           <intent
-               android:targetPackage="org.musicmod.android"
-               android:targetClass="org.musicmod.android.activity.PluginsManagerActivity"/>
-       </PreferenceScreen>
-	
+	<PreferenceScreen
+		android:key="plugins_manager"
+		android:title="@string/plugins_manager">
+		<intent
+			android:targetClass="org.musicmod.android.activity.PluginsManagerActivity"
+			android:targetPackage="org.musicmod.android"/>
+	</PreferenceScreen>
+
 </PreferenceScreen>

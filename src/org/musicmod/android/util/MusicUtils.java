@@ -71,7 +71,6 @@ import org.musicmod.android.IMusicPlaybackService;
 import org.musicmod.android.MusicPlaybackService;
 import org.musicmod.android.R;
 import org.musicmod.android.ScanningProgress;
-import org.musicmod.android.app.MusicPlaybackActivity;
 
 public class MusicUtils implements Constants {
 
@@ -940,10 +939,6 @@ public class MusicUtils implements Constants {
 		if (v != null) {
 			v.setVisibility(View.GONE);
 		}
-		v = a.findViewById(R.id.buttonbar);
-		if (v != null) {
-			v.setVisibility(View.GONE);
-		}
 		TextView tv = (TextView) a.findViewById(R.id.sd_message);
 		tv.setText(message);
 	}
@@ -1373,41 +1368,6 @@ public class MusicUtils implements Constants {
 			//
 		}
 		return null;
-	}
-
-	public static void updateNowPlaying(Activity a) {
-
-		View nowPlayingView = a.findViewById(R.id.nowplaying);
-		if (nowPlayingView == null) {
-			return;
-		}
-		try {
-			if (MusicUtils.sService != null && MusicUtils.sService.getAudioId() != -1) {
-				TextView title = (TextView) nowPlayingView.findViewById(R.id.nowplaying_track_name);
-				TextView artist = (TextView) nowPlayingView
-						.findViewById(R.id.nowplaying_artist_name);
-				title.setText(MusicUtils.sService.getTrackName());
-				String artistName = MusicUtils.sService.getArtistName();
-				if (MediaStore.UNKNOWN_STRING.equals(artistName)) {
-					artistName = a.getString(R.string.unknown_artist);
-				}
-				artist.setText(artistName);
-				// mNowPlayingView.setOnFocusChangeListener(mFocuser);
-				// mNowPlayingView.setOnClickListener(this);
-				nowPlayingView.setVisibility(View.VISIBLE);
-				nowPlayingView.setOnClickListener(new View.OnClickListener() {
-
-					public void onClick(View v) {
-
-						Context c = v.getContext();
-						c.startActivity(new Intent(c, MusicPlaybackActivity.class));
-					}
-				});
-				return;
-			}
-		} catch (RemoteException ex) {
-		}
-		nowPlayingView.setVisibility(View.GONE);
 	}
 
 	public static void setBackground(View v, Bitmap bm) {
