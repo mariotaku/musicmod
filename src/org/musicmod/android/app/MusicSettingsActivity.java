@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.musicmod.android.activity;
+package org.musicmod.android.app;
 
 import org.musicmod.android.Constants;
 import org.musicmod.android.R;
@@ -25,7 +25,7 @@ import android.preference.PreferenceActivity;
 public class MusicSettingsActivity extends PreferenceActivity implements Constants {
 
 	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+	public void onCreate(Bundle savedInstanceState) {
 
 		super.onCreate(savedInstanceState);
 		getPreferenceManager().setSharedPreferencesName(SHAREDPREFS_PREFERENCES);

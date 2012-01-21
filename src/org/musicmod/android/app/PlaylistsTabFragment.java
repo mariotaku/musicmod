@@ -10,8 +10,8 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
@@ -19,20 +19,17 @@ import android.support.v4.widget.CursorAdapter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.AdapterView.OnItemClickListener;
 
-public class PlaylistsTabFragment extends Fragment implements
-		LoaderManager.LoaderCallbacks<Cursor>, OnItemClickListener, Constants {
+public class PlaylistsTabFragment extends ListFragment implements
+		LoaderManager.LoaderCallbacks<Cursor>, Constants {
 
 	private PlaylistsAdapter mPlaylistsAdapter;
 	private SmartPlaylistsAdapter mSmartPlaylistsAdapter;
 	private SeparatedListAdapter mAdapter;
-	private ListView mListView;
-	private Long[] mSmartPlaylists = new Long[] { PLAYLIST_RECENTLY_ADDED, PLAYLIST_FAVORITES,
+	private Long[] mSmartPlaylists = new Long[] { PLAYLIST_FAVORITES, PLAYLIST_RECENTLY_ADDED,
 			PLAYLIST_PODCASTS };
 
 	private int mIdIdx, mNameIdx;
@@ -46,8 +43,6 @@ public class PlaylistsTabFragment extends Fragment implements
 		mPlaylistsAdapter = new PlaylistsAdapter(getActivity(), null, false);
 		mSmartPlaylistsAdapter = new SmartPlaylistsAdapter(getActivity(),
 				R.layout.playlist_list_item, mSmartPlaylists);
-
-		mListView = (ListView) getView().findViewById(R.id.playlists_listview);
 
 		getLoaderManager().initLoader(0, null, this);
 	}
@@ -86,9 +81,7 @@ public class PlaylistsTabFragment extends Fragment implements
 		mAdapter.addSection(getString(R.string.my_playlists), mPlaylistsAdapter);
 		mAdapter.addSection(getString(R.string.smart_playlists), mSmartPlaylistsAdapter);
 
-		mListView.setAdapter(mAdapter);
-		mListView.setOnItemClickListener(this);
-		mListView.setTextFilterEnabled(true);
+		setListAdapter(mAdapter);
 
 	}
 
@@ -98,26 +91,17 @@ public class PlaylistsTabFragment extends Fragment implements
 	}
 
 	@Override
-	public void onItemClick(AdapterView<?> adapter, View view, int position, long id) {
+	public void onListItemClick(ListView listview, View view, int position, long id) {
 
-		showDetails(position, id);
+		long playlist_id = (Long) ((Object[]) view.getTag())[1];
+
+		showDetails(position, playlist_id);
 	}
 
 	private void showDetails(int index, long id) {
 
 		View detailsFrame = getActivity().findViewById(R.id.frame_details);
 		boolean mDualPane = detailsFrame != null && detailsFrame.getVisibility() == View.VISIBLE;
-
-		switch ((int) id) {
-			case (int) PLAYLIST_RECENTLY_ADDED:
-				return;
-			case (int) PLAYLIST_FAVORITES:
-				return;
-			case (int) PLAYLIST_PODCASTS:
-				return;
-			default:
-				if (id < 0) return;
-		}
 
 		long playlist_id = id;
 
@@ -211,15 +195,15 @@ public class PlaylistsTabFragment extends Fragment implements
 			}
 
 			switch (playlists[position].intValue()) {
-				case (int) PLAYLIST_RECENTLY_ADDED:
-					viewholder.playlist_name.setText(R.string.recently_added);
-					viewholder.playlist_name.setCompoundDrawablesWithIntrinsicBounds(
-							R.drawable.ic_mp_list_playlist_recent, 0, 0, 0);
-					break;
 				case (int) PLAYLIST_FAVORITES:
 					viewholder.playlist_name.setText(R.string.favorites);
 					viewholder.playlist_name.setCompoundDrawablesWithIntrinsicBounds(
 							R.drawable.ic_mp_list_playlist_favorite, 0, 0, 0);
+					break;
+				case (int) PLAYLIST_RECENTLY_ADDED:
+					viewholder.playlist_name.setText(R.string.recently_added);
+					viewholder.playlist_name.setCompoundDrawablesWithIntrinsicBounds(
+							R.drawable.ic_mp_list_playlist_recent, 0, 0, 0);
 					break;
 				case (int) PLAYLIST_PODCASTS:
 					viewholder.playlist_name.setText(R.string.podcasts);

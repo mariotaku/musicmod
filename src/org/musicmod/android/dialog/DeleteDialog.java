@@ -26,12 +26,15 @@ import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnMultiChoiceClickListener;
 import android.content.DialogInterface.OnShowListener;
+import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore.Audio;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
+
+//FIXME activity not found error when called by setData()
 
 public class DeleteDialog extends Activity implements Constants, OnMultiChoiceClickListener,
 		DialogInterface.OnClickListener, OnCancelListener, OnShowListener, View.OnClickListener {
@@ -45,7 +48,7 @@ public class DeleteDialog extends Activity implements Constants, OnMultiChoiceCl
 	private String KEY_RESTORE_CONFIRM = "restore_confirm";
 
 	private String action;
-	String mimetype, content = "";
+	String mime_type, name, path = null;
 	long[] items;
 
 	@Override
@@ -64,12 +67,27 @@ public class DeleteDialog extends Activity implements Constants, OnMultiChoiceCl
 					.getBooleanExtra(KEY_DELETE_LYRICS, false);
 			delete_music = icicle != null ? icicle.getBoolean(KEY_DELETE_MUSIC) : getIntent()
 					.getBooleanExtra(KEY_DELETE_MUSIC, false);
-			mimetype = icicle != null ? icicle.getString(INTENT_KEY_MIMETYPE) : getIntent()
-					.getType();
-			content = icicle != null ? icicle.getString(INTENT_KEY_CONTENT) : getIntent()
-					.getStringExtra(INTENT_KEY_CONTENT);
-			items = icicle != null ? icicle.getLongArray(INTENT_KEY_ITEMS) : getIntent()
-					.getLongArrayExtra(INTENT_KEY_ITEMS);
+
+			path = icicle != null ? icicle.getString(INTENT_KEY_PATH) : getIntent().getData()
+					.toString();
+
+			if (path.startsWith(Audio.Media.EXTERNAL_CONTENT_URI.toString())) {
+				long id = Long.valueOf(Uri.parse(path).getLastPathSegment());
+				items = new long[] { id };
+				mime_type = Audio.Media.CONTENT_TYPE;
+				name = MusicUtils.getTrackName(getApplicationContext(), id);
+			} else if (path.startsWith(Audio.Albums.EXTERNAL_CONTENT_URI.toString())) {
+				long id = Long.valueOf(Uri.parse(path).getLastPathSegment());
+				items = MusicUtils.getSongListForAlbum(getApplicationContext(), Long.valueOf(id));
+				mime_type = Audio.Albums.CONTENT_TYPE;
+				name = MusicUtils.getAlbumName(getApplicationContext(), id, true);
+			} else if (path.startsWith(Audio.Artists.EXTERNAL_CONTENT_URI.toString())) {
+				long id = Long.valueOf(Uri.parse(path).getLastPathSegment());
+				items = MusicUtils.getSongListForArtist(getApplicationContext(), Long.valueOf(id));
+				mime_type = Audio.Artists.CONTENT_TYPE;
+				name = MusicUtils.getArtistName(getApplicationContext(), id, true);
+			}
+
 		} else {
 			Toast.makeText(this, R.string.error_bad_parameters, Toast.LENGTH_SHORT).show();
 			finish();
@@ -137,26 +155,26 @@ public class DeleteDialog extends Activity implements Constants, OnMultiChoiceCl
 	public void onClick(View v) {
 
 		String desc = "";
-		if (Audio.Artists.CONTENT_TYPE.equals(mimetype)) {
+		if (Audio.Artists.CONTENT_TYPE.equals(mime_type)) {
 			if (delete_lyrics) {
-				desc += "\n" + getString(R.string.delete_artist_lyrics, content);
+				desc += "\n" + getString(R.string.delete_artist_lyrics, name);
 			}
 			if (delete_music) {
-				desc += "\n" + getString(R.string.delete_artist_tracks, content);
+				desc += "\n" + getString(R.string.delete_artist_tracks, name);
 			}
-		} else if (Audio.Albums.CONTENT_TYPE.equals(mimetype)) {
+		} else if (Audio.Albums.CONTENT_TYPE.equals(mime_type)) {
 			if (delete_lyrics) {
-				desc += "\n" + getString(R.string.delete_album_lyrics, content);
+				desc += "\n" + getString(R.string.delete_album_lyrics, name);
 			}
 			if (delete_music) {
-				desc += "\n" + getString(R.string.delete_album_tracks, content);
+				desc += "\n" + getString(R.string.delete_album_tracks, name);
 			}
-		} else if (Audio.Media.CONTENT_TYPE.equals(mimetype)) {
+		} else if (Audio.Media.CONTENT_TYPE.equals(mime_type)) {
 			if (delete_lyrics) {
-				desc += "\n" + getString(R.string.delete_song_lyrics, content);
+				desc += "\n" + getString(R.string.delete_song_lyrics, name);
 			}
 			if (delete_music) {
-				desc += "\n" + getString(R.string.delete_song_track, content);
+				desc += "\n" + getString(R.string.delete_song_track, name);
 			}
 		} else {
 			return;
@@ -212,9 +230,6 @@ public class DeleteDialog extends Activity implements Constants, OnMultiChoiceCl
 		outcicle.putBoolean(KEY_RESTORE_CONFIRM, restore_confirm);
 		outcicle.putBoolean(KEY_DELETE_LYRICS, delete_lyrics);
 		outcicle.putBoolean(KEY_DELETE_MUSIC, delete_music);
-		outcicle.putString(INTENT_KEY_MIMETYPE, mimetype);
-		outcicle.putString(INTENT_KEY_CONTENT, content);
-		outcicle.putLongArray(INTENT_KEY_LIST, items);
 	}
 
 	public void confirmDelete(String desc, final long[] list) {

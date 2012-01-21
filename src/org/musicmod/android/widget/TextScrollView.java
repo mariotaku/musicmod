@@ -1,7 +1,5 @@
 package org.musicmod.android.widget;
 
-import java.util.ArrayList;
-
 import org.musicmod.android.R;
 import org.musicmod.android.util.LyricsSplitter;
 
@@ -50,7 +48,7 @@ public class TextScrollView extends ScrollView implements OnLongClickListener {
 
 	public void registerLineSelectedListener(OnLineSelectedListener listener) {
 
-			mListener = listener;
+		mListener = listener;
 	}
 
 	public void unregisterLineSelectedListener(OnLineSelectedListener listener) {
@@ -97,19 +95,20 @@ public class TextScrollView extends ScrollView implements OnLongClickListener {
 		int content_id = 0;
 
 		for (String line : content) {
-			TextView mTextLine = new TextView(context);
-			mTextLine.setText(LyricsSplitter.split(line, mTextLine.getTextSize()));
-			mTextLine.setTextColor(Color.argb(0xD0, Color.red(mTextColor), Color.green(mTextColor),
+			TextView mTextView = new TextView(context);
+			mTextView.setText(LyricsSplitter.split(line, mTextView.getTextSize()));
+			mTextView.setTextColor(Color.argb(0xD0, Color.red(mTextColor), Color.green(mTextColor),
 					Color.blue(mTextColor)));
-			mTextLine.setShadowLayer(4, 0, 0, R.color.shadow_color_default);
-			mTextLine.setGravity(Gravity.CENTER);
-			mTextLine.setTextSize(mTextSize);
-			mTextLine.setOnLongClickListener(this);
+			float density = getResources().getDisplayMetrics().density;
+			mTextView.setShadowLayer(6 * density, 0, 0, android.R.color.black);
+			mTextView.setGravity(Gravity.CENTER);
+			mTextView.setTextSize(mTextSize);
+			mTextView.setOnLongClickListener(this);
 			if (content_id < content.length) {
-				mTextLine.setTag(content_id);
+				mTextView.setTag(content_id);
 				content_id++;
 			}
-			mContentContainer.addView(mTextLine, new LayoutParams(LayoutParams.WRAP_CONTENT,
+			mContentContainer.addView(mTextView, new LayoutParams(LayoutParams.WRAP_CONTENT,
 					LayoutParams.WRAP_CONTENT, Gravity.CENTER));
 		}
 

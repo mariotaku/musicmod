@@ -180,7 +180,7 @@ public class PlaylistDialog extends Activity implements Constants, TextWatcher, 
 		if (button == null) {
 			return;
 		}
-		if (typedname.trim().length() == 0) {
+		if (typedname.trim().length() == 0 || PLAYLIST_NAME_FAVORITES.equals(typedname)) {
 			button.setEnabled(false);
 		} else {
 			button.setEnabled(true);

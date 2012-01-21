@@ -33,7 +33,6 @@ import org.musicmod.android.widget.RepeatingImageButton.RepeatListener;
 import org.musicmod.android.widget.TextScrollView;
 import org.musicmod.android.widget.TextScrollView.OnLineSelectedListener;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.KeyguardManager;
 import android.app.SearchManager;
@@ -60,21 +59,22 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
 import android.provider.MediaStore;
+import android.provider.MediaStore.Audio;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.Menu;
+import android.support.v4.view.MenuItem;
 import android.text.TextUtils.TruncateAt;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.animation.AnimationUtils;
-import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -85,8 +85,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
-public class MusicPlaybackActivity extends Activity implements Constants, View.OnTouchListener,
-		View.OnLongClickListener, OnLineSelectedListener, ServiceConnection {
+public class MusicPlaybackActivity extends FragmentActivity implements Constants,
+		View.OnTouchListener, View.OnLongClickListener, OnLineSelectedListener, ServiceConnection {
 
 	private boolean mSeeking = false;
 	private boolean mDeviceHasDpad;
@@ -189,11 +189,6 @@ public class MusicPlaybackActivity extends Activity implements Constants, View.O
 		mArtistNameView = (TextView) findViewById(R.id.artistname);
 		mAlbumNameView = (TextView) findViewById(R.id.albumname);
 
-		mTrackNameButton = (Button) findViewById(R.id.trackname);
-		mTrackNameButton.setBackgroundDrawable(new ButtonStateDrawable(
-				new Drawable[] { getResources().getDrawable(R.drawable.btn_mp_playback) }));
-		mTrackNameButton.setOnLongClickListener(this);
-
 		mLyricsView = (LinearLayout) findViewById(R.id.lyrics_view);
 
 		mLyricsScrollView = (TextScrollView) findViewById(R.id.lyrics_scroll);
@@ -229,12 +224,12 @@ public class MusicPlaybackActivity extends Activity implements Constants, View.O
 
 		mDeviceHasDpad = (getResources().getConfiguration().navigation == Configuration.NAVIGATION_DPAD);
 
-		mShuffleButton = ((ImageButton) findViewById(R.id.shuffle));
+		mShuffleButton = new ImageButton(this);
 		mShuffleButton.setBackgroundDrawable(new ButtonStateDrawable(
 				new Drawable[] { getResources().getDrawable(R.drawable.btn_mp_playback) }));
 		mShuffleButton.setOnClickListener(mShuffleListener);
 
-		mRepeatButton = ((ImageButton) findViewById(R.id.repeat));
+		mRepeatButton = new ImageButton(this);
 		mRepeatButton.setBackgroundDrawable(new ButtonStateDrawable(new Drawable[] { getResources()
 				.getDrawable(R.drawable.btn_mp_playback) }));
 		mRepeatButton.setOnClickListener(mRepeatListener);
@@ -356,7 +351,7 @@ public class MusicPlaybackActivity extends Activity implements Constants, View.O
 	@Override
 	public boolean onLongClick(View v) {
 
-		String track = mTrackNameButton.getText().toString();
+		String track = getSupportActionBar().getTitle().toString();
 		String artist = mArtistNameView.getText().toString();
 		String album = mAlbumNameView.getText().toString();
 
@@ -657,8 +652,7 @@ public class MusicPlaybackActivity extends Activity implements Constants, View.O
 		Intent intent;
 		switch (item.getItemId()) {
 			case GOTO_START:
-				intent = new Intent();
-				intent.setClass(this, MusicBrowserActivity.class);
+				intent = new Intent(INTENT_MUSIC_BROWSER);
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 				startActivity(intent);
 				finish();
@@ -683,13 +677,11 @@ public class MusicPlaybackActivity extends Activity implements Constants, View.O
 				startActivity(intent);
 				break;
 			case DELETE_ITEMS:
-				final long[] list = new long[1];
-				list[0] = MusicUtils.getCurrentAudioId();
 				intent = new Intent(INTENT_DELETE_ITEMS);
-				intent.putExtra(INTENT_KEY_CONTENT, mTrackNameButton.getText());
-				intent.putExtra(INTENT_KEY_TYPE, TYPE_TRACK);
-				intent.putExtra(INTENT_KEY_ITEMS, list);
-				startActivityForResult(intent, DELETE_ITEMS);
+				Uri data = Uri.withAppendedPath(Audio.Media.EXTERNAL_CONTENT_URI,
+						String.valueOf(MusicUtils.getCurrentAudioId()));
+				intent.setData(data);
+				startActivity(intent);
 				break;
 			case SETTINGS:
 				intent = new Intent(INTENT_APPEARANCE_SETTINGS);
@@ -1251,7 +1243,6 @@ public class MusicPlaybackActivity extends Activity implements Constants, View.O
 	private ImageView mAlbum;
 	private TextView mCurrentTime, mTotalTime;
 	private TextView mArtistNameView, mAlbumNameView;
-	private Button mTrackNameButton;
 	private ProgressBar mProgress;
 	private long mPosOverride = -1;
 	private boolean mFromTouch = false;
@@ -1329,7 +1320,7 @@ public class MusicPlaybackActivity extends Activity implements Constants, View.O
 					new AlertDialog.Builder(MusicPlaybackActivity.this)
 							.setTitle(R.string.service_start_error_title)
 							.setMessage(R.string.service_start_error_msg)
-							.setPositiveButton(R.string.service_start_error_button,
+							.setPositiveButton(android.R.string.ok,
 									new DialogInterface.OnClickListener() {
 
 										public void onClick(DialogInterface dialog, int whichButton) {
@@ -1418,7 +1409,8 @@ public class MusicPlaybackActivity extends Activity implements Constants, View.O
 				albumName = getString(R.string.unknown_album);
 			}
 			mAlbumNameView.setText(albumName);
-			mTrackNameButton.setText(mService.getTrackName());
+
+			getSupportActionBar().setTitle(mService.getTrackName());
 
 			if (mAlbumArtLoader != null) mAlbumArtLoader.cancel(true);
 			mAlbumArtLoader = new AsyncAlbumArtLoader(mAlbum, animation);

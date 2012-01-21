@@ -41,8 +41,8 @@ public interface Constants {
 	public final static long PLAYLIST_ALL_SONGS = -2;
 	public final static long PLAYLIST_QUEUE = -3;
 	public final static long PLAYLIST_NEW = -4;
-	public final static long PLAYLIST_RECENTLY_ADDED = -5;
-	public final static long PLAYLIST_FAVORITES = -6;
+	public final static long PLAYLIST_FAVORITES = -5;
+	public final static long PLAYLIST_RECENTLY_ADDED = -6;
 	public final static long PLAYLIST_PODCASTS = -7;
 
 	public static final String INTERNAL_VOLUME = "internal";
@@ -216,6 +216,7 @@ public interface Constants {
 	public final static String INTENT_APPEARANCE_SETTINGS = "org.musicmod.android.APPEARANCE_SETTINGS";
 	public final static String INTENT_MUSIC_SETTINGS = "org.musicmod.android.MUSIC_SETTINGS";
 	public final static String INTENT_PLAYBACK_VIEWER = "org.musicmod.android.PLAYBACK_VIEWER";
+	public final static String INTENT_MUSIC_BROWSER = "org.musicmod.android.MUSIC_BROWSER";
 	public final static String INTENT_STREAM_PLAYER = "org.musicmod.android.STREAM_PLAYER";
 	public final static String INTENT_ADD_TO_PLAYLIST = "org.musicmod.android.ADD_TO_PLAYLIST";
 	public final static String INTENT_CREATE_PLAYLIST = "org.musicmod.android.CREATE_PLAYLIST";

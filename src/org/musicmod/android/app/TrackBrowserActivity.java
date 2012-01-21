@@ -19,11 +19,8 @@ package org.musicmod.android.app;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.provider.MediaStore;
 import android.provider.MediaStore.Audio;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.MenuItem;
@@ -73,14 +70,14 @@ public class TrackBrowserActivity extends FragmentActivity implements
 
 		super.onDestroy();
 	}
-	
+
 	@Override
 	public void onStart() {
 		super.onStart();
 		mToken = MusicUtils.bindToService(this, this);
 		setTitle();
 	}
-	
+
 	@Override
 	public void onStop() {
 
@@ -110,49 +107,41 @@ public class TrackBrowserActivity extends FragmentActivity implements
 
 	private void setTitle() {
 		String mimeType = bundle.getString(INTENT_KEY_MIMETYPE);
-		Cursor cursor;
-		String[] cols;
-		Uri uri;
-		String where;
+		String name;
 		long id;
 		if (Audio.Playlists.CONTENT_TYPE.equals(mimeType)) {
 			id = bundle.getLong(Audio.Playlists._ID);
-			where = Audio.Playlists._ID + "=" + id;
-			cols = new String[] { Audio.Playlists.NAME };
-			uri = Audio.Playlists.EXTERNAL_CONTENT_URI;
+			switch ((int) id) {
+				case (int) PLAYLIST_RECENTLY_ADDED:
+					getSupportActionBar().setTitle(R.string.recently_added);
+					return;
+				case (int) PLAYLIST_FAVORITES:
+					getSupportActionBar().setTitle(R.string.favorites);
+					return;
+				case (int) PLAYLIST_PODCASTS:
+					getSupportActionBar().setTitle(R.string.podcasts);
+					return;
+				default:
+					if (id < 0) {
+						getSupportActionBar().setTitle(R.string.music_library);
+						return;
+					}
+			}
+
+			name = MusicUtils.getPlaylistName(getApplicationContext(), id);
 		} else if (Audio.Artists.CONTENT_TYPE.equals(mimeType)) {
 			id = bundle.getLong(Audio.Artists._ID);
-			where = Audio.Artists._ID + "=" + id;
-			cols = new String[] { Audio.Artists.ARTIST };
-			uri = Audio.Artists.EXTERNAL_CONTENT_URI;
+			name = MusicUtils.getArtistName(getApplicationContext(), id, true);
 		} else if (Audio.Albums.CONTENT_TYPE.equals(mimeType)) {
 			id = bundle.getLong(Audio.Albums._ID);
-			where = Audio.Albums._ID + "=" + id;
-			cols = new String[] { Audio.Albums.ALBUM };
-			uri = Audio.Albums.EXTERNAL_CONTENT_URI;
+			name = MusicUtils.getAlbumName(getApplicationContext(), id, true);
 		} else {
-			getSupportActionBar().setTitle(R.string.musicbrowserlabel);
+			getSupportActionBar().setTitle(R.string.music_library);
 			return;
 		}
 
-		cursor = getContentResolver().query(uri, cols, where, null, null);
-		if (cursor.getCount() <= 0) {
-			getSupportActionBar().setTitle(R.string.musicbrowserlabel);
-			return;
-		}
-		
-		cursor.moveToFirst();
-		String name = cursor.getString(0);
-		cursor.close();
-		if (name == null || MediaStore.UNKNOWN_STRING.equals(name)) {
-			if (Audio.Artists.CONTENT_TYPE.equals(mimeType)) {
-				name = getString(R.string.unknown_artist);
-			} else if (Audio.Albums.CONTENT_TYPE.equals(mimeType)) {
-				name = getString(R.string.unknown_album);
-			}
-		}
 		getSupportActionBar().setTitle(name);
-		
+
 	}
 
 }

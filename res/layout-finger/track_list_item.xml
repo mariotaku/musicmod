@@ -26,7 +26,7 @@
 		android:id="@+id/track_name"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
-		android:drawablePadding="4dip"
+		android:drawablePadding="@dimen/default_element_spacing"
 		android:drawableRight="@drawable/ic_indicator_nowplaying_small"
 		android:ellipsize="marquee"
 		android:singleLine="true"

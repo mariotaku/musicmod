@@ -26,8 +26,8 @@
 		android:id="@+id/info"
 		android:text="@string/now_playing"
 		android:textSize="@dimen/textsize_info_album"
-		android:textColor="@color/text_color_default"
-		android:shadowColor="@color/shadow_color_default"
+		android:textColor="@android:color/white"
+		android:shadowColor="@android:color/black"
 		android:shadowDx="0"
 		android:shadowDy="0"
 		android:shadowRadius="3"
@@ -39,8 +39,8 @@
 		android:id="@+id/artistname"
 		android:textSize="@dimen/textsize_artist"
 		android:textStyle="bold"
-		android:textColor="@color/text_color_default"
-		android:shadowColor="@color/shadow_color_default"
+		android:textColor="@android:color/white"
+		android:shadowColor="@android:color/black"
 		android:shadowDx="0"
 		android:shadowDy="0"
 		android:shadowRadius="3"
@@ -50,14 +50,14 @@
 	 		
 	<TextView
 		android:id="@+id/albumname"
-		android:textSize="@dimen/textsize_info_album"
-		android:textColor="@color/text_color_default"
-		android:shadowColor="@color/shadow_color_default"
+		android:layout_width="match_parent"
+		android:layout_height="wrap_content"
+		android:gravity="center"
+		android:shadowColor="@android:color/black"
 		android:shadowDx="0"
 		android:shadowDy="0"
 		android:shadowRadius="3"
-		android:gravity="center"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"/>
+		android:textColor="@android:color/white"
+		android:textSize="@dimen/textsize_info_album"/>
 	
 </LinearLayout>

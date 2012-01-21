@@ -24,5 +24,6 @@
 	<dimen name="default_list_height">64dip</dimen>
 	<dimen name="default_element_height">48dip</dimen>
 	<dimen name="default_element_spacing">4dip</dimen>
+	<dimen name="expandable_group_spacing_left">64dip</dimen>
 
 </resources>

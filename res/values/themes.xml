@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+	<style name="Theme" parent="@style/Theme.Sherlock">
+		<item name="android:windowBackground">@drawable/default_background</item>
+		<item name="android:colorBackgroundCacheHint">@null</item>
+		<item name="android:windowShowWallpaper">true</item>
+		<item name="windowActionBarOverlay">false</item>
+		<item name="abBackground">@drawable/action_bar_background</item>
+	</style>
+
+	<style name="Theme.MusicPlayback" parent="@style/Theme">
+		<item name="android:windowBackground">@drawable/music_playback_background</item>
+	</style>
+
+</resources>

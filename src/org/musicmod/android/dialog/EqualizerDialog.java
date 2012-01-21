@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.musicmod.android.app;
+package org.musicmod.android.dialog;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +45,7 @@ import org.musicmod.android.IMusicPlaybackService;
 import org.musicmod.android.R;
 import org.musicmod.android.util.*;
 
-public class EqualizerActivity extends Activity implements Constants {
+public class EqualizerDialog extends Activity implements Constants {
 
 	private IMusicPlaybackService mService = null;
 	private ServiceToken mToken;

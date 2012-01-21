@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (C) 2009 The Android Open Source Project
+<!--
+     Copyright (C) 2009 The Android Open Source Project
 
      Licensed under the Apache License, Version 2.0 (the "License");
      you may not use this file except in compliance with the License.
@@ -15,13 +16,8 @@
 -->
 
 <resources>
-    <color name="transparent">#00000000</color>
-	<color name="appwidget_text">#ffffffff</color>
-	<!-- Do not translate. Background color for currently dragged item in playlist edit mode. -->
-	<color name="dragndrop_background">#e0103010</color>
-	<!-- Do not translate. Background color for albums in the artists list view. -->
-	<color name="expanding_child_background">#ff404040</color>
-	<color name="text_color_default">#ffffffff</color>
-	<color name="shadow_color_default">#ff000000</color>
-</resources>
 
+	<color name="dragndrop_background">#e0103010</color>
+	<color name="expanding_child_background">#80000000</color>
+
+</resources>

@@ -42,6 +42,7 @@ import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.provider.MediaStore;
+import android.provider.MediaStore.Audio;
 import android.text.TextUtils;
 import android.text.format.Time;
 import android.util.Log;
@@ -70,7 +71,7 @@ import org.musicmod.android.Constants;
 import org.musicmod.android.IMusicPlaybackService;
 import org.musicmod.android.MusicPlaybackService;
 import org.musicmod.android.R;
-import org.musicmod.android.ScanningProgress;
+import org.musicmod.android.dialog.ScanningProgress;
 
 public class MusicUtils implements Constants {
 
@@ -362,6 +363,90 @@ public class MusicUtils implements Constants {
 		return sEmptyList;
 	}
 
+	public static String getArtistName(Context context, long artist_id, boolean default_name) {
+		String where = Audio.Artists._ID + "=" + artist_id;
+		String[] cols = new String[] { Audio.Artists.ARTIST };
+		Uri uri = Audio.Artists.EXTERNAL_CONTENT_URI;
+		Cursor cursor = context.getContentResolver().query(uri, cols, where, null, null);
+		if (cursor.getCount() <= 0) {
+			if (default_name) {
+				return context.getString(R.string.unknown_artist);
+			} else {
+				return MediaStore.UNKNOWN_STRING;
+			}
+		} else {
+			cursor.moveToFirst();
+			String name = cursor.getString(0);
+			cursor.close();
+			if (name == null || MediaStore.UNKNOWN_STRING.equals(name)) {
+				if (default_name) {
+					return context.getString(R.string.unknown_artist);
+				} else {
+					return MediaStore.UNKNOWN_STRING;
+				}
+			}
+			return name;
+		}
+
+	}
+
+	public static String getAlbumName(Context context, long album_id, boolean default_name) {
+		String where = Audio.Albums._ID + "=" + album_id;
+		String[] cols = new String[] { Audio.Albums.ALBUM };
+		Uri uri = Audio.Albums.EXTERNAL_CONTENT_URI;
+		Cursor cursor = context.getContentResolver().query(uri, cols, where, null, null);
+		if (cursor.getCount() <= 0) {
+			if (default_name) {
+				return context.getString(R.string.unknown_album);
+			} else {
+				return MediaStore.UNKNOWN_STRING;
+			}
+		} else {
+			cursor.moveToFirst();
+			String name = cursor.getString(0);
+			cursor.close();
+			if (name == null || MediaStore.UNKNOWN_STRING.equals(name)) {
+				if (default_name) {
+					return context.getString(R.string.unknown_album);
+				} else {
+					return MediaStore.UNKNOWN_STRING;
+				}
+			}
+			return name;
+		}
+
+	}
+
+	public static String getTrackName(Context context, long audio_id) {
+		String where = Audio.Media._ID + "=" + audio_id;
+		String[] cols = new String[] { Audio.Media.TITLE };
+		Uri uri = Audio.Media.EXTERNAL_CONTENT_URI;
+		Cursor cursor = context.getContentResolver().query(uri, cols, where, null, null);
+		if (cursor.getCount() <= 0) {
+			return "";
+		}
+
+		cursor.moveToFirst();
+		String name = cursor.getString(0);
+		cursor.close();
+		return name;
+	}
+
+	public static String getPlaylistName(Context context, long playlist_id) {
+		String where = Audio.Playlists._ID + "=" + playlist_id;
+		String[] cols = new String[] { Audio.Playlists.NAME };
+		Uri uri = Audio.Playlists.EXTERNAL_CONTENT_URI;
+		Cursor cursor = context.getContentResolver().query(uri, cols, where, null, null);
+		if (cursor.getCount() <= 0) {
+			return "";
+		}
+
+		cursor.moveToFirst();
+		String name = cursor.getString(0);
+		cursor.close();
+		return name;
+	}
+
 	public static void playPlaylist(Context context, long plid) {
 
 		long[] list = getSongListForPlaylist(context, plid);
@@ -484,16 +569,23 @@ public class MusicUtils implements Constants {
 
 		Map<String, String> map;
 
-		String[] cols = new String[] { MediaStore.Audio.Playlists._ID,
-				MediaStore.Audio.Playlists.NAME };
+		String[] cols = new String[] { Audio.Playlists._ID, Audio.Playlists.NAME };
+		StringBuilder where = new StringBuilder();
+
 		ContentResolver resolver = context.getContentResolver();
 		if (resolver == null) {
 			System.out.println("resolver = null");
 		} else {
-			String whereclause = MediaStore.Audio.Playlists.NAME + " != ''";
-			Cursor cur = resolver.query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, cols,
-					whereclause, null, MediaStore.Audio.Playlists.NAME);
+			where.append(Audio.Playlists.NAME + " != ''");
+			where.append(" AND " + Audio.Playlists.NAME + " != '" + PLAYLIST_NAME_FAVORITES + "'");
+			Cursor cur = resolver.query(Audio.Playlists.EXTERNAL_CONTENT_URI, cols,
+					where.toString(), null, Audio.Playlists.NAME);
 			list.clear();
+
+			map = new HashMap<String, String>();
+			map.put(MAP_KEY_ID, String.valueOf(PLAYLIST_FAVORITES));
+			map.put(MAP_KEY_NAME, context.getString(R.string.favorites));
+			list.add(map);
 
 			if (create_shortcut) {
 				map = new HashMap<String, String>();
@@ -518,7 +610,6 @@ public class MusicUtils implements Constants {
 			}
 
 			if (cur != null && cur.getCount() > 0) {
-				// sub.addSeparator(1, 0);
 				cur.moveToFirst();
 				while (!cur.isAfterLast()) {
 					map = new HashMap<String, String>();

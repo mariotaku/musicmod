@@ -63,17 +63,18 @@ public class MusicBrowserActivity extends FragmentActivity implements Constants,
 		super.onCreate(icicle);
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 		setContentView(R.layout.music_browser);
+
 		mPrefs = new PreferencesEditor(getApplicationContext());
 
 		getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-		ActionBar.Tab mArtistsTab = getSupportActionBar().newTab().setText(
+		Tab mArtistsTab = getSupportActionBar().newTab().setText(
 				getString(R.string.artists).toUpperCase());
-		ActionBar.Tab mAlbumsTab = getSupportActionBar().newTab().setText(
+		Tab mAlbumsTab = getSupportActionBar().newTab().setText(
 				getString(R.string.albums).toUpperCase());
-		ActionBar.Tab mTracksTab = getSupportActionBar().newTab().setText(
+		Tab mTracksTab = getSupportActionBar().newTab().setText(
 				getString(R.string.tracks).toUpperCase());
-		ActionBar.Tab mPlaylistsTab = getSupportActionBar().newTab().setText(
+		Tab mPlaylistsTab = getSupportActionBar().newTab().setText(
 				getString(R.string.playlists).toUpperCase());
 
 		mViewPager = (ViewPager) findViewById(R.id.pager);

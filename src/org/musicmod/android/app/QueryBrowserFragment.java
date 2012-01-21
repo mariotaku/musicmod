@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.musicmod.android;
+package org.musicmod.android.app;
 
 import android.app.ListActivity;
 import android.app.SearchManager;
@@ -46,21 +46,18 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
+import org.musicmod.android.Constants;
+import org.musicmod.android.R;
 import org.musicmod.android.util.MusicUtils;
 import org.musicmod.android.util.ServiceToken;
 
-public class QueryBrowserActivity extends ListActivity implements Constants, ServiceConnection {
+public class QueryBrowserFragment extends ListActivity implements Constants, ServiceConnection {
 
 	private QueryListAdapter mAdapter;
 	private boolean mAdapterSent;
 	private String mFilterString = "";
 	private ServiceToken mToken;
 
-	public QueryBrowserActivity() {
-
-	}
-
-	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle icicle) {
 
@@ -211,7 +208,7 @@ public class QueryBrowserActivity extends ListActivity implements Constants, Ser
 		@Override
 		public void onReceive(Context context, Intent intent) {
 
-			MusicUtils.setSpinnerState(QueryBrowserActivity.this);
+			MusicUtils.setSpinnerState(QueryBrowserFragment.this);
 			mReScanHandler.sendEmptyMessage(0);
 		}
 	};
@@ -261,7 +258,7 @@ public class QueryBrowserActivity extends ListActivity implements Constants, Ser
 	}
 
 	@Override
-	protected void onListItemClick(ListView l, View v, int position, long id) {
+	public void onListItemClick(ListView l, View v, int position, long id) {
 
 		// Dialog doesn't allow us to wait for a result, so we need to store
 		// the info we need for when the dialog posts its result
@@ -317,7 +314,7 @@ public class QueryBrowserActivity extends ListActivity implements Constants, Ser
 
 	static class QueryListAdapter extends SimpleCursorAdapter {
 
-		private QueryBrowserActivity mActivity = null;
+		private QueryBrowserFragment mActivity = null;
 		private AsyncQueryHandler mQueryHandler;
 		private String mConstraint = null;
 		private boolean mConstraintIsValid = false;
@@ -336,7 +333,7 @@ public class QueryBrowserActivity extends ListActivity implements Constants, Ser
 			}
 		}
 
-		QueryListAdapter(Context context, QueryBrowserActivity currentactivity, int layout,
+		QueryListAdapter(Context context, QueryBrowserFragment currentactivity, int layout,
 				Cursor cursor, String[] from, int[] to) {
 
 			super(context, layout, cursor, from, to);
@@ -344,7 +341,7 @@ public class QueryBrowserActivity extends ListActivity implements Constants, Ser
 			mQueryHandler = new QueryHandler(context.getContentResolver());
 		}
 
-		public void setActivity(QueryBrowserActivity newactivity) {
+		public void setActivity(QueryBrowserFragment newactivity) {
 
 			mActivity = newactivity;
 		}

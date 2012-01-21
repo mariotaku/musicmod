@@ -93,8 +93,6 @@ public class ArtistsTabFragment extends Fragment implements LoaderManager.Loader
 
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
-		// Swap the new cursor in. (The framework will take care of closing
-		// the old cursor once we return.)
 
 		mGroupArtistIdIdx = data.getColumnIndexOrThrow(MediaStore.Audio.Artists._ID);
 		mGroupArtistIdx = data.getColumnIndexOrThrow(MediaStore.Audio.Artists.ARTIST);
@@ -102,7 +100,6 @@ public class ArtistsTabFragment extends Fragment implements LoaderManager.Loader
 		mGroupSongIdx = data.getColumnIndexOrThrow(MediaStore.Audio.Artists.NUMBER_OF_TRACKS);
 
 		mArtistsAdapter.changeCursor(data);
-		mListView.setTextFilterEnabled(true);
 
 	}
 
@@ -113,16 +110,10 @@ public class ArtistsTabFragment extends Fragment implements LoaderManager.Loader
 
 	@Override
 	public void onGroupExpand(int position) {
-		// TODO Auto-generated method stub
 		long id = mArtistsAdapter.getGroupId(position);
 		showGroupDetails(position, id);
 	}
-	
-	/**
-	 * Helper function to show the details of a selected item, either by
-	 * displaying a fragment in-place in the current UI, or starting a whole new
-	 * activity in which it is displayed.
-	 */
+
 	private void showGroupDetails(int groupPosition, long id) {
 
 		View detailsFrame = getActivity().findViewById(R.id.frame_details);
@@ -302,10 +293,10 @@ public class ArtistsTabFragment extends Fragment implements LoaderManager.Loader
 					null);
 			ViewHolderChild viewholder = new ViewHolderChild(view);
 			view.setTag(viewholder);
-			
+
 			return view;
-		}		
-		
+		}
+
 		@Override
 		public void bindChildView(View view, Context context, Cursor cursor, boolean isLastChild) {
 
@@ -313,19 +304,21 @@ public class ArtistsTabFragment extends Fragment implements LoaderManager.Loader
 			viewholder.gridview.setAdapter(new AlbumChildAdapter(context, cursor, false));
 			viewholder.gridview.setOnItemClickListener(this);
 			viewholder.gridview.setVerticalScrollBarEnabled(false);
-			
+
 			int item_width = getResources().getDimensionPixelOffset(R.dimen.gridview_item_width);
 			int item_height = getResources().getDimensionPixelOffset(R.dimen.gridview_item_height);
-			
+
 			int parent_width = mListView.getWidth();
 			int albums_count = cursor.getCount();
 			int columns_count = (int) Math.floor(parent_width / item_width);
-			int gridview_rows = (int) Math.ceil((float) albums_count / columns_count); 
-			
-			int default_padding = getResources().getDimensionPixelOffset(R.dimen.default_element_spacing);
+			int gridview_rows = (int) Math.ceil((float) albums_count / columns_count);
+
+			int default_padding = getResources().getDimensionPixelOffset(
+					R.dimen.default_element_spacing);
 			int paddings_count = default_padding * gridview_rows * 2 * 2;
-			
-			viewholder.gridview.getLayoutParams().height = item_height * gridview_rows + paddings_count;
+
+			viewholder.gridview.getLayoutParams().height = item_height * gridview_rows
+					+ paddings_count;
 
 		}
 

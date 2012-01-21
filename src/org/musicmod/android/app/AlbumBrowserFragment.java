@@ -4,6 +4,7 @@ import org.musicmod.android.Constants;
 import org.musicmod.android.R;
 import org.musicmod.android.util.MusicUtils;
 
+import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -22,7 +23,10 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.support.v4.view.MenuItem;
 import android.support.v4.widget.CursorAdapter;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,15 +34,18 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 
 public class AlbumBrowserFragment extends Fragment implements Constants, OnItemClickListener,
 		LoaderManager.LoaderCallbacks<Cursor> {
 
 	private AlbumsAdapter mAdapter;
-	private String mCurFilter;
 	private GridView mGridView;
-
+	private Cursor mCursor;
+	private int mSelectedPosition;
+	private long mSelectedId;
+	private String mCurrentAlbumName, mCurrentArtistNameForAlbum;
 	private int mIdIdx, mAlbumIdx, mArtistIdx;
 
 	@Override
@@ -54,8 +61,7 @@ public class AlbumBrowserFragment extends Fragment implements Constants, OnItemC
 		mGridView = (GridView) fragmentView.findViewById(R.id.album_gridview);
 		mGridView.setAdapter(mAdapter);
 		mGridView.setOnItemClickListener(this);
-		// mGridView.setOnCreateContextMenuListener(this);
-		mGridView.setTextFilterEnabled(true);
+		mGridView.setOnCreateContextMenuListener(this);
 
 		getLoaderManager().initLoader(0, null, this);
 	}
@@ -88,18 +94,16 @@ public class AlbumBrowserFragment extends Fragment implements Constants, OnItemC
 		String[] cols = new String[] { MediaStore.Audio.Albums._ID, MediaStore.Audio.Albums.ALBUM,
 				MediaStore.Audio.Albums.ARTIST };
 
-		Uri baseUri = MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI;
-		if (mCurFilter != null) {
-			baseUri = baseUri.buildUpon().appendQueryParameter("filter", Uri.encode(mCurFilter))
-					.build();
-		}
+		Uri uri = MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI;
 
-		return new CursorLoader(getActivity(), baseUri, cols, null, null,
+		return new CursorLoader(getActivity(), uri, cols, null, null,
 				MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
 	}
 
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+
+		mCursor = data;
 
 		mIdIdx = data.getColumnIndexOrThrow(MediaStore.Audio.Albums._ID);
 		mAlbumIdx = data.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM);
@@ -120,6 +124,81 @@ public class AlbumBrowserFragment extends Fragment implements Constants, OnItemC
 		showDetails(position, id);
 	}
 
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View view, ContextMenuInfo info) {
+
+		if (mCursor == null) return;
+
+		getActivity().getMenuInflater().inflate(R.menu.music_browser_item, menu);
+
+		AdapterContextMenuInfo adapterinfo = (AdapterContextMenuInfo) info;
+		mSelectedPosition = adapterinfo.position;
+		mCursor.moveToPosition(mSelectedPosition);
+		try {
+			mSelectedId = mCursor.getLong(mIdIdx);
+		} catch (IllegalArgumentException ex) {
+			mSelectedId = adapterinfo.id;
+		}
+
+		mCurrentArtistNameForAlbum = mCursor.getString(mArtistIdx);
+
+		mCurrentAlbumName = mCursor.getString(mAlbumIdx);
+		menu.setHeaderTitle(mCurrentAlbumName);
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+
+		if (mCursor == null) return false;
+
+		Intent intent;
+
+		switch (item.getItemId()) {
+			case PLAY_SELECTION:
+				int position = mSelectedPosition;
+				long[] list = MusicUtils.getSongListForAlbum(getActivity(), mSelectedId);
+				MusicUtils.playAll(getActivity(), list, position);
+				return true;
+			case DELETE_ITEMS:
+				intent = new Intent(INTENT_DELETE_ITEMS);
+				Uri data = Uri.withAppendedPath(Audio.Albums.EXTERNAL_CONTENT_URI,
+						String.valueOf(mSelectedId));
+				intent.setData(data);
+				startActivity(intent);
+				return true;
+			case SEARCH:
+				doSearch();
+				return true;
+		}
+		return super.onContextItemSelected(item);
+	}
+
+	private void doSearch() {
+
+		CharSequence title = null;
+		String query = null;
+
+		Intent i = new Intent();
+		i.setAction(MediaStore.INTENT_ACTION_MEDIA_SEARCH);
+		i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+		title = mCurrentAlbumName;
+		if (MediaStore.UNKNOWN_STRING.equals(mCurrentArtistNameForAlbum)) {
+			query = mCurrentAlbumName;
+		} else {
+			query = mCurrentArtistNameForAlbum + " " + mCurrentAlbumName;
+			i.putExtra(MediaStore.EXTRA_MEDIA_ARTIST, mCurrentArtistNameForAlbum);
+		}
+		if (MediaStore.UNKNOWN_STRING.equals(mCurrentAlbumName)) {
+			i.putExtra(MediaStore.EXTRA_MEDIA_ALBUM, mCurrentAlbumName);
+		}
+		i.putExtra(MediaStore.EXTRA_MEDIA_FOCUS, "audio/*");
+		title = getString(R.string.mediasearch, title);
+		i.putExtra(SearchManager.QUERY, query);
+
+		startActivity(Intent.createChooser(i, title));
+	}
+
 	private void showDetails(int index, long id) {
 
 		Bundle bundle = new Bundle();
@@ -127,7 +206,8 @@ public class AlbumBrowserFragment extends Fragment implements Constants, OnItemC
 		bundle.putLong(Audio.Albums._ID, id);
 
 		View detailsFrame = getActivity().findViewById(R.id.frame_details);
-		boolean mDualPane = detailsFrame != null && detailsFrame.getVisibility() == View.VISIBLE && getResources().getBoolean(R.bool.dual_pane);
+		boolean mDualPane = detailsFrame != null && detailsFrame.getVisibility() == View.VISIBLE
+				&& getResources().getBoolean(R.bool.dual_pane);
 
 		if (mDualPane) {
 			mGridView.setSelection(index);

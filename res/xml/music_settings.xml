@@ -83,7 +83,7 @@
 		android:key="plugins_manager"
 		android:title="@string/plugins_manager">
 		<intent
-			android:targetClass="org.musicmod.android.activity.PluginsManagerActivity"
+			android:action="org.musicmod.android.PLUGINS_MANAGER"
 			android:targetPackage="org.musicmod.android"/>
 	</PreferenceScreen>
 

@@ -75,15 +75,12 @@
 	<string name="create_playlist_overwrite_text">Overwrite</string>
 	<string name="service_start_error_title">Playback problem</string>
 	<string name="service_start_error_msg">Sorry, the song could not be played.</string>
-	<string name="service_start_error_button">OK</string>
 	<string name="save_as_playlist">Save as playlist</string>
 	<string name="clear_playlist">Clear playlist</string>
-	<string name="musicbrowserlabel">Music</string>
 	<string name="musicshortcutlabel">Music playlist</string>
 	<string name="mediaplaybacklabel">Music</string>
 	<string name="mediapickerlabel">Music</string>
 	<string name="playback_failed">Sorry, the player does not support this type of audio file.</string>
-	<string name="cancel">Cancel</string>
 	<string name="remove_from_playlist">Remove from playlist</string>
 	<string name="streamloadingtext">Connecting to <xliff:g id="host">%s</xliff:g></string>
 	<string name="mediasearch">Search for <xliff:g id="term" example="Beethoven">%s</xliff:g> using:</string>
@@ -116,10 +113,10 @@
 	<string name="overwrite">Overwrite</string>
 	<string name="delete_music">Delete Music</string>
 	<string name="delete_lyrics">Delete Lyrics</string>
-	<string name="delete_confirm">The following items will be permanently deleted:<xliff:g id="content">%s</xliff:g></string>
+	<string name="delete_confirm">Following items will be deleted from your device:<xliff:g id="content">%s</xliff:g></string>
 	<string name="delete_artist_tracks">All songs by <xliff:g id="artist">%s</xliff:g></string>
 	<string name="delete_artist_lyrics">All lyrics from songs by <xliff:g id="artist">%s</xliff:g></string>
-	<string name="delete_album_tracks">Songs in the entire album \"<xliff:g id="album">%s</xliff:g>\"</string>
+	<string name="delete_album_tracks">Songs in the album \"<xliff:g id="album">%s</xliff:g>\"</string>
 	<string name="delete_album_lyrics">Lyrics from album \"<xliff:g id="album">%s</xliff:g>\"</string>
 	<string name="delete_song_track">Song \"<xliff:g id="song">%s</xliff:g>\"</string>
 	<string name="delete_song_lyrics">Lyrics of \"<xliff:g id="song">%s</xliff:g>\"</string>
@@ -142,8 +139,10 @@
 	<string name="service_start_error">Playback problem</string>
 	<string name="set_time">Set time</string>
 	<string name="music_picker">Select music track</string>
-	<string name="music_widget_label_4x1">MusicMod Music Player (4x1)</string>
-	<string name="music_widget_label_2x2">MusicMod Music Player (2x2)</string>
+	<string name="widget_label_4x1">MusicMod Music Player (4x1)</string>
+	<string name="widget_label_4x2">MusicMod Music Player (4x2)</string>
+	<string name="widget_label_2x2">MusicMod Music Player (2x2)</string>
+	<string name="playback_service_name">MusicMod Playback Service</string>
 	<string name="base_settings">Base settings</string>
 	<string name="appearances_settings">Appearances settings</string>
 	<string name="other_settings">Other settings</string>
@@ -212,7 +211,7 @@
 	<string name="lyrics_wakelock">Screen on while lyrics displaying</string>
 	<string name="lyrics_wakelock_summary">Keep the screen on while lyrics displaying</string>
 	<string name="blur_background">Blur background</string>
-	<string name="blur_background_summary">Experimental! May slow down your device and takes no effect on 3.0+ devices!</string>
+	<string name="blur_background_summary">May slow down your device and takes no effect on 3.0+ devices!</string>
 	<string name="gentle_sleeptimer">Gentle sleeptimer</string>
 	<string name="gentle_sleeptimer_summaryon">Playback will continue until current song finished when sleep timer timed up</string>
 	<string name="gentle_sleeptimer_summaryoff">Playback will stop immediately when sleep timer timed up</string>

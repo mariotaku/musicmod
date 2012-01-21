@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--          Copyright (C) 2011 The MusicMod Project
+<!--
+ Copyright (C) 2011 The MusicMod Project
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -14,24 +15,84 @@
  limitations under the License.
 -->
 
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" android:title="@string/settings" android:key="settings">
-	<PreferenceCategory android:key="appearances_settings" android:title="@string/appearances_settings">
-		<PreferenceScreen android:key="ui_color" android:title="@string/ui_color">
-			<CheckBoxPreference android:key="auto_color" android:title="@string/ui_color_auto" android:summaryOn="@string/ui_color_auto_summaryon" android:summaryOff="@string/ui_color_auto_summaryoff" android:defaultValue="true"/>
-			<net.margaritov.preference.colorpicker.ColorPickerPreference android:key="customized_color" android:title="@string/ui_color_customize" android:summary="@string/ui_color_customize_summary" android:defaultValue="@integer/white" alphaSlider="false"/>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+	android:key="settings"
+	android:title="@string/settings">
+
+	<PreferenceCategory
+		android:key="appearances_settings"
+		android:title="@string/appearances_settings">
+		<PreferenceScreen
+			android:key="ui_color"
+			android:title="@string/ui_color">
+			<CheckBoxPreference
+				android:defaultValue="true"
+				android:key="auto_color"
+				android:summaryOff="@string/ui_color_auto_summaryoff"
+				android:summaryOn="@string/ui_color_auto_summaryon"
+				android:title="@string/ui_color_auto"/>
+
+			<net.margaritov.preference.colorpicker.ColorPickerPreference
+				alphaSlider="false"
+				android:defaultValue="@integer/white"
+				android:key="customized_color"
+				android:summary="@string/ui_color_customize_summary"
+				android:title="@string/ui_color_customize"/>
 		</PreferenceScreen>
-		<PreferenceScreen android:key="visualizer_preference" android:title="@string/visualizer">
-			<ListPreference android:key="visualizer_type" android:title="@string/visualizer_type" android:summary="@string/visualizer_type_summary" android:dialogTitle="@string/visualizer_type" android:entries="@array/entries_visualizer_type" android:entryValues="@array/values_visualizer_type" android:defaultValue="1"/>
-			<ListPreference android:key="visualizer_refreshrate" android:title="@string/visualizer_refreshrate" android:summary="@string/visualizer_refreshrate_summary" android:dialogTitle="@string/visualizer_refreshrate" android:entries="@array/entries_visualizer_refreshrate" android:entryValues="@array/values_visualizer_refreshrate" android:defaultValue="1"/>
-			<ListPreference android:key="visualizer_accuracy" android:title="@string/visualizer_accuracy" android:summary="@string/visualizer_accuracy_summary" android:dialogTitle="@string/visualizer_accuracy" android:entries="@array/entries_visualizer_accuracy" android:entryValues="@array/values_visualizer_accuracy" android:defaultValue="1"/>
-			<CheckBoxPreference android:key="visualizer_antialias" android:title="@string/visualizer_antialias" android:summaryOn="@string/visualizer_antialias_summaryon" android:summaryOff="@string/visualizer_antialias_summaryoff" android:defaultValue="true"/>
+		<PreferenceScreen
+			android:key="visualizer_preference"
+			android:title="@string/visualizer">
+			<ListPreference
+				android:defaultValue="1"
+				android:dialogTitle="@string/visualizer_type"
+				android:entries="@array/entries_visualizer_type"
+				android:entryValues="@array/values_visualizer_type"
+				android:key="visualizer_type"
+				android:summary="@string/visualizer_type_summary"
+				android:title="@string/visualizer_type"/>
+			<ListPreference
+				android:defaultValue="1"
+				android:dialogTitle="@string/visualizer_refreshrate"
+				android:entries="@array/entries_visualizer_refreshrate"
+				android:entryValues="@array/values_visualizer_refreshrate"
+				android:key="visualizer_refreshrate"
+				android:summary="@string/visualizer_refreshrate_summary"
+				android:title="@string/visualizer_refreshrate"/>
+			<ListPreference
+				android:defaultValue="1"
+				android:dialogTitle="@string/visualizer_accuracy"
+				android:entries="@array/entries_visualizer_accuracy"
+				android:entryValues="@array/values_visualizer_accuracy"
+				android:key="visualizer_accuracy"
+				android:summary="@string/visualizer_accuracy_summary"
+				android:title="@string/visualizer_accuracy"/>
+
+			<CheckBoxPreference
+				android:defaultValue="true"
+				android:key="visualizer_antialias"
+				android:summaryOff="@string/visualizer_antialias_summaryoff"
+				android:summaryOn="@string/visualizer_antialias_summaryon"
+				android:title="@string/visualizer_antialias"/>
 		</PreferenceScreen>
-		<CheckBoxPreference android:key="lyrics_wakelock" android:defaultValue="false" android:title="@string/lyrics_wakelock" android:summary="@string/lyrics_wakelock_summary"/>
-		<CheckBoxPreference android:key="blur_background" android:defaultValue="false" android:title="@string/blur_background" android:summary="@string/blur_background_summary"/>
+
+		<CheckBoxPreference
+			android:defaultValue="false"
+			android:key="lyrics_wakelock"
+			android:summary="@string/lyrics_wakelock_summary"
+			android:title="@string/lyrics_wakelock"/>
+		<CheckBoxPreference
+			android:defaultValue="false"
+			android:key="blur_background"
+			android:summary="@string/blur_background_summary"
+			android:title="@string/blur_background"/>
 	</PreferenceCategory>
-	<PreferenceScreen android:key="base_settings" android:title="@string/base_settings">
-            <intent
-                android:targetPackage="org.musicmod.android"
-                android:targetClass="org.musicmod.android.activity.MusicSettingsActivity"/>
+
+	<PreferenceScreen
+		android:key="base_settings"
+		android:title="@string/base_settings">
+		<intent
+			android:action="org.musicmod.android.MUSIC_SETTINGS"
+			android:targetPackage="org.musicmod.android"/>
 	</PreferenceScreen>
+
 </PreferenceScreen>

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.musicmod.android.activity;
+package org.musicmod.android.app;
 
 import org.musicmod.android.Constants;
 import org.musicmod.android.R;

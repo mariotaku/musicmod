@@ -21,7 +21,7 @@
 	android:gravity="center_vertical"
 	android:orientation="vertical"
 	android:paddingBottom="@dimen/default_element_spacing"
-	android:paddingLeft="48dip"
+	android:paddingLeft="@dimen/expandable_group_spacing_left"
 	android:paddingRight="@dimen/default_element_spacing"
 	android:paddingTop="@dimen/default_element_spacing">
 

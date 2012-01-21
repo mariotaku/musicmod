@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
- Copyright (C) 2011 The MusicMod Project
+<!--          Copyright (C) 2011 The MusicMod Project
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -15,18 +14,11 @@
  limitations under the License.
 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="match_parent"
-	android:layout_height="match_parent"
-	android:gravity="center_vertical"
-	android:orientation="vertical">
-
-	<org.musicmod.android.widget.TouchInterceptor
-		android:id="@android:id/list"
-		android:layout_width="match_parent"
-		android:layout_height="0dip"
-		android:layout_weight="1"
-		android:drawSelectorOnTop="false"
-		android:fastScrollEnabled="true"/>
-
-</LinearLayout>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"> 
+	<gradient android:type="radial" 
+		android:startColor="#a0000000" 
+		android:endColor="#d0000000" 
+		android:gradientRadius="500" 
+		android:centerX="0.0" 
+		android:centerY="0.0"/> 
+</shape>
