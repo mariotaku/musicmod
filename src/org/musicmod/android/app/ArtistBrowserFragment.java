@@ -361,7 +361,8 @@ public class ArtistBrowserFragment extends Fragment implements
 
 			int parent_width = mListView.getWidth();
 			int albums_count = cursor.getCount();
-			int columns_count = (int) Math.floor(parent_width / item_width);
+			int columns_count = (int) (Math.floor(parent_width / item_width) > 0 ? Math
+					.floor(parent_width / item_width) : 1);
 			int gridview_rows = (int) Math.ceil((float) albums_count / columns_count);
 
 			int default_padding = getResources().getDimensionPixelOffset(

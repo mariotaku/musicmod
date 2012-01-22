@@ -235,8 +235,7 @@ public class DeleteDialog extends Activity implements Constants, OnMultiChoiceCl
 	public void confirmDelete(String desc, final long[] list) {
 
 		mDeleteConfirm = new AlertDialog.Builder(this).setIcon(android.R.drawable.ic_dialog_alert)
-				.setTitle(R.string.delete_lyrics)
-				.setMessage(getString(R.string.delete_confirm, desc))
+				.setTitle(R.string.delete).setMessage(getString(R.string.delete_confirm, desc))
 				.setPositiveButton(android.R.string.ok, this)
 				.setNegativeButton(android.R.string.cancel, this).setOnCancelListener(this).show();
 		restore_confirm = true;

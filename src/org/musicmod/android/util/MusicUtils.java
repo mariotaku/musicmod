@@ -95,7 +95,7 @@ public class MusicUtils implements Constants {
 			sFormatBuilder.setLength(0);
 			sFormatter.format(f, Integer.valueOf(numalbums));
 			songs_albums.append(sFormatBuilder);
-			songs_albums.append(context.getString(R.string.albumsongseparator));
+			songs_albums.append("\n");
 		}
 		return songs_albums.toString();
 	}
@@ -121,7 +121,7 @@ public class MusicUtils implements Constants {
 			sFormatBuilder.setLength(0);
 			sFormatter.format(f, Integer.valueOf(numalbums));
 			songs_albums.append(sFormatBuilder);
-			songs_albums.append(context.getString(R.string.albumsongseparator));
+			songs_albums.append("\n");
 		}
 		String f = r.getQuantityText(R.plurals.Nsongs, numsongs).toString();
 		sFormatBuilder.setLength(0);

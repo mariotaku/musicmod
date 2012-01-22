@@ -105,7 +105,7 @@ public class SearchDialog extends Activity implements Constants, TextWatcher, On
 
 			mKeywordSummary1 = new TextView(this);
 			mKeywordSummary1.setTextAppearance(this, android.R.attr.textAppearanceSmall);
-			mKeywordSummary1.setText(R.string.search_artist);
+			mKeywordSummary1.setText(R.string.artist);
 			mContainer.addView(mKeywordSummary1);
 
 			mKeyword1 = icicle != null ? icicle.getString(INTENT_KEY_ARTIST) : getIntent()
@@ -121,11 +121,11 @@ public class SearchDialog extends Activity implements Constants, TextWatcher, On
 			if (INTENT_SEARCH_ALBUMART.equals(action)) {
 				mKeyword2 = icicle != null ? icicle.getString(INTENT_KEY_ALBUM) : getIntent()
 						.getStringExtra(INTENT_KEY_ALBUM);
-				mKeywordSummary2.setText(R.string.search_album);
+				mKeywordSummary2.setText(R.string.album);
 			} else if (INTENT_SEARCH_LYRICS.equals(action)) {
 				mKeyword2 = icicle != null ? icicle.getString(INTENT_KEY_TRACK) : getIntent()
 						.getStringExtra(INTENT_KEY_TRACK);
-				mKeywordSummary2.setText(R.string.search_track);
+				mKeywordSummary2.setText(R.string.track);
 			}
 			mContainer.addView(mKeywordSummary2);
 
@@ -349,13 +349,10 @@ public class SearchDialog extends Activity implements Constants, TextWatcher, On
 			try {
 				return mDownloader.search(params[0], params[1]);
 			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (XmlPullParserException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			return null;

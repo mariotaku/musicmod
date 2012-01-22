@@ -122,6 +122,7 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 
 	// for lyrics displaying
 	private TextScrollView mLyricsScrollView;
+	private TextView mLyricsInfoMessage;
 
 	private LinearLayout mLyricsView, mInfoView, mVolumeSlider;
 
@@ -135,7 +136,6 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 
 		super.onCreate(icicle);
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		mGestureDetector = new GestureDetector(getApplicationContext(), mVolumeSlideListener);
 		mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 		mPrefs = new PreferencesEditor(this);
@@ -193,6 +193,9 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 
 		mLyricsScrollView = (TextScrollView) findViewById(R.id.lyrics_scroll);
 		mLyricsScrollView.setContentGravity(Gravity.CENTER_HORIZONTAL);
+
+		mLyricsInfoMessage = (TextView) findViewById(R.id.message);
+		mLyricsInfoMessage.setOnLongClickListener(mSearchLyricsListener);
 
 		mInfoView = (LinearLayout) findViewById(R.id.info_view);
 
@@ -421,7 +424,7 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 			bundle.putLong(MediaStore.Audio.Playlists._ID, PLAYLIST_QUEUE);
 			Intent intent = new Intent(getApplicationContext(), TrackBrowserActivity.class);
 			intent.putExtras(bundle);
-			
+
 			startActivity(intent);
 		}
 	};
@@ -614,7 +617,7 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 
-		getMenuInflater().inflate(R.menu.now_playing, menu);
+		getMenuInflater().inflate(R.menu.music_playback, menu);
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -915,7 +918,13 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 	private void loadLyricsToView() {
 
 		try {
+
 			mLyricsScrollView.setTextContent(mService.getLyrics(), this);
+
+			if (mService.getLyricsStatus() == LYRICS_STATUS_OK) {
+			} else {
+			}
+
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}

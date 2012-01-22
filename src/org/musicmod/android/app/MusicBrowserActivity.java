@@ -25,26 +25,38 @@ import org.musicmod.android.util.MusicUtils;
 import org.musicmod.android.util.ServiceToken;
 import org.musicmod.android.util.PreferencesEditor;
 
+import com.viewpagerindicator.TabPageIndicator;
+import com.viewpagerindicator.TitlePageIndicator;
+import com.viewpagerindicator.TitleProvider;
+
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.graphics.Bitmap;
 import android.media.AudioManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.provider.MediaStore;
 import android.support.v4.app.ActionBar;
-import android.support.v4.app.ActionBar.Tab;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.Menu;
 import android.support.v4.view.MenuItem;
 import android.support.v4.view.ViewPager;
+import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.view.animation.AnimationUtils;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 public class MusicBrowserActivity extends FragmentActivity implements Constants, ServiceConnection {
 
@@ -53,10 +65,13 @@ public class MusicBrowserActivity extends FragmentActivity implements Constants,
 	private ServiceToken mToken;
 	private IMusicPlaybackService mService;
 	private PreferencesEditor mPrefs;
+	private ImageView mAlbumArt;
+	private TextView mTrackName, mTrackDetail;
+	private ImageButton mPlayPauseButton, mNextButton;
+	private ActionBar mActionBar;
+	private AsyncAlbumArtLoader mAlbumArtLoader;
+	private TitlePageIndicator mIndicator;
 
-	/**
-	 * Called when the activity is first created.
-	 */
 	@Override
 	public void onCreate(Bundle icicle) {
 
@@ -64,28 +79,55 @@ public class MusicBrowserActivity extends FragmentActivity implements Constants,
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 		setContentView(R.layout.music_browser);
 
+		mActionBar = getSupportActionBar();
+
 		mPrefs = new PreferencesEditor(getApplicationContext());
 
-		getSupportActionBar().setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
+		configureActivity();
+		configureTabs();
 
-		Tab mArtistsTab = getSupportActionBar().newTab().setText(
-				getString(R.string.artists).toUpperCase());
-		Tab mAlbumsTab = getSupportActionBar().newTab().setText(
-				getString(R.string.albums).toUpperCase());
-		Tab mTracksTab = getSupportActionBar().newTab().setText(
-				getString(R.string.tracks).toUpperCase());
-		Tab mPlaylistsTab = getSupportActionBar().newTab().setText(
-				getString(R.string.playlists).toUpperCase());
+	}
 
+	private void configureActivity() {
+
+		View mCustomView = mActionBar.getCustomView();
+
+		mCustomView.setOnClickListener(mActionBarClickListener);
+
+		mAlbumArt = (ImageView) mCustomView.findViewById(R.id.album_art);
+		mTrackName = (TextView) mCustomView.findViewById(R.id.track_name);
+		mTrackDetail = (TextView) mCustomView.findViewById(R.id.track_detail);
+		mPlayPauseButton = (ImageButton) mCustomView.findViewById(R.id.play_pause);
+		mPlayPauseButton.setOnClickListener(mPlayPauseClickListener);
+		mNextButton = (ImageButton) mCustomView.findViewById(R.id.next);
+		mNextButton.setOnClickListener(mNextClickListener);
+
+		mTabsAdapter = new TabsAdapter(getSupportFragmentManager());
 		mViewPager = (ViewPager) findViewById(R.id.pager);
 
-		mTabsAdapter = new TabsAdapter(this, getSupportActionBar(), mViewPager);
+		mIndicator = (TitlePageIndicator) mCustomView.findViewById(R.id.indicator);
+		if (mIndicator == null) {
+			mIndicator = (TitlePageIndicator) findViewById(R.id.indicator);
+		}
 
-		mTabsAdapter.addTab(mArtistsTab, ArtistBrowserFragment.class);
-		mTabsAdapter.addTab(mAlbumsTab, AlbumBrowserFragment.class);
-		mTabsAdapter.addTab(mTracksTab, TrackBrowserFragment.class);
-		mTabsAdapter.addTab(mPlaylistsTab, PlaylistsTabFragment.class);
+	}
 
+	private void configureTabs() {
+
+		mTabsAdapter.addFragment(new ArtistBrowserFragment(), getString(R.string.artists)
+				.toUpperCase());
+		mTabsAdapter.addFragment(new AlbumBrowserFragment(), getString(R.string.albums)
+				.toUpperCase());
+		mTabsAdapter.addFragment(new TrackBrowserFragment(), getString(R.string.tracks)
+				.toUpperCase());
+		mTabsAdapter.addFragment(new PlaylistsTabFragment(), getString(R.string.playlists)
+				.toUpperCase());
+
+		mViewPager.setAdapter(mTabsAdapter);
+		mIndicator.setViewPager(mViewPager);
+		int currenttab = mPrefs.getIntState(STATE_KEY_CURRENTTAB, 0);
+		mIndicator.setCurrentItem(currenttab);
+		mIndicator.setOnPageChangeListener(mOnPageChangeListener);
 	}
 
 	@Override
@@ -95,16 +137,14 @@ public class MusicBrowserActivity extends FragmentActivity implements Constants,
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(BROADCAST_META_CHANGED);
 		filter.addAction(BROADCAST_QUEUE_CHANGED);
+		filter.addAction(BROADCAST_PLAYSTATE_CHANGED);
 		registerReceiver(mMediaStatusReceiver, filter);
 
-		int currenttab = mPrefs.getIntState(STATE_KEY_CURRENTTAB, 0);
-		mViewPager.setCurrentItem(currenttab);
 	}
 
 	@Override
 	public void onStop() {
 
-		mPrefs.setIntState(STATE_KEY_CURRENTTAB, mViewPager.getCurrentItem());
 		unregisterReceiver(mMediaStatusReceiver);
 		MusicUtils.unbindFromService(mToken);
 		mService = null;
@@ -115,7 +155,6 @@ public class MusicBrowserActivity extends FragmentActivity implements Constants,
 	public boolean onCreateOptionsMenu(Menu menu) {
 
 		getMenuInflater().inflate(R.menu.music_browser, menu);
-		menu.findItem(GOTO_PLAYBACK).setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
 		return super.onCreateOptionsMenu(menu);
 	}
 
@@ -145,7 +184,13 @@ public class MusicBrowserActivity extends FragmentActivity implements Constants,
 
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			updateTitleBar();
+			if (BROADCAST_META_CHANGED.equals(intent.getAction())
+					|| BROADCAST_META_CHANGED.equals(intent.getAction())) {
+				updateNowplaying();
+			} else if (BROADCAST_PLAYSTATE_CHANGED.equals(intent.getAction())) {
+				updatePlayPauseButton();
+			}
+
 		}
 
 	};
@@ -153,7 +198,7 @@ public class MusicBrowserActivity extends FragmentActivity implements Constants,
 	@Override
 	public void onServiceConnected(ComponentName name, IBinder service) {
 		mService = IMusicPlaybackService.Stub.asInterface(service);
-		updateTitleBar();
+		updateNowplaying();
 	}
 
 	@Override
@@ -162,86 +207,200 @@ public class MusicBrowserActivity extends FragmentActivity implements Constants,
 		finish();
 	}
 
-	private void updateTitleBar() {
+	private void updateNowplaying() {
 		if (mService == null) return;
 		try {
 			if (mService.getAudioId() > -1 || mService.getPath() != null) {
-				getSupportActionBar().setTitle(mService.getTrackName());
+				mPlayPauseButton.setVisibility(View.VISIBLE);
+				mNextButton.setVisibility(View.VISIBLE);
+				mTrackName.setText(mService.getTrackName());
 				if (mService.getArtistName() != null
 						&& !MediaStore.UNKNOWN_STRING.equals(mService.getArtistName())) {
-					getSupportActionBar().setSubtitle(mService.getArtistName());
+					mTrackDetail.setText(mService.getArtistName());
 				} else if (mService.getAlbumName() != null
 						&& !MediaStore.UNKNOWN_STRING.equals(mService.getAlbumName())) {
-					getSupportActionBar().setSubtitle(mService.getAlbumName());
+					mTrackDetail.setText(mService.getAlbumName());
 				} else {
-					getSupportActionBar().setSubtitle(null);
+					mTrackDetail.setText(R.string.unknown_artist);
 				}
 			} else {
-				getSupportActionBar().setTitle(R.string.music_library);
-				getSupportActionBar().setSubtitle(null);
+				mPlayPauseButton.setVisibility(View.GONE);
+				mNextButton.setVisibility(View.GONE);
+				mTrackName.setText(R.string.music_library);
+				mTrackDetail.setText(R.string.touch_to_shuffle_all);
+			}
+			if (mAlbumArtLoader != null) mAlbumArtLoader.cancel(true);
+			mAlbumArtLoader = new AsyncAlbumArtLoader(mAlbumArt, true);
+			mAlbumArtLoader.execute();
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void updatePlayPauseButton() {
+		if (mService == null) return;
+		try {
+			if (mService.isPlaying()) {
+				mPlayPauseButton.setImageResource(R.drawable.ic_action_media_pause);
+			} else {
+				mPlayPauseButton.setImageResource(R.drawable.ic_action_media_play);
 			}
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
 	}
 
-	private class TabsAdapter extends FragmentPagerAdapter implements
-			ViewPager.OnPageChangeListener, ActionBar.TabListener {
+	private OnClickListener mActionBarClickListener = new OnClickListener() {
 
-		private final Context mContext;
-		private final ActionBar mActionBar;
-		private final ViewPager mViewPager;
-		private final ArrayList<String> mTabs = new ArrayList<String>();
+		@Override
+		public void onClick(View v) {
+			if (mService == null) return;
+			try {
+				if (mService.getAudioId() > -1 || mService.getPath() != null) {
+					Intent intent = new Intent(INTENT_PLAYBACK_VIEWER);
+					intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+					startActivity(intent);
+				} else {
+					MusicUtils.shuffleAll(getApplicationContext());
+				}
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
 
-		public TabsAdapter(FragmentActivity activity, ActionBar actionBar, ViewPager pager) {
-			super(activity.getSupportFragmentManager());
-			mContext = activity;
-			mActionBar = actionBar;
-			mViewPager = pager;
-			mViewPager.setAdapter(this);
-			mViewPager.setOnPageChangeListener(this);
+		}
+	};
+
+	private OnClickListener mPlayPauseClickListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			if (mService == null) return;
+			try {
+				if (mService.isPlaying()) {
+					mService.pause();
+				} else {
+					mService.play();
+				}
+
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
+
+		}
+	};
+
+	private OnClickListener mNextClickListener = new OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+			if (mService == null) return;
+			try {
+				mService.next();
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
+
+		}
+	};
+
+	private OnPageChangeListener mOnPageChangeListener = new OnPageChangeListener() {
+
+		@Override
+		public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
 		}
 
-		public void addTab(ActionBar.Tab tab, Class<?> clss) {
-			mTabs.add(clss.getName());
-			mActionBar.addTab(tab.setTabListener(this));
+		@Override
+		public void onPageSelected(int position) {
+
+			mPrefs.setIntState(STATE_KEY_CURRENTTAB, position);
+		}
+
+		@Override
+		public void onPageScrollStateChanged(int state) {
+
+		}
+	};
+
+	private class TabsAdapter extends FragmentPagerAdapter implements TitleProvider {
+
+		private final ArrayList<Fragment> mFragments = new ArrayList<Fragment>();
+		private final ArrayList<String> mTitles = new ArrayList<String>();
+
+		public TabsAdapter(FragmentManager manager) {
+			super(manager);
+		}
+
+		public void addFragment(Fragment fragment, String name) {
+			mFragments.add(fragment);
+			mTitles.add(name);
 			notifyDataSetChanged();
 		}
 
 		@Override
 		public int getCount() {
-			return mTabs.size();
+			return mFragments.size();
 		}
 
 		@Override
 		public Fragment getItem(int position) {
-			return Fragment.instantiate(mContext, mTabs.get(position), null);
+			return mFragments.get(position);
 		}
 
 		@Override
-		public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+		public String getTitle(int position) {
+			return mTitles.get(position);
+		}
+
+	}
+
+	private class AsyncAlbumArtLoader extends AsyncTask<Void, Void, Bitmap> {
+
+		boolean enable_animation = false;
+		private ImageView mImageView;
+
+		public AsyncAlbumArtLoader(ImageView iv, boolean animation) {
+
+			mImageView = iv;
+			enable_animation = animation;
 		}
 
 		@Override
-		public void onPageSelected(int position) {
-			mActionBar.setSelectedNavigationItem(position);
+		protected void onPreExecute() {
+
+			if (enable_animation) {
+				mImageView.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(),
+						android.R.anim.fade_out));
+				mImageView.setVisibility(View.INVISIBLE);
+			}
 		}
 
 		@Override
-		public void onPageScrollStateChanged(int state) {
+		protected Bitmap doInBackground(Void... params) {
+
+			if (mService != null) {
+				try {
+					return mService.getAlbumArt();
+				} catch (RemoteException e) {
+					e.printStackTrace();
+				}
+			}
+			return null;
 		}
 
 		@Override
-		public void onTabSelected(Tab tab, FragmentTransaction ft) {
-			mViewPager.setCurrentItem(tab.getPosition());
-		}
+		protected void onPostExecute(Bitmap result) {
 
-		@Override
-		public void onTabReselected(Tab tab, FragmentTransaction ft) {
-		}
-
-		@Override
-		public void onTabUnselected(Tab tab, FragmentTransaction ft) {
+			if (result != null) {
+				mImageView.setImageBitmap(result);
+			} else {
+				mImageView.setImageResource(R.drawable.ic_mp_albumart_unknown);
+			}
+			if (enable_animation) {
+				mImageView.setVisibility(View.VISIBLE);
+				mImageView.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(),
+						android.R.anim.fade_in));
+			}
 		}
 	}
 }

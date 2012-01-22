@@ -18,7 +18,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 	android:installLocation="auto"
 	package="org.musicmod.android"
-	android:versionCode="25"
+	android:versionCode="24"
 	android:versionName="@string/app_version">
 
 	<original-package android:name="com.android.music"/>
@@ -48,7 +48,8 @@
 
 		<activity
 			android:name=".app.MusicBrowserActivity"
-			android:label="@string/music_library">
+			android:label="@string/music_library"
+			android:theme="@style/Theme.MusicBrowser">
 			<intent-filter>
 				<action android:name="android.intent.action.MAIN"/>
 				<action android:name="org.musicmod.android.MUSIC_BROWSER"/>
@@ -60,6 +61,7 @@
 		<activity
 			android:name=".app.MusicPlaybackActivity"
 			android:clearTaskOnLaunch="true"
+			android:icon="@drawable/ic_launcher_music"
 			android:label="@string/now_playing"
 			android:theme="@style/Theme.MusicPlayback">
 			<intent-filter>
@@ -68,7 +70,10 @@
 				<category android:name="android.intent.category.DEFAULT"/>
 			</intent-filter>
 		</activity>
-		<activity android:name=".app.TrackBrowserActivity">
+		<activity
+			android:name=".app.TrackBrowserActivity"
+			android:label="@string/tracks"
+			android:theme="@style/Theme.MusicBrowser">
 			<intent-filter>
 				<action android:name="android.intent.action.EDIT"/>
 				<action android:name="android.intent.action.VIEW"/>

@@ -199,7 +199,7 @@ public class TrackBrowserFragment extends ListFragment implements LoaderCallback
 				&& Playlists.CONTENT_TYPE.equals(getArguments().getString(INTENT_KEY_MIMETYPE))
 				&& getArguments().getLong(Playlists._ID) != PLAYLIST_QUEUE
 				&& getArguments().getLong(Playlists._ID) != PLAYLIST_PODCASTS
-				&& getArguments().getLong(Playlists._ID) != PLAYLIST_RECENTLY_ADDED){
+				&& getArguments().getLong(Playlists._ID) != PLAYLIST_RECENTLY_ADDED) {
 			mIdIdx = data.getColumnIndexOrThrow(Playlists.Members.AUDIO_ID);
 			mTrackIdx = data.getColumnIndexOrThrow(Playlists.Members.TITLE);
 			mAlbumIdx = data.getColumnIndexOrThrow(Playlists.Members.ALBUM);
@@ -231,7 +231,7 @@ public class TrackBrowserFragment extends ListFragment implements LoaderCallback
 		// dropping out of party shuffle.
 		long[] list_for_cursor = MusicUtils.getSongListForCursor(mCursor);
 		long[] queue = MusicUtils.getQueue();
-		
+
 		if (Arrays.equals(list_for_cursor, queue)) {
 			MusicUtils.setQueuePosition(position);
 			return;
@@ -274,7 +274,7 @@ public class TrackBrowserFragment extends ListFragment implements LoaderCallback
 				int position = mSelectedPosition;
 				long[] list_for_cursor = MusicUtils.getSongListForCursor(mCursor);
 				long[] queue = MusicUtils.getQueue();
-				
+
 				if (Arrays.equals(list_for_cursor, queue)) {
 					MusicUtils.setQueuePosition(position);
 					return true;
