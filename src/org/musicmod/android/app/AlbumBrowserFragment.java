@@ -9,11 +9,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -239,8 +236,6 @@ public class AlbumBrowserFragment extends Fragment implements Constants, OnItemC
 
 	private class AlbumsAdapter extends CursorAdapter {
 
-		private final BitmapDrawable mDefaultAlbumIcon;
-
 		private class ViewHolder {
 
 			TextView album_name;
@@ -259,14 +254,6 @@ public class AlbumBrowserFragment extends Fragment implements Constants, OnItemC
 
 			super(context, cursor, autoRequery);
 
-			Resources r = context.getResources();
-
-			Bitmap b = BitmapFactory.decodeResource(r, R.drawable.ic_mp_albumart_unknown);
-			mDefaultAlbumIcon = new BitmapDrawable(context.getResources(), b);
-			// no filter or dither, it's a lot faster and we can't tell the
-			// difference
-			mDefaultAlbumIcon.setFilterBitmap(false);
-			mDefaultAlbumIcon.setDither(false);
 		}
 
 		@Override
@@ -291,7 +278,7 @@ public class AlbumBrowserFragment extends Fragment implements Constants, OnItemC
 			}
 
 			String artist_name = cursor.getString(mArtistIdx);
-			if (album_name == null || MediaStore.UNKNOWN_STRING.equals(album_name)) {
+			if (artist_name == null || MediaStore.UNKNOWN_STRING.equals(artist_name)) {
 				viewholder.artist_name.setText(R.string.unknown_artist);
 			} else {
 				viewholder.artist_name.setText(artist_name);
@@ -303,13 +290,12 @@ public class AlbumBrowserFragment extends Fragment implements Constants, OnItemC
 			int width = getResources().getDimensionPixelSize(R.dimen.gridview_bitmap_width);
 			int height = getResources().getDimensionPixelSize(R.dimen.gridview_bitmap_height);
 
-			viewholder.album_art.setImageBitmap(MusicUtils.getCachedArtwork(getActivity(), aid,
-					width, height));
-
-			// viewholder.album_art.setTag(aid);
-			// new AsyncAlbumArtLoader(viewholder.album_art,
-			// mShowFadeAnimation,
-			// aid, width, height).execute();
+			Bitmap bitmap = MusicUtils.getCachedArtwork(getActivity(), aid, width, height);
+			if (bitmap == null) {
+				viewholder.album_art.setImageResource(R.drawable.ic_mp_albumart_unknown);
+			} else {
+				viewholder.album_art.setImageBitmap(bitmap);
+			}
 
 			long currentalbumid = MusicUtils.getCurrentAlbumId();
 			if (currentalbumid == aid) {

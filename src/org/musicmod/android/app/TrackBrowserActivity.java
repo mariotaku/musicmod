@@ -90,6 +90,7 @@ public class TrackBrowserActivity extends FragmentActivity implements
 		switch (item.getItemId()) {
 			case android.R.id.home:
 				finish();
+				break;
 		}
 		return super.onOptionsItemSelected(item);
 	}
@@ -112,11 +113,14 @@ public class TrackBrowserActivity extends FragmentActivity implements
 		if (Audio.Playlists.CONTENT_TYPE.equals(mimeType)) {
 			id = bundle.getLong(Audio.Playlists._ID);
 			switch ((int) id) {
-				case (int) PLAYLIST_RECENTLY_ADDED:
-					getSupportActionBar().setTitle(R.string.recently_added);
+				case (int) PLAYLIST_QUEUE:
+					getSupportActionBar().setTitle(R.string.now_playing);
 					return;
 				case (int) PLAYLIST_FAVORITES:
 					getSupportActionBar().setTitle(R.string.favorites);
+					return;
+				case (int) PLAYLIST_RECENTLY_ADDED:
+					getSupportActionBar().setTitle(R.string.recently_added);
 					return;
 				case (int) PLAYLIST_PODCASTS:
 					getSupportActionBar().setTitle(R.string.podcasts);

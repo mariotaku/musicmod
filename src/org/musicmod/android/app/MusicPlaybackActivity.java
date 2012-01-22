@@ -65,7 +65,6 @@ import android.provider.Settings.SettingNotFoundException;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.view.Menu;
 import android.support.v4.view.MenuItem;
-import android.text.TextUtils.TruncateAt;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
@@ -136,6 +135,7 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 
 		super.onCreate(icicle);
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
+		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 		mGestureDetector = new GestureDetector(getApplicationContext(), mVolumeSlideListener);
 		mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 		mPrefs = new PreferencesEditor(this);
@@ -329,25 +329,6 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 		}
 	};
 
-	Handler mLabelScroller = new Handler() {
-
-		@Override
-		public void handleMessage(Message msg) {
-
-			TextView tv = (TextView) msg.obj;
-			int x = tv.getScrollX();
-			x = x * 3 / 4;
-			tv.scrollTo(x, 0);
-			if (x == 0) {
-				tv.setEllipsize(TruncateAt.END);
-				tv.setHorizontalFadingEdgeEnabled(false);
-			} else {
-				Message newmsg = obtainMessage(0, tv);
-				mLabelScroller.sendMessageDelayed(newmsg, 15);
-			}
-		}
-	};
-
 	@Override
 	public boolean onLongClick(View v) {
 
@@ -435,9 +416,13 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 		@Override
 		public void onClick(View v) {
 
-			startActivity(new Intent(Intent.ACTION_EDIT)
-					.setDataAndType(Uri.EMPTY, "vnd.android.cursor.dir/track")
-					.setPackage("org.musicmod.android").putExtra("playlist", "nowplaying"));
+			Bundle bundle = new Bundle();
+			bundle.putString(INTENT_KEY_MIMETYPE, MediaStore.Audio.Playlists.CONTENT_TYPE);
+			bundle.putLong(MediaStore.Audio.Playlists._ID, PLAYLIST_QUEUE);
+			Intent intent = new Intent(getApplicationContext(), TrackBrowserActivity.class);
+			intent.putExtras(bundle);
+			
+			startActivity(intent);
 		}
 	};
 
@@ -651,12 +636,6 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 
 		Intent intent;
 		switch (item.getItemId()) {
-			case GOTO_START:
-				intent = new Intent(INTENT_MUSIC_BROWSER);
-				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-				startActivity(intent);
-				finish();
-				break;
 			case PARTY_SHUFFLE:
 				MusicUtils.togglePartyShuffle();
 				setShuffleButtonImage();
@@ -686,6 +665,12 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 			case SETTINGS:
 				intent = new Intent(INTENT_APPEARANCE_SETTINGS);
 				startActivity(intent);
+				break;
+			case GOTO_HOME:
+				intent = new Intent(INTENT_MUSIC_BROWSER);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+				startActivity(intent);
+				finish();
 				break;
 		}
 

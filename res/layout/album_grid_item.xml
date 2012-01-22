@@ -23,7 +23,8 @@
 		android:id="@+id/album_art"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		android:scaleType="centerInside"
+		android:layout_gravity="center"
+		android:adjustViewBounds="true"
 		android:src="@drawable/ic_mp_albumart_unknown"/>
 
 	<LinearLayout

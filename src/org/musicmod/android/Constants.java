@@ -249,7 +249,7 @@ public interface Constants {
 	public final static int NEW_PLAYLIST = R.id.new_playlist;
 	public final static int PLAY_SELECTION = R.id.play_selection;
 	public final static int GOTO_PLAYBACK = R.id.goto_playback;
-	public final static int GOTO_START = R.id.goto_start;
+	public final static int GOTO_HOME = android.R.id.home;
 	public final static int PARTY_SHUFFLE = R.id.party_shuffle;
 	public final static int SHUFFLE_ALL = R.id.shuffle_all;
 	public final static int PLAY_ALL = R.id.play_all;

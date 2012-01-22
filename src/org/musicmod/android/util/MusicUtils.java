@@ -1162,11 +1162,21 @@ public class MusicUtils implements Constants {
 		}
 	}
 
+	public static long[] getQueue() {
+		try {
+			return sService.getQueue();
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+		return new long[] {};
+	}
+
 	public static void clearQueue() {
 
 		try {
 			sService.removeTracks(0, Integer.MAX_VALUE);
-		} catch (RemoteException ex) {
+		} catch (RemoteException e) {
+			e.printStackTrace();
 		}
 	}
 

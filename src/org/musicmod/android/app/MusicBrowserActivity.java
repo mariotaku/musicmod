@@ -81,7 +81,7 @@ public class MusicBrowserActivity extends FragmentActivity implements Constants,
 
 		mTabsAdapter = new TabsAdapter(this, getSupportActionBar(), mViewPager);
 
-		mTabsAdapter.addTab(mArtistsTab, ArtistsTabFragment.class);
+		mTabsAdapter.addTab(mArtistsTab, ArtistBrowserFragment.class);
 		mTabsAdapter.addTab(mAlbumsTab, AlbumBrowserFragment.class);
 		mTabsAdapter.addTab(mTracksTab, TrackBrowserFragment.class);
 		mTabsAdapter.addTab(mPlaylistsTab, PlaylistsTabFragment.class);
