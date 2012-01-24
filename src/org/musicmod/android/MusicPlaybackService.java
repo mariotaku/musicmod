@@ -1320,6 +1320,18 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 		}
 	}
 
+	public void addToFavorites(long id) {
+		MusicUtils.addToFavorites(this, id);
+	}
+	
+	public void removeFromFavorites(long id) {
+		MusicUtils.removeFromFavorites(this, id);
+	}
+	
+	public boolean isFavorite(long id) {
+		return MusicUtils.isFavorite(this, id);
+	}
+	
 	/**
 	 * Returns the current play list
 	 * 
@@ -2680,6 +2692,18 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 		public void reloadSettings() {
 
 			mService.get().reloadSettings();
+		}
+		
+		public void addToFavorites(long id) {
+			mService.get().addToFavorites(id);
+		}
+		
+		public void removeFromFavorites(long id) {
+			mService.get().removeFromFavorites(id);
+		}
+		
+		public boolean isFavorite(long id) {
+			return mService.get().isFavorite(id);
 		}
 	}
 

@@ -20,15 +20,16 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v4.view.MenuItem;
 import android.support.v4.widget.CursorAdapter;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnCreateContextMenuListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.CursorTreeAdapter;
 import android.widget.ExpandableListView;
@@ -132,7 +133,9 @@ public class ArtistBrowserFragment extends Fragment implements
 		ExpandableListContextMenuInfo mi = (ExpandableListContextMenuInfo) info;
 
 		int itemtype = ExpandableListView.getPackedPositionType(mi.packedPosition);
-		int gpos = ExpandableListView.getPackedPositionGroup(mi.packedPosition);
+		mSelectedGroupPosition = ExpandableListView.getPackedPositionGroup(mi.packedPosition);
+		int gpos = mSelectedGroupPosition;
+		mSelectedGroupId = mGroupCursor.getLong(mGroupArtistIdIdx);
 		if (itemtype == ExpandableListView.PACKED_POSITION_TYPE_GROUP) {
 			mGroupSelected = true;
 			mChildSelected = false;
@@ -144,7 +147,6 @@ public class ArtistBrowserFragment extends Fragment implements
 			}
 			gpos = gpos - mListView.getHeaderViewsCount();
 			mGroupCursor.moveToPosition(gpos);
-			mSelectedGroupId = mGroupCursor.getLong(mGroupArtistIdIdx);
 			mCurrentGroupArtistName = mGroupCursor.getString(mGroupArtistIdx);
 			if (mCurrentGroupArtistName == null
 					|| MediaStore.UNKNOWN_STRING.equals(mCurrentGroupArtistName)) {
@@ -154,9 +156,6 @@ public class ArtistBrowserFragment extends Fragment implements
 			} else {
 				menu.setHeaderTitle(mCurrentGroupArtistName);
 			}
-			return;
-		} else {
-			return;
 		}
 	}
 
@@ -225,7 +224,7 @@ public class ArtistBrowserFragment extends Fragment implements
 
 			TrackBrowserFragment fragment = new TrackBrowserFragment();
 			Bundle args = new Bundle();
-			args.putString(INTENT_KEY_MIMETYPE, MediaStore.Audio.Artists.CONTENT_TYPE);
+			args.putString(INTENT_KEY_TYPE, MediaStore.Audio.Artists.CONTENT_TYPE);
 			args.putLong(Audio.Artists._ID, id);
 
 			fragment.setArguments(args);
@@ -387,24 +386,36 @@ public class ArtistBrowserFragment extends Fragment implements
 
 			// TODO create context menu
 			getActivity().getMenuInflater().inflate(R.menu.music_browser_item, menu);
-			// if (mCursor == null) return;
-			//
-			// getActivity().getMenuInflater().inflate(R.menu.music_browser_item,
-			// menu);
-			//
-			// AdapterContextMenuInfo adapterinfo = (AdapterContextMenuInfo)
-			// info;
-			// mSelectedChildPosition = adapterinfo.position;
-			// mCursor.moveToPosition(mSelectedChildPosition);
-			// try {
-			// mSelectedChildId = mCursor.getLong(mIdIdx);
-			// } catch (IllegalArgumentException ex) {
-			// mSelectedChildId = adapterinfo.id;
+
+			AdapterContextMenuInfo mi = (AdapterContextMenuInfo) info;
+			int cpos = mi.position;
+			int gpos = mSelectedGroupPosition;
+
+			Cursor c = (Cursor) mArtistsAdapter.getChild(gpos, cpos);
+			// c.moveToPosition(cpos);
+			// mSelectedChildId = mi.id;
+			// mCurrentChildAlbumName = c.getString(c
+			// .getColumnIndexOrThrow(Audio.Albums.ALBUM));
+			// gpos = gpos - mListView.getHeaderViewsCount();
+			// mGroupCursor.moveToPosition(gpos);
+			// mCurrentChildArtistNameForAlbum =
+			// mGroupCursor.getString(mGroupCursor
+			// .getColumnIndexOrThrow(Audio.Artists.ARTIST));
+			// boolean mIsUnknownArtist = mCurrentChildArtistNameForAlbum ==
+			// null
+			// || mCurrentChildArtistNameForAlbum
+			// .equals(MediaStore.UNKNOWN_STRING);
+			// boolean mIsUnknownAlbum = mCurrentChildAlbumName == null
+			// || mCurrentChildAlbumName.equals(MediaStore.UNKNOWN_STRING);
+			// if (mIsUnknownAlbum) {
+			// menu.setHeaderTitle(getString(R.string.unknown_album));
+			// } else {
+			// menu.setHeaderTitle(mCurrentChildAlbumName);
 			// }
-			//
-			// mCurrentArtistName = mCursor.getString(mArtistIdx);
-			//
-			// menu.setHeaderTitle(mCurrentArtistName);
+			// if (mIsUnknownAlbum && mIsUnknownArtist) {
+			// menu.findItem(SEARCH).setVisible(false);
+			// menu.findItem(SEARCH).setEnabled(false);
+			// }
 
 		}
 
@@ -415,7 +426,7 @@ public class ArtistBrowserFragment extends Fragment implements
 					&& detailsFrame.getVisibility() == View.VISIBLE;
 
 			Bundle bundle = new Bundle();
-			bundle.putString(INTENT_KEY_MIMETYPE, MediaStore.Audio.Albums.CONTENT_TYPE);
+			bundle.putString(INTENT_KEY_TYPE, MediaStore.Audio.Albums.CONTENT_TYPE);
 			bundle.putLong(MediaStore.Audio.Albums._ID, id);
 
 			if (mDualPane) {
@@ -522,8 +533,8 @@ public class ArtistBrowserFragment extends Fragment implements
 
 			long currentalbumid = MusicUtils.getCurrentAlbumId();
 			if (currentalbumid == aid) {
-				viewholder.album_name.setCompoundDrawablesWithIntrinsicBounds(
-						R.drawable.ic_indicator_nowplaying_small, 0, 0, 0);
+				viewholder.album_name.setCompoundDrawablesWithIntrinsicBounds(0, 0,
+						R.drawable.ic_indicator_nowplaying_small, 0);
 			} else {
 				viewholder.album_name.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
 			}

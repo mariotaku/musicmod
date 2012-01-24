@@ -3,17 +3,18 @@ package org.musicmod.android.app;
 import java.util.Arrays;
 
 import org.musicmod.android.Constants;
-import org.musicmod.android.IMusicPlaybackService;
 import org.musicmod.android.R;
 import org.musicmod.android.util.MusicUtils;
 import org.musicmod.android.util.PreferencesEditor;
+import org.musicmod.android.widget.TouchInterceptor;
+import org.musicmod.android.widget.TouchInterceptor.OnDropListener;
+import org.musicmod.android.widget.TouchInterceptor.OnRemoveListener;
 
 import android.app.SearchManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.AbstractCursor;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -25,11 +26,11 @@ import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v4.view.MenuItem;
 import android.support.v4.widget.CursorAdapter;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView.AdapterContextMenuInfo;
@@ -45,6 +46,20 @@ public class TrackBrowserFragment extends ListFragment implements LoaderCallback
 	private long mSelectedId;
 	private String mCurrentTrackName, mCurrentAlbumName, mCurrentArtistNameForAlbum;
 	private int mIdIdx, mTrackIdx, mAlbumIdx, mArtistIdx, mDurationIdx;
+	private boolean mEditMode = false;
+	private boolean mDeletedOneRow = false;
+	private ListView mListView;
+	long[] list_for_cursor = new long[] {};
+	long[] queue = new long[] {};
+	long playlist_id = -1;
+
+	public TrackBrowserFragment() {
+
+	}
+
+	public TrackBrowserFragment(Bundle arguments) {
+		setArguments(arguments);
+	}
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
@@ -57,7 +72,9 @@ public class TrackBrowserFragment extends ListFragment implements LoaderCallback
 
 		setListAdapter(mAdapter);
 
-		getListView().setOnCreateContextMenuListener(this);
+		mListView = getListView();
+
+		mListView.setOnCreateContextMenuListener(this);
 
 		// Prepare the loader. Either re-connect with an existing one,
 		// or start a new one.
@@ -75,6 +92,7 @@ public class TrackBrowserFragment extends ListFragment implements LoaderCallback
 	public void onStart() {
 		super.onStart();
 
+		queue = MusicUtils.getQueue();
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(BROADCAST_META_CHANGED);
 		filter.addAction(BROADCAST_QUEUE_CHANGED);
@@ -102,10 +120,10 @@ public class TrackBrowserFragment extends ListFragment implements LoaderCallback
 
 		if (getArguments() != null) {
 
-			String mimeType = getArguments().getString(INTENT_KEY_MIMETYPE);
+			String mimeType = getArguments().getString(INTENT_KEY_TYPE);
 
 			if (Audio.Playlists.CONTENT_TYPE.equals(mimeType)) {
-				long playlist_id = getArguments().getLong(Audio.Playlists._ID);
+				playlist_id = getArguments().getLong(Audio.Playlists._ID);
 
 				where = new StringBuilder();
 				where.append(Playlists.Members.IS_MUSIC + "=1");
@@ -113,7 +131,7 @@ public class TrackBrowserFragment extends ListFragment implements LoaderCallback
 
 				switch ((int) playlist_id) {
 					case (int) PLAYLIST_QUEUE:
-
+						mEditMode = true;
 						uri = Audio.Media.EXTERNAL_CONTENT_URI;
 						long[] mNowPlaying = MusicUtils.getQueue();
 						if (mNowPlaying.length == 0) {
@@ -131,6 +149,8 @@ public class TrackBrowserFragment extends ListFragment implements LoaderCallback
 
 						break;
 					case (int) PLAYLIST_FAVORITES:
+						mEditMode = true;
+						long favorites_id;
 						String favorites_where = Audio.Playlists.NAME + "='"
 								+ PLAYLIST_NAME_FAVORITES + "'";
 						String[] favorites_cols = new String[] { Audio.Playlists._ID };
@@ -138,11 +158,13 @@ public class TrackBrowserFragment extends ListFragment implements LoaderCallback
 						Cursor cursor = getActivity().getContentResolver().query(favorites_uri,
 								favorites_cols, favorites_where, null, null);
 						if (cursor.getCount() <= 0) {
-							return null;
+							favorites_id = MusicUtils.createPlaylist(getActivity(),
+									PLAYLIST_NAME_FAVORITES);
+						} else {
+							cursor.moveToFirst();
+							favorites_id = cursor.getLong(0);
+							cursor.close();
 						}
-						cursor.moveToFirst();
-						long favorites_id = cursor.getLong(0);
-						cursor.close();
 
 						cols = new String[] { Playlists.Members._ID, Playlists.Members.AUDIO_ID,
 								Playlists.Members.TITLE, Playlists.Members.ALBUM,
@@ -164,6 +186,7 @@ public class TrackBrowserFragment extends ListFragment implements LoaderCallback
 						break;
 					default:
 						if (id < 0) return null;
+						mEditMode = true;
 						cols = new String[] { Playlists.Members._ID, Playlists.Members.AUDIO_ID,
 								Playlists.Members.TITLE, Playlists.Members.ALBUM,
 								Playlists.Members.ARTIST, Playlists.Members.DURATION };
@@ -195,8 +218,11 @@ public class TrackBrowserFragment extends ListFragment implements LoaderCallback
 	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 
 		mCursor = data;
+
+		list_for_cursor = MusicUtils.getSongListForCursor(data);
+
 		if (getArguments() != null
-				&& Playlists.CONTENT_TYPE.equals(getArguments().getString(INTENT_KEY_MIMETYPE))
+				&& Playlists.CONTENT_TYPE.equals(getArguments().getString(INTENT_KEY_TYPE))
 				&& getArguments().getLong(Playlists._ID) != PLAYLIST_QUEUE
 				&& getArguments().getLong(Playlists._ID) != PLAYLIST_PODCASTS
 				&& getArguments().getLong(Playlists._ID) != PLAYLIST_RECENTLY_ADDED) {
@@ -215,6 +241,13 @@ public class TrackBrowserFragment extends ListFragment implements LoaderCallback
 
 		mAdapter.swapCursor(data);
 
+		if (mEditMode) {
+			((TouchInterceptor) mListView).setDropListener(mDropListener);
+			((TouchInterceptor) mListView).setRemoveListener(mRemoveListener);
+			mListView.setDivider(null);
+			mListView.setSelector(R.drawable.list_selector_background);
+		}
+
 	}
 
 	@Override
@@ -229,8 +262,6 @@ public class TrackBrowserFragment extends ListFragment implements LoaderCallback
 		// When selecting a track from the queue, just jump there instead of
 		// reloading the queue. This is both faster, and prevents accidentally
 		// dropping out of party shuffle.
-		long[] list_for_cursor = MusicUtils.getSongListForCursor(mCursor);
-		long[] queue = MusicUtils.getQueue();
 
 		if (Arrays.equals(list_for_cursor, queue)) {
 			MusicUtils.setQueuePosition(position);
@@ -328,6 +359,66 @@ public class TrackBrowserFragment extends ListFragment implements LoaderCallback
 		}
 
 	};
+
+	private OnDropListener mDropListener = new OnDropListener() {
+
+		public void onDrop(int from, int to) {
+
+			// if (mCursor instanceof NowPlayingCursor) {
+			// // update the currently playing list
+			// NowPlayingCursor c = (NowPlayingCursor) mCursor;
+			// c.moveItem(from, to);
+			// ((TracksAdapter) getListAdapter()).notifyDataSetChanged();
+			// getListView().invalidateViews();
+			// mDeletedOneRow = true;
+			// } else {
+			// // update a saved playlist
+			// Playlists.Members.moveItem(getActivity().getContentResolver(),
+			// playlist_id, from, to);
+			// }
+		}
+	};
+
+	private OnRemoveListener mRemoveListener = new OnRemoveListener() {
+
+		public void onRemove(int which) {
+
+			removePlaylistItem(which);
+		}
+	};
+
+	private void removePlaylistItem(int which) {
+
+		View v = mListView.getChildAt(which - mListView.getFirstVisiblePosition());
+		if (v == null) {
+			return;
+		}
+		try {
+			if (MusicUtils.sService != null && which != MusicUtils.sService.getQueuePosition()) {
+				mDeletedOneRow = true;
+			}
+		} catch (RemoteException e) {
+			// Service died, so nothing playing.
+			mDeletedOneRow = true;
+		}
+		v.setVisibility(View.GONE);
+		mListView.invalidateViews();
+		// if (mCursor instanceof NowPlayingCursor) {
+		// ((NowPlayingCursor) mCursor).removeItem(which);
+		// } else {
+		// int colidx =
+		// mCursor.getColumnIndexOrThrow(MediaStore.Audio.Playlists.Members._ID);
+		// mCursor.moveToPosition(which);
+		// long id = mCursor.getLong(colidx);
+		// Uri uri =
+		// MediaStore.Audio.Playlists.Members.getContentUri("external",
+		// playlist_id);
+		// getActivity().getContentResolver().delete(ContentUris.withAppendedId(uri,
+		// id), null, null);
+		// }
+		v.setVisibility(View.VISIBLE);
+		mListView.invalidateViews();
+	}
 
 	private class TracksAdapter extends CursorAdapter {
 

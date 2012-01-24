@@ -19,8 +19,6 @@
 
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
 
-	<string name="durationformatshort" translatable="false"><xliff:g id="format">%2$d:%5$02d</xliff:g></string>
-	<string name="durationformatlong" translatable="false"><xliff:g id="format">%1$d:%3$02d:%5$02d</xliff:g></string>
 	<string name="goto_start">媒体库</string>
 	<string name="goto_playback">正在播放</string>
 	<string name="party_shuffle">派对随机播放</string>
@@ -36,12 +34,12 @@
 	<string name="no_tracks">No songs</string>
 	<string name="no_playlists">No playlists</string>
 	<string name="delete">删除</string>
-	<string name="edit">Edit</string>
-	<string name="rename">Rename</string>
+	<string name="edit">编辑</string>
+	<string name="rename">更名</string>
 	<string name="playlist_deleted">Playlist deleted.</string>
 	<string name="playlist_renamed">Playlist renamed.</string>
 	<string name="podcasts">播客</string>
-	<string name="favorites">收藏夹</string>
+	<string name="favorites">收藏</string>
 	<string name="my_playlists">我的播放列表</string>
 	<string name="smart_playlists">智能播放列表</string>
 	<string name="sdcard_missing_title">No SD card</string>
@@ -94,7 +92,7 @@
 	<string name="gadget_track">Track <xliff:g id="track_number">%d</xliff:g></string>
 	<string name="fail_to_start_stream">Failed to play the requested stream.</string>
 	<string name="search_settings_description">Artists, albums, and tracks</string>
-	<string name="search_hint">Search Music</string>
+	<string name="search_hint">搜索音乐</string>
 	<string name="widget_initial_text">Touch to select music.</string>
 	<string name="settings">设置</string>
 	<string name="enable_focus_loss_ducking_title">Focus loss ducking</string>
@@ -102,7 +100,6 @@
 	<string name="sleep_timer_disabled">Sleep timer disabled</string>
 	<string name="sleep_timer_enabled">Sleep timer enabled</string>
 	<string name="notification_sleep_timer">Music playback will stop at <xliff:g id="time">%s</xliff:g></string>
-	<string name="notification_artist_album" translatable="false"><xliff:g id="artist">%1$s</xliff:g> - <xliff:g id="album">%2$s</xliff:g></string>
 	<string name="test">Test</string>
 	<string name="save">Save</string>
 	<string name="overwrite">Overwrite</string>
@@ -127,7 +124,9 @@
 	<string name="track">曲目</string>
 	<string name="playlist">播放列表</string>
 	<string name="recently_added">最近添加</string>
-	<string name="error_bad_parameters">你以错误的方式启动了这个活动！请参阅项目页面上的文档解决出现的问题。</string>
+	<string name="error_bad_parameters">你以错误的方式启动了这个Activity！请参阅项目页面上的文档解决出现的问题。</string>
+	<string name="added_to_favorites">已添加到收藏。</string>
+	<string name="removed_from_favorites">已从收藏中移除。</string>
 	<string name="sleep_timer">睡眠计时器</string>
 	<string name="disabled">禁用</string>
 	<string name="create_playlist_prompt">播放列表名称</string>
@@ -148,24 +147,20 @@
 	<string name="ui_color_auto_summaryoff">Color will change to customized color</string>
 	<string name="ui_color_customize">Customize color</string>
 	<string name="ui_color_customize_summary">Choose UI color</string>
-	<string name="pick_color">Pick a color</string>
-	<string name="press_color_to_apply">Press on Color to apply</string>
-	<string name="visualizer">Visualizer</string>
-	<string name="visualizer_type">Type</string>
-	<string name="visualizer_type_summary">Type of visualizer on the screen</string>
+	<string name="pick_color">选择颜色</string>
+	<string name="press_color_to_apply">按下色彩应用设置</string>
+	<string name="visualizer">可视化效果</string>
+	<string name="visualizer_type">可视化类型</string>
+	<string name="visualizer_type_summary">屏幕上显示的可视化效果的样式</string>
 	<string name="visualizer_antialias">抗锯齿效果</string>
-	<string name="visualizer_antialias_summaryon">效果更棒，但是速度较慢</string>
+	<string name="visualizer_antialias_summaryon">效果更好，但是速度较慢</string>
 	<string name="visualizer_antialias_summaryoff">速度更快，但是会降低质量</string>
-	<string name="visualizer_refreshrate">Refresh rate</string>
-	<string name="visualizer_refreshrate_summary">Refresh rate of visualizer</string>
-	<string name="visualizer_accuracy">Accuracy</string>
-	<string name="visualizer_accuracy_summary">Accuracy of visualizer</string>
-	<string name="unpause_on_headset_plug">Unpause on connect</string>
-	<string name="unpause_on_headset_plug_summary">Unpause the player when a headset is connected</string>
-	<string name="duck_attenuation">Audio focus loss action</string>
-	<string name="duck_attenuation_summary">Select action to take upon transient loss of audio focus (short alerts from other apps)</string>
-	<string name="rescan_media">Rescan media</string>
-	<string name="rescan_media_summary">Rescan media in SD card</string>
+	<string name="visualizer_refreshrate">刷新率</string>
+	<string name="visualizer_refreshrate_summary">可视化效果的刷新率</string>
+	<string name="visualizer_accuracy">精度</string>
+	<string name="visualizer_accuracy_summary">可视化效果的显示精度</string>
+	<string name="rescan_media">刷新媒体库</string>
+	<string name="rescan_media_summary">重新扫描设备中的所有媒体</string>
 	<string name="shaking_enabled">启用摇晃设备</string>
 	<string name="shaking_enabled_summary">启用摇晃设备的快捷操作</string>
 	<string name="shaking_behavior">摇晃设备行为</string>

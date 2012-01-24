@@ -21,8 +21,10 @@
 	<dimen name="normal_height">66dip</dimen>
 	<!-- height of an expanded list item in edit playlist mode -->
 	<dimen name="expanded_height">132dip</dimen>
+	<dimen name="actionbar_height">48dp</dimen>
 	<dimen name="default_list_height">64dip</dimen>
 	<dimen name="default_element_height">48dip</dimen>
+	<dimen name="actionbar_control_button_width">48dip</dimen>
 	<dimen name="default_element_spacing">4dip</dimen>
 	<dimen name="expandable_group_spacing_left">64dip</dimen>
 

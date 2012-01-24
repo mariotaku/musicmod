@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007 The Android Open Source Project
+ * Copyright (C) 2012 The MusicMod Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -25,7 +25,6 @@ import org.musicmod.android.util.MusicUtils;
 import org.musicmod.android.util.ServiceToken;
 import org.musicmod.android.util.PreferencesEditor;
 
-import com.viewpagerindicator.TabPageIndicator;
 import com.viewpagerindicator.TitlePageIndicator;
 import com.viewpagerindicator.TitleProvider;
 
@@ -38,21 +37,22 @@ import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.provider.MediaStore;
-import android.support.v4.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.Menu;
-import android.support.v4.view.MenuItem;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.Window;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -68,7 +68,6 @@ public class MusicBrowserActivity extends FragmentActivity implements Constants,
 	private ImageView mAlbumArt;
 	private TextView mTrackName, mTrackDetail;
 	private ImageButton mPlayPauseButton, mNextButton;
-	private ActionBar mActionBar;
 	private AsyncAlbumArtLoader mAlbumArtLoader;
 	private TitlePageIndicator mIndicator;
 
@@ -77,9 +76,6 @@ public class MusicBrowserActivity extends FragmentActivity implements Constants,
 
 		super.onCreate(icicle);
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
-		setContentView(R.layout.music_browser);
-
-		mActionBar = getSupportActionBar();
 
 		mPrefs = new PreferencesEditor(getApplicationContext());
 
@@ -90,7 +86,21 @@ public class MusicBrowserActivity extends FragmentActivity implements Constants,
 
 	private void configureActivity() {
 
-		View mCustomView = mActionBar.getCustomView();
+		View mCustomView;
+
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB)
+			requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+
+		setContentView(R.layout.music_browser);
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			getActionBar().setCustomView(R.layout.actionbar_music_browser);
+			mCustomView = getActionBar().getCustomView();
+		} else {
+			getWindow()
+					.setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.actionbar_music_browser);
+			mCustomView = findViewById(R.id.actionbar_view);
+		}
 
 		mCustomView.setOnClickListener(mActionBarClickListener);
 

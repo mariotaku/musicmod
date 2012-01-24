@@ -19,20 +19,19 @@ package org.musicmod.android.app;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.MediaStore.Audio;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.view.MenuItem;
-import android.view.View;
-import android.view.Window;
+import android.view.MenuItem;
+
 import org.musicmod.android.Constants;
 import org.musicmod.android.R;
 import org.musicmod.android.util.MusicUtils;
 import org.musicmod.android.util.ServiceToken;
 
-public class TrackBrowserActivity extends FragmentActivity implements
-		View.OnCreateContextMenuListener, Constants, ServiceConnection {
+public class TrackBrowserActivity extends FragmentActivity implements Constants, ServiceConnection {
 
 	private ServiceToken mToken;
 	private Intent intent;
@@ -43,7 +42,7 @@ public class TrackBrowserActivity extends FragmentActivity implements
 
 		super.onCreate(icicle);
 
-		requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
 		intent = getIntent();
 		bundle = icicle != null ? icicle : intent.getExtras();
@@ -54,21 +53,21 @@ public class TrackBrowserActivity extends FragmentActivity implements
 
 		if (bundle.getString(INTENT_KEY_ACTION) == null)
 			bundle.putString(INTENT_KEY_ACTION, intent.getAction());
-		if (bundle.getString(INTENT_KEY_MIMETYPE) == null)
-			bundle.putString(INTENT_KEY_MIMETYPE, intent.getType());
+		if (bundle.getString(INTENT_KEY_TYPE) == null)
+			bundle.putString(INTENT_KEY_TYPE, intent.getType());
 
 		TrackBrowserFragment fragment = new TrackBrowserFragment();
 		fragment.setArguments(bundle);
 
-		getSupportFragmentManager().beginTransaction().add(android.R.id.content, fragment).commit();
-		getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		getSupportFragmentManager().beginTransaction().replace(android.R.id.content, fragment)
+				.commit();
 
 	}
 
 	@Override
-	public void onDestroy() {
-
-		super.onDestroy();
+	public void onSaveInstanceState(Bundle outcicle) {
+		outcicle.putAll(bundle);
+		super.onSaveInstanceState(outcicle);
 	}
 
 	@Override
@@ -107,27 +106,27 @@ public class TrackBrowserActivity extends FragmentActivity implements
 	}
 
 	private void setTitle() {
-		String mimeType = bundle.getString(INTENT_KEY_MIMETYPE);
+		String mimeType = bundle.getString(INTENT_KEY_TYPE);
 		String name;
 		long id;
 		if (Audio.Playlists.CONTENT_TYPE.equals(mimeType)) {
 			id = bundle.getLong(Audio.Playlists._ID);
 			switch ((int) id) {
 				case (int) PLAYLIST_QUEUE:
-					getSupportActionBar().setTitle(R.string.now_playing);
+					setTitle(R.string.now_playing);
 					return;
 				case (int) PLAYLIST_FAVORITES:
-					getSupportActionBar().setTitle(R.string.favorites);
+					setTitle(R.string.favorites);
 					return;
 				case (int) PLAYLIST_RECENTLY_ADDED:
-					getSupportActionBar().setTitle(R.string.recently_added);
+					setTitle(R.string.recently_added);
 					return;
 				case (int) PLAYLIST_PODCASTS:
-					getSupportActionBar().setTitle(R.string.podcasts);
+					setTitle(R.string.podcasts);
 					return;
 				default:
 					if (id < 0) {
-						getSupportActionBar().setTitle(R.string.music_library);
+						setTitle(R.string.music_library);
 						return;
 					}
 			}
@@ -140,11 +139,11 @@ public class TrackBrowserActivity extends FragmentActivity implements
 			id = bundle.getLong(Audio.Albums._ID);
 			name = MusicUtils.getAlbumName(getApplicationContext(), id, true);
 		} else {
-			getSupportActionBar().setTitle(R.string.music_library);
+			setTitle(R.string.music_library);
 			return;
 		}
 
-		getSupportActionBar().setTitle(name);
+		setTitle(name);
 
 	}
 

@@ -43,12 +43,12 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Audio;
+import android.provider.MediaStore.Audio.Playlists;
 import android.text.TextUtils;
 import android.text.format.Time;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.SubMenu;
 import android.view.View;
 import android.view.Window;
 import android.widget.TextView;
@@ -517,53 +517,6 @@ public class MusicUtils implements Constants {
 		}
 	}
 
-	/**
-	 * Fills out the given submenu with items for "new playlist" and any
-	 * existing playlists. When the user selects an item, the application will
-	 * receive PLAYLIST_SELECTED with the Uri of the selected playlist,
-	 * NEW_PLAYLIST if a new playlist should be created, and QUEUE if the
-	 * "current playlist" was selected.
-	 * 
-	 * @param context
-	 *            The context to use for creating the menu items
-	 * @param sub
-	 *            The submenu to add the items to.
-	 */
-	public static void makePlaylistMenu(Context context, SubMenu sub) {
-
-		String[] cols = new String[] { MediaStore.Audio.Playlists._ID,
-				MediaStore.Audio.Playlists.NAME };
-		ContentResolver resolver = context.getContentResolver();
-		if (resolver == null) {
-			System.out.println("resolver = null");
-		} else {
-			String whereclause = MediaStore.Audio.Playlists.NAME + " != ''";
-			Cursor cur = resolver.query(MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, cols,
-					whereclause, null, MediaStore.Audio.Playlists.NAME);
-			sub.clear();
-			sub.add(1, QUEUE, 0, R.string.queue);
-			sub.add(1, NEW_PLAYLIST, 0, R.string.new_playlist);
-			if (cur != null && cur.getCount() > 0) {
-				// sub.addSeparator(1, 0);
-				cur.moveToFirst();
-				while (!cur.isAfterLast()) {
-					Intent intent = new Intent();
-					intent.putExtra("playlist", cur.getLong(0));
-					// if (cur.getInt(0) == mLastPlaylistSelected) {
-					// sub.add(0, MusicBaseActivity.PLAYLIST_SELECTED,
-					// cur.getString(1)).setIntent(intent);
-					// } else {
-					sub.add(1, PLAYLIST_SELECTED, 0, cur.getString(1)).setIntent(intent);
-					// }
-					cur.moveToNext();
-				}
-			}
-			if (cur != null) {
-				cur.close();
-			}
-		}
-	}
-
 	public static void makePlaylistList(Context context, boolean create_shortcut,
 			List<Map<String, String>> list) {
 
@@ -856,10 +809,8 @@ public class MusicUtils implements Constants {
 				sContentValuesCache[i] = new ContentValues();
 			}
 
-			sContentValuesCache[i].put(MediaStore.Audio.Playlists.Members.PLAY_ORDER, base + offset
-					+ i);
-			sContentValuesCache[i]
-					.put(MediaStore.Audio.Playlists.Members.AUDIO_ID, ids[offset + i]);
+			sContentValuesCache[i].put(Playlists.Members.PLAY_ORDER, base + offset + i);
+			sContentValuesCache[i].put(Playlists.Members.AUDIO_ID, ids[offset + i]);
 		}
 	}
 
@@ -922,6 +873,130 @@ public class MusicUtils implements Constants {
 			Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
 			// mLastPlaylistSelected = playlistid;
 		}
+	}
+
+	public static void addToFavorites(Context context, long id) {
+
+		long favorites_id;
+
+		if (id < 0) {
+			// this shouldn't happen (the menuitems shouldn't be visible
+			// unless the selected item represents something playable
+			Log.e(LOGTAG_MUSICUTILS, "playlist id " + id + " is invalid.");
+		} else {
+			ContentResolver resolver = context.getContentResolver();
+			// need to determine the number of items currently in the playlist,
+			// so the play_order field can be maintained.
+
+			String favorites_where = Audio.Playlists.NAME + "='" + PLAYLIST_NAME_FAVORITES + "'";
+			String[] favorites_cols = new String[] { Audio.Playlists._ID };
+			Uri favorites_uri = Audio.Playlists.EXTERNAL_CONTENT_URI;
+			Cursor cursor = resolver.query(favorites_uri, favorites_cols, favorites_where, null,
+					null);
+			if (cursor.getCount() <= 0) {
+				favorites_id = createPlaylist(context, PLAYLIST_NAME_FAVORITES);
+			} else {
+				cursor.moveToFirst();
+				favorites_id = cursor.getLong(0);
+				cursor.close();
+			}
+
+			String[] cols = new String[] { Playlists.Members.AUDIO_ID };
+			Uri uri = Playlists.Members.getContentUri("external", favorites_id);
+			Cursor cur = resolver.query(uri, cols, null, null, null);
+
+			int base = cur.getCount();
+			cur.moveToFirst();
+			while (!cur.isAfterLast()) {
+				if (cur.getLong(0) == id) return;
+				cur.moveToNext();
+			}
+			cur.close();
+
+			ContentValues item = new ContentValues();
+			item.put(Playlists.Members.AUDIO_ID, id);
+			item.put(Playlists.Members.PLAY_ORDER, base + 1);
+			resolver.insert(uri, item);
+
+			Toast.makeText(context, R.string.added_to_favorites, Toast.LENGTH_SHORT).show();
+		}
+	}
+
+	public static void removeFromFavorites(Context context, long id) {
+
+		long favorites_id;
+
+		if (id < 0) {
+			// this shouldn't happen (the menuitems shouldn't be visible
+			// unless the selected item represents something playable
+			Log.e(LOGTAG_MUSICUTILS, "playlist id " + id + " is invalid.");
+		} else {
+			ContentResolver resolver = context.getContentResolver();
+			// need to determine the number of items currently in the playlist,
+			// so the play_order field can be maintained.
+
+			String favorites_where = Audio.Playlists.NAME + "='" + PLAYLIST_NAME_FAVORITES + "'";
+			String[] favorites_cols = new String[] { Audio.Playlists._ID };
+			Uri favorites_uri = Audio.Playlists.EXTERNAL_CONTENT_URI;
+			Cursor cursor = resolver.query(favorites_uri, favorites_cols, favorites_where, null,
+					null);
+			if (cursor.getCount() <= 0) {
+				favorites_id = createPlaylist(context, PLAYLIST_NAME_FAVORITES);
+			} else {
+				cursor.moveToFirst();
+				favorites_id = cursor.getLong(0);
+				cursor.close();
+			}
+
+			Uri uri = Playlists.Members.getContentUri("external", favorites_id);
+			resolver.delete(uri, Playlists.Members.AUDIO_ID + "=" + id, null);
+
+			Toast.makeText(context, R.string.removed_from_favorites, Toast.LENGTH_SHORT).show();
+		}
+	}
+	
+	public static boolean isFavorite(Context context, long id) {
+
+		long favorites_id;
+
+		if (id < 0) {
+			// this shouldn't happen (the menuitems shouldn't be visible
+			// unless the selected item represents something playable
+			Log.e(LOGTAG_MUSICUTILS, "playlist id " + id + " is invalid.");
+		} else {
+			ContentResolver resolver = context.getContentResolver();
+			// need to determine the number of items currently in the playlist,
+			// so the play_order field can be maintained.
+
+			String favorites_where = Audio.Playlists.NAME + "='" + PLAYLIST_NAME_FAVORITES + "'";
+			String[] favorites_cols = new String[] { Audio.Playlists._ID };
+			Uri favorites_uri = Audio.Playlists.EXTERNAL_CONTENT_URI;
+			Cursor cursor = resolver.query(favorites_uri, favorites_cols, favorites_where, null,
+					null);
+			if (cursor.getCount() <= 0) {
+				favorites_id = createPlaylist(context, PLAYLIST_NAME_FAVORITES);
+			} else {
+				cursor.moveToFirst();
+				favorites_id = cursor.getLong(0);
+				cursor.close();
+			}
+			
+			String[] cols = new String[] { Playlists.Members.AUDIO_ID };
+			Uri uri = Playlists.Members.getContentUri("external", favorites_id);
+			Cursor cur = resolver.query(uri, cols, null, null, null);
+
+			cur.moveToFirst();
+			while (!cur.isAfterLast()) {
+				if (cur.getLong(0) == id) {
+					cur.close();
+					return true;
+				}
+				cur.moveToNext();
+			}
+			cur.close();
+			return false;
+		}
+		return false;
 	}
 
 	public static Cursor query(Context context, Uri uri, String[] projection, String selection,
@@ -1163,6 +1238,9 @@ public class MusicUtils implements Constants {
 	}
 
 	public static long[] getQueue() {
+
+		if (sService == null) return new long[] {};
+
 		try {
 			return sService.getQueue();
 		} catch (RemoteException e) {
@@ -1171,7 +1249,41 @@ public class MusicUtils implements Constants {
 		return new long[] {};
 	}
 
+	public static int removeTrack(long id) {
+		if (sService == null) return 0;
+
+		try {
+			return sService.removeTrack(id);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+
+	public static int removeTracks(int first, int last) {
+		if (sService == null) return 0;
+
+		try {
+			return sService.removeTracks(first, last);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+
+	public static void moveQueueItem(int from, int to) {
+		if (sService == null) return;
+
+		try {
+			sService.moveQueueItem(from, to);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public static void clearQueue() {
+
+		if (sService == null) return;
 
 		try {
 			sService.removeTracks(0, Integer.MAX_VALUE);

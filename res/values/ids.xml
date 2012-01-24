@@ -1,25 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-	<item type="id" name="open_url"/>
-	<item type="id" name="add_to_playlist"/>
-	<item type="id" name="sleep_timer"/>
-	<item type="id" name="save_as_playlist"/>
-	<item type="id" name="clear_playlist"/>
-	<item type="id" name="playlist_selected"/>
-	<item type="id" name="new_playlist"/>
-	<item type="id" name="play_selection"/>
-	<item type="id" name="goto_playback"/>
-	<item type="id" name="goto_start"/>
-	<item type="id" name="party_shuffle"/>
-	<item type="id" name="shuffle_all"/>
-	<item type="id" name="play_all"/>
-	<item type="id" name="delete_items"/>
-	<item type="id" name="equalizer"/>
-	<item type="id" name="equalizer_presets"/>
-	<item type="id" name="equalizer_reset"/>
-	<item type="id" name="scan_done"/>
-	<item type="id" name="queue"/>
-	<item type="id" name="settings"/>
-	<item type="id" name="search"/>
-	<item type="id" name="remove"/>
+
+	<item name="open_url" type="id"/>
+	<item name="add_to_playlist" type="id"/>
+	<item name="sleep_timer" type="id"/>
+	<item name="save_as_playlist" type="id"/>
+	<item name="clear_playlist" type="id"/>
+	<item name="playlist_selected" type="id"/>
+	<item name="new_playlist" type="id"/>
+	<item name="play_selection" type="id"/>
+	<item name="goto_playback" type="id"/>
+	<item name="goto_start" type="id"/>
+	<item name="party_shuffle" type="id"/>
+	<item name="shuffle_all" type="id"/>
+	<item name="play_all" type="id"/>
+	<item name="delete_items" type="id"/>
+	<item name="equalizer" type="id"/>
+	<item name="equalizer_presets" type="id"/>
+	<item name="equalizer_reset" type="id"/>
+	<item name="scan_done" type="id"/>
+	<item name="queue" type="id"/>
+	<item name="settings" type="id"/>
+	<item name="search" type="id"/>
+	<item name="remove" type="id"/>
+
 </resources>

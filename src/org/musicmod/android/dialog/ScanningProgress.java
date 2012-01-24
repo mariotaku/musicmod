@@ -17,7 +17,6 @@
 package org.musicmod.android.dialog;
 
 import org.musicmod.android.R;
-import org.musicmod.android.R.layout;
 import org.musicmod.android.util.MusicUtils;
 
 import android.app.Activity;

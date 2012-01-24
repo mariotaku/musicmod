@@ -189,7 +189,6 @@ public interface Constants {
 	public final static String BROADCAST_KEY_LYRICS = "lyrics";
 
 	public final static String INTENT_KEY_CONTENT = "content";
-	public final static String INTENT_KEY_TYPE = "type";
 	public final static String INTENT_KEY_ITEMS = "items";
 	public final static String INTENT_KEY_ALBUM = "album";
 	public final static String INTENT_KEY_ARTIST = "artist";
@@ -199,9 +198,11 @@ public interface Constants {
 	public final static String INTENT_KEY_LIST = "list";
 	public final static String INTENT_KEY_RENAME = "rename";
 	public final static String INTENT_KEY_DEFAULT_NAME = "default_name";
+	public final static String INTENT_KEY_FILTER = "filter";
 
-	public final static String INTENT_KEY_MIMETYPE = "mimeType";
+	public final static String INTENT_KEY_TYPE = "type";
 	public final static String INTENT_KEY_ACTION = "action";
+	public final static String INTENT_KEY_DATA = "data";
 
 	public final static String MAP_KEY_NAME = "name";
 	public final static String MAP_KEY_ID = "id";

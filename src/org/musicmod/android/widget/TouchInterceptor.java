@@ -60,9 +60,9 @@ public class TouchInterceptor extends ListView {
 							// coordinates in this view
 	private int mYOffset; // the difference between screen coordinates and
 							// coordinates in this view
-	private DragListener mDragListener;
-	private DropListener mDropListener;
-	private RemoveListener mRemoveListener;
+	private OnDragListener mDragListener;
+	private OnDropListener mDropListener;
+	private OnRemoveListener mRemoveListener;
 	private int mUpperBound;
 	private int mLowerBound;
 	private int mHeight;
@@ -109,7 +109,7 @@ public class TouchInterceptor extends ListView {
 									// fast fling right with release
 									// near the right edge of the screen
 									stopDragging();
-									mRemoveListener.remove(mSrcDragPos);
+									mRemoveListener.onRemove(mSrcDragPos);
 									unExpandViews(true);
 								}
 							}
@@ -327,12 +327,12 @@ public class TouchInterceptor extends ListView {
 					stopDragging();
 					if (mRemoveMode == SLIDE && ev.getX() > r.right * 3 / 4) {
 						if (mRemoveListener != null) {
-							mRemoveListener.remove(mSrcDragPos);
+							mRemoveListener.onRemove(mSrcDragPos);
 						}
 						unExpandViews(true);
 					} else {
 						if (mDropListener != null && mDragPos >= 0 && mDragPos < getCount()) {
-							mDropListener.drop(mSrcDragPos, mDragPos);
+							mDropListener.onDrop(mSrcDragPos, mDragPos);
 						}
 						unExpandViews(false);
 					}
@@ -347,7 +347,7 @@ public class TouchInterceptor extends ListView {
 					if (itemnum >= 0) {
 						if (action == MotionEvent.ACTION_DOWN || itemnum != mDragPos) {
 							if (mDragListener != null) {
-								mDragListener.drag(mDragPos, itemnum);
+								mDragListener.onDrag(mDragPos, itemnum);
 							}
 							mDragPos = itemnum;
 							doExpansion();
@@ -408,7 +408,7 @@ public class TouchInterceptor extends ListView {
 
 		Context context = getContext();
 		ImageView v = new ImageView(context);
-		v.setBackgroundResource(R.drawable.playlist_tile);
+		v.setBackgroundResource(R.drawable.playlist_tile_drag);
 		v.setPadding(0, 0, 0, 0);
 		v.setImageBitmap(bm);
 		mDragBitmap = bm;
@@ -474,33 +474,33 @@ public class TouchInterceptor extends ListView {
 		mRemoveMode = TRASH;
 	}
 
-	public void setDragListener(DragListener l) {
+	public void setDragListener(OnDragListener l) {
 
 		mDragListener = l;
 	}
 
-	public void setDropListener(DropListener l) {
+	public void setDropListener(OnDropListener l) {
 
 		mDropListener = l;
 	}
 
-	public void setRemoveListener(RemoveListener l) {
+	public void setRemoveListener(OnRemoveListener l) {
 
 		mRemoveListener = l;
 	}
 
-	public interface DragListener {
+	public interface OnDragListener {
 
-		void drag(int from, int to);
+		void onDrag(int from, int to);
 	}
 
-	public interface DropListener {
+	public interface OnDropListener {
 
-		void drop(int from, int to);
+		void onDrop(int from, int to);
 	}
 
-	public interface RemoveListener {
+	public interface OnRemoveListener {
 
-		void remove(int which);
+		void onRemove(int which);
 	}
 }

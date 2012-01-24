@@ -128,6 +128,8 @@
 	<string name="playlist">Playlist</string>
 	<string name="recently_added">Recently added</string>
 	<string name="error_bad_parameters">You called this activity in wrong way! Maybe you should see application documents on my project page.</string>
+	<string name="added_to_favorites">Added to favorites.</string>
+	<string name="removed_from_favorites">Removed from favorites.</string>
 	<string name="sleep_timer">Sleep timer</string>
 	<string name="disabled">Disabled</string>
 	<string name="create_playlist_prompt">Playlist name</string>
@@ -213,7 +215,7 @@
 	<string name="uninstall">Uninstall</string>
 	<string name="open_configure">Open/Configure</string>
 	<string name="app_developer">Mariotaku Lee</string>
-	<string name="app_version">1.4.999999 (1.5.0 pre-pre-alpha)</string>
+	<string name="app_version">1.5.0</string>
 	<string name="special_thanks_to">Speical thanks to</string>
 	<string name="special_thanks_to_summary">\@JavranC: Testing\n\@oliver661: Testing\n\@leytwit: Japanese translation</string>
 

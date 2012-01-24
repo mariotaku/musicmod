@@ -53,6 +53,7 @@ import android.graphics.drawable.LayerDrawable;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -63,14 +64,15 @@ import android.provider.MediaStore.Audio;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.view.Menu;
-import android.support.v4.view.MenuItem;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.animation.AnimationUtils;
@@ -130,6 +132,9 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 	private boolean mShowFadeAnimation = false;
 	private boolean mLyricsWakelock = DEFAULT_LYRICS_WAKELOCK;
 
+	private TextView mTrackNameView, mTrackDetailView;
+	private ImageButton mFavoriteButton;
+
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle icicle) {
@@ -172,7 +177,26 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 
 	private void configureActivity() {
 
+		View mCustomView;
+
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB)
+			requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+
 		setContentView(R.layout.nowplaying_default);
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			getActionBar().setCustomView(R.layout.actionbar_music_playback);
+			mCustomView = getActionBar().getCustomView();
+		} else {
+			getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
+					R.layout.actionbar_music_playback);
+			mCustomView = findViewById(R.id.actionbar_view);
+		}
+
+		mTrackNameView = (TextView) mCustomView.findViewById(R.id.track_name);
+		mTrackDetailView = (TextView) mCustomView.findViewById(R.id.track_detail);
+		mFavoriteButton = (ImageButton) mCustomView.findViewById(R.id.favorite_button);
+		mFavoriteButton.setOnClickListener(mFavoriteListener);
 
 		mCurrentTime = (TextView) findViewById(R.id.currenttime);
 		((View) mCurrentTime.getParent()).setOnLongClickListener(mToggleVisualizerListener);
@@ -335,7 +359,7 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 	@Override
 	public boolean onLongClick(View v) {
 
-		String track = getSupportActionBar().getTitle().toString();
+		String track = getTitle().toString();
 		String artist = mArtistNameView.getText().toString();
 		String album = mAlbumNameView.getText().toString();
 
@@ -420,7 +444,7 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 		public void onClick(View v) {
 
 			Bundle bundle = new Bundle();
-			bundle.putString(INTENT_KEY_MIMETYPE, MediaStore.Audio.Playlists.CONTENT_TYPE);
+			bundle.putString(INTENT_KEY_TYPE, MediaStore.Audio.Playlists.CONTENT_TYPE);
 			bundle.putLong(MediaStore.Audio.Playlists._ID, PLAYLIST_QUEUE);
 			Intent intent = new Intent(getApplicationContext(), TrackBrowserActivity.class);
 			intent.putExtras(bundle);
@@ -453,6 +477,27 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 		public void onClick(View v) {
 
 			doPauseResume();
+		}
+	};
+	
+	private View.OnClickListener mFavoriteListener = new View.OnClickListener() {
+
+		@Override
+		public void onClick(View v) {
+
+			try {
+				if (MusicUtils.isFavorite(getApplicationContext(), mService.getAudioId())) {
+					MusicUtils.removeFromFavorites(getApplicationContext(), mService.getAudioId());
+					((ImageButton) v).setImageResource(R.drawable.ic_action_media_favorite_off);
+				} else {
+					MusicUtils.addToFavorites(getApplicationContext(), mService.getAudioId());
+					((ImageButton) v).setImageResource(R.drawable.ic_action_media_favorite);
+				}
+					
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
+			
 		}
 	};
 
@@ -1393,6 +1438,24 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 		}
 		try {
 
+			mTrackNameView.setText(mService.getTrackName());
+
+			if (mService.getArtistName() != null
+					&& !MediaStore.UNKNOWN_STRING.equals(mService.getArtistName())) {
+				mTrackDetailView.setText(mService.getArtistName());
+			} else if (mService.getAlbumName() != null
+					&& !MediaStore.UNKNOWN_STRING.equals(mService.getAlbumName())) {
+				mTrackDetailView.setText(mService.getAlbumName());
+			} else {
+				mTrackDetailView.setText(R.string.unknown_artist);
+			}
+
+			if (MusicUtils.isFavorite(getApplicationContext(), mService.getAudioId())) {
+				mFavoriteButton.setImageResource(R.drawable.ic_action_media_favorite);
+			} else {
+				mFavoriteButton.setImageResource(R.drawable.ic_action_media_favorite_off);
+			}
+			
 			String artistName = mService.getArtistName();
 			if (MediaStore.UNKNOWN_STRING.equals(artistName)) {
 				artistName = getString(R.string.unknown_artist);
@@ -1403,8 +1466,6 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 				albumName = getString(R.string.unknown_album);
 			}
 			mAlbumNameView.setText(albumName);
-
-			getSupportActionBar().setTitle(mService.getTrackName());
 
 			if (mAlbumArtLoader != null) mAlbumArtLoader.cancel(true);
 			mAlbumArtLoader = new AsyncAlbumArtLoader(mAlbum, animation);

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-		  Copyright (C) 2011 The MusicMod Project
+ Copyright (C) 2011 The MusicMod Project
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
  You may obtain a copy of the License at
 
-			http://www.apache.org/licenses/LICENSE-2.0
+            http://www.apache.org/licenses/LICENSE-2.0
 
  Unless required by applicable law or agreed to in writing, software
  distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,50 +14,43 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="@dimen/gridview_item_width"
-	android:layout_height="@dimen/gridview_item_height"
-	android:layout_gravity="center"
-	android:gravity="center">
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:layout_width="match_parent"
+	android:layout_height="@dimen/default_list_height"
+	android:gravity="center_vertical"
+	android:orientation="horizontal"
+	android:padding="@dimen/default_element_spacing">
 
 	<ImageView
-		android:id="@+id/album_art"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:layout_gravity="center"
-		android:adjustViewBounds="true"
-		android:scaleType="center"
-		android:src="@drawable/ic_mp_albumart_unknown"/>
+		android:id="@+id/result_icon"
+		android:layout_width="wrap_content"
+		android:layout_height="wrap_content"/>
 
 	<LinearLayout
 		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:layout_gravity="bottom"
-		android:background="#A0000000"
-		android:orientation="vertical"
-		android:padding="@dimen/default_element_spacing">
+		android:layout_height="match_parent"
+		android:orientation="vertical">
 
 		<TextView
-			android:id="@+id/album_name"
+			android:id="@+id/query_result"
 			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:layout_gravity="bottom"
+			android:layout_height="0dip"
+			android:layout_weight="1"
+			android:drawablePadding="@dimen/default_element_spacing"
 			android:drawableRight="@drawable/ic_indicator_nowplaying_small"
 			android:ellipsize="marquee"
 			android:singleLine="true"
-			android:text="@string/album"
 			android:textAppearance="?android:attr/textAppearanceMedium"/>
 
 		<TextView
-			android:id="@+id/artist_name"
+			android:id="@+id/result_summary"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
-			android:layout_gravity="bottom"
 			android:ellipsize="end"
 			android:scrollHorizontally="true"
 			android:singleLine="true"
-			android:text="@string/artist"
 			android:textAppearance="?android:attr/textAppearanceSmall"/>
 	</LinearLayout>
 
-</FrameLayout>
+</LinearLayout>

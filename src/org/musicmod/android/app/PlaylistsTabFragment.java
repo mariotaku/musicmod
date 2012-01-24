@@ -106,7 +106,7 @@ public class PlaylistsTabFragment extends ListFragment implements
 		long playlist_id = id;
 
 		Bundle bundle = new Bundle();
-		bundle.putString(INTENT_KEY_MIMETYPE, MediaStore.Audio.Playlists.CONTENT_TYPE);
+		bundle.putString(INTENT_KEY_TYPE, MediaStore.Audio.Playlists.CONTENT_TYPE);
 		bundle.putLong(MediaStore.Audio.Playlists._ID, playlist_id);
 
 		if (mDualPane) {

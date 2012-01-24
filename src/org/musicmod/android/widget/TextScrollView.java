@@ -18,6 +18,9 @@ import android.widget.TextView;
 
 public class TextScrollView extends ScrollView implements OnLongClickListener {
 
+	// Namespaces to read attributes
+	private static final String TEXTSCROLLVIEW_NS = "http://schemas.android.com/apk/res/org.musicmod.android";
+
 	private LinearLayout mScrollContainer;
 	private LinearLayout mContentContainer, mContentEmptyView;
 	private boolean mSmoothScrolling = false;
@@ -100,7 +103,7 @@ public class TextScrollView extends ScrollView implements OnLongClickListener {
 			mTextView.setTextColor(Color.argb(0xD0, Color.red(mTextColor), Color.green(mTextColor),
 					Color.blue(mTextColor)));
 			float density = getResources().getDisplayMetrics().density;
-			mTextView.setShadowLayer(6 * density, 0, 0, android.R.color.black);
+			mTextView.setShadowLayer(4 * density, 0, 0, Color.BLACK);
 			mTextView.setGravity(Gravity.CENTER);
 			mTextView.setTextSize(mTextSize);
 			mTextView.setOnLongClickListener(this);

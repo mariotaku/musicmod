@@ -12,6 +12,7 @@ import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Audio;
@@ -20,13 +21,14 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v4.view.MenuItem;
 import android.support.v4.widget.CursorAdapter;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -199,7 +201,7 @@ public class AlbumBrowserFragment extends Fragment implements Constants, OnItemC
 	private void showDetails(int index, long id) {
 
 		Bundle bundle = new Bundle();
-		bundle.putString(INTENT_KEY_MIMETYPE, MediaStore.Audio.Albums.CONTENT_TYPE);
+		bundle.putString(INTENT_KEY_TYPE, MediaStore.Audio.Albums.CONTENT_TYPE);
 		bundle.putLong(Audio.Albums._ID, id);
 
 		View detailsFrame = getActivity().findViewById(R.id.frame_details);
@@ -290,12 +292,7 @@ public class AlbumBrowserFragment extends Fragment implements Constants, OnItemC
 			int width = getResources().getDimensionPixelSize(R.dimen.gridview_bitmap_width);
 			int height = getResources().getDimensionPixelSize(R.dimen.gridview_bitmap_height);
 
-			Bitmap bitmap = MusicUtils.getCachedArtwork(getActivity(), aid, width, height);
-			if (bitmap == null) {
-				viewholder.album_art.setImageResource(R.drawable.ic_mp_albumart_unknown);
-			} else {
-				viewholder.album_art.setImageBitmap(bitmap);
-			}
+			new AsyncAlbumArtLoader(viewholder, true).execute(aid, width, height);
 
 			long currentalbumid = MusicUtils.getCurrentAlbumId();
 			if (currentalbumid == aid) {
@@ -307,5 +304,51 @@ public class AlbumBrowserFragment extends Fragment implements Constants, OnItemC
 
 		}
 
+		private class AsyncAlbumArtLoader extends AsyncTask<Object, Void, Bitmap> {
+
+			boolean enable_animation = false;
+			private ViewHolder viewholder;
+
+			public AsyncAlbumArtLoader(ViewHolder viewholder, Boolean animation) {
+
+				enable_animation = animation;
+				this.viewholder = viewholder;
+			}
+
+			@Override
+			protected void onPreExecute() {
+
+				if (enable_animation) {
+					viewholder.album_art.startAnimation(AnimationUtils.loadAnimation(getActivity(),
+							android.R.anim.fade_out));
+					viewholder.album_art.setVisibility(View.INVISIBLE);
+				}
+			}
+
+			@Override
+			protected Bitmap doInBackground(Object... params) {
+
+				return MusicUtils.getCachedArtwork(getActivity(), (Long) params[0],
+						(Integer) params[1], (Integer) params[2]);
+			}
+
+			@Override
+			protected void onPostExecute(Bitmap result) {
+
+				if (result != null) {
+					viewholder.album_art.setImageBitmap(result);
+				} else {
+					viewholder.album_art.setImageResource(R.drawable.ic_mp_albumart_unknown);
+				}
+				if (enable_animation) {
+					viewholder.album_art.setVisibility(View.VISIBLE);
+					viewholder.album_art.startAnimation(AnimationUtils.loadAnimation(getActivity(),
+							android.R.anim.fade_in));
+				}
+
+			}
+		}
+
 	}
+
 }

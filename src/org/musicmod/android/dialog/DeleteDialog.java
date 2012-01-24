@@ -68,8 +68,7 @@ public class DeleteDialog extends Activity implements Constants, OnMultiChoiceCl
 			delete_music = icicle != null ? icicle.getBoolean(KEY_DELETE_MUSIC) : getIntent()
 					.getBooleanExtra(KEY_DELETE_MUSIC, false);
 
-			path = icicle != null ? icicle.getString(INTENT_KEY_PATH) : getIntent().getData()
-					.toString();
+			path = icicle != null ? icicle.getString(INTENT_KEY_PATH) : getIntent().getDataString();
 
 			if (path.startsWith(Audio.Media.EXTERNAL_CONTENT_URI.toString())) {
 				long id = Long.valueOf(Uri.parse(path).getLastPathSegment());
