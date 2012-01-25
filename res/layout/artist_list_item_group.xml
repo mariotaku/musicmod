@@ -17,31 +17,11 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="match_parent"
-	android:layout_height="@dimen/default_list_height"
+	android:layout_height="?android:attr/listPreferredItemHeight"
 	android:gravity="center_vertical"
-	android:orientation="vertical"
-	android:paddingBottom="@dimen/default_element_spacing"
-	android:paddingLeft="@dimen/expandable_group_spacing_left"
-	android:paddingRight="@dimen/default_element_spacing"
-	android:paddingTop="@dimen/default_element_spacing">
+	android:orientation="horizontal"
+	android:paddingLeft="@dimen/expandable_group_spacing_left">
 
-	<TextView
-		android:id="@+id/artist_name"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:drawableRight="@drawable/ic_indicator_nowplaying_small"
-		android:ellipsize="marquee"
-		android:singleLine="true"
-		android:text="@string/artist"
-		android:textAppearance="?android:attr/textAppearanceMedium"/>
-
-	<TextView
-		android:id="@+id/album_track_count"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:ellipsize="end"
-		android:scrollHorizontally="true"
-		android:singleLine="true"
-		android:textAppearance="?android:attr/textAppearanceSmall"/>
+	<include layout="@layout/list_item_common"/>
 
 </LinearLayout>

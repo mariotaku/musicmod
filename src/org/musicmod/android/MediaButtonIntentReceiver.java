@@ -112,8 +112,7 @@ public class MediaButtonIntentReceiver extends BroadcastReceiver implements Cons
 						// if this isn't a repeat event
 
 						// The service may or may not be running, but we need to
-						// send it
-						// a command.
+						// send it a command.
 						Intent i = new Intent(context, MusicPlaybackService.class);
 						i.setAction(SERVICECMD);
 						if (keycode == KeyEvent.KEYCODE_HEADSETHOOK

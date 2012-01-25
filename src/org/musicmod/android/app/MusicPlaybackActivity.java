@@ -479,7 +479,7 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 			doPauseResume();
 		}
 	};
-	
+
 	private View.OnClickListener mFavoriteListener = new View.OnClickListener() {
 
 		@Override
@@ -493,11 +493,11 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 					MusicUtils.addToFavorites(getApplicationContext(), mService.getAudioId());
 					((ImageButton) v).setImageResource(R.drawable.ic_action_media_favorite);
 				}
-					
+
 			} catch (RemoteException e) {
 				e.printStackTrace();
 			}
-			
+
 		}
 	};
 
@@ -1455,7 +1455,7 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 			} else {
 				mFavoriteButton.setImageResource(R.drawable.ic_action_media_favorite_off);
 			}
-			
+
 			String artistName = mService.getArtistName();
 			if (MediaStore.UNKNOWN_STRING.equals(artistName)) {
 				artistName = getString(R.string.unknown_artist);

@@ -70,7 +70,7 @@ public class QueryBrowserActivity extends FragmentActivity implements Constants,
 			bundle.putString(MediaStore.EXTRA_MEDIA_TITLE,
 					intent.getStringExtra(MediaStore.EXTRA_MEDIA_TITLE));
 
-		QueryBrowserFragment fragment = new QueryBrowserFragment(bundle);
+		QueryFragment fragment = new QueryFragment(bundle);
 
 		getSupportFragmentManager().beginTransaction().replace(android.R.id.content, fragment)
 				.commit();

@@ -20,5 +20,8 @@
 	<dimen name="actionbar_height">42dp</dimen>
 	<dimen name="appwidget_width">421dip</dimen>
 	<dimen name="appwidget_height">68dip</dimen>
-
+	<dimen name="appwidget_width">421dip</dimen>
+	<dimen name="appwidget_height">68dip</dimen>
+	<dimen name="album_art_height">200dip</dimen>
+	<dimen name="album_art_width">200dip</dimen>
 </resources>

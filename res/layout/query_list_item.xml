@@ -17,40 +17,15 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="match_parent"
-	android:layout_height="@dimen/default_list_height"
+	android:layout_height="?android:attr/listPreferredItemHeight"
 	android:gravity="center_vertical"
-	android:orientation="horizontal"
-	android:padding="@dimen/default_element_spacing">
+	android:orientation="horizontal">
 
 	<ImageView
-		android:id="@+id/result_icon"
+		android:id="@+id/icon"
 		android:layout_width="wrap_content"
-		android:layout_height="wrap_content"/>
+		android:layout_height="match_parent"/>
 
-	<LinearLayout
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:orientation="vertical">
-
-		<TextView
-			android:id="@+id/query_result"
-			android:layout_width="match_parent"
-			android:layout_height="0dip"
-			android:layout_weight="1"
-			android:drawablePadding="@dimen/default_element_spacing"
-			android:drawableRight="@drawable/ic_indicator_nowplaying_small"
-			android:ellipsize="marquee"
-			android:singleLine="true"
-			android:textAppearance="?android:attr/textAppearanceMedium"/>
-
-		<TextView
-			android:id="@+id/result_summary"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:ellipsize="end"
-			android:scrollHorizontally="true"
-			android:singleLine="true"
-			android:textAppearance="?android:attr/textAppearanceSmall"/>
-	</LinearLayout>
+	<include layout="@layout/list_item_common"/>
 
 </LinearLayout>

@@ -33,5 +33,4 @@
 	<dimen name="lyrics_scroll_fading_edge">80dip</dimen>
 	<dimen name="gridview_item_height">152dip</dimen>
 	<dimen name="gridview_item_width">152dip</dimen>
-
 </resources>

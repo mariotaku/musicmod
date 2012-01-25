@@ -1,3 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <lint>
+    <issue id="UnusedResources">
+        <ignore path="res/layout/track_list_item_edit_mode.xml" />
+    </issue>
+    <issue id="UselessParent">
+        <ignore path="res/layout/track_list_item_edit_mode.xml" />
+    </issue>
 </lint>

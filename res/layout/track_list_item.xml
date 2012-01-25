@@ -17,46 +17,10 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="match_parent"
-	android:layout_height="@dimen/default_list_height"
-	android:background="@drawable/playlist_tile"
+	android:layout_height="?android:attr/listPreferredItemHeight"
 	android:gravity="center_vertical"
-	android:orientation="vertical"
-	android:padding="@dimen/default_element_spacing">
+	android:orientation="horizontal">
 
-	<TextView
-		android:id="@+id/track_name"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:drawablePadding="@dimen/default_element_spacing"
-		android:drawableRight="@drawable/ic_indicator_nowplaying_small"
-		android:ellipsize="marquee"
-		android:singleLine="true"
-		android:textAppearance="?android:attr/textAppearanceMedium"/>
-
-	<LinearLayout
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:orientation="horizontal">
-
-		<TextView
-			android:id="@+id/artist_name"
-			android:layout_width="match_parent"
-			android:layout_height="wrap_content"
-			android:layout_weight="1"
-			android:ellipsize="end"
-			android:scrollHorizontally="true"
-			android:singleLine="true"
-			android:textAppearance="?android:attr/textAppearanceSmall"/>
-
-		<TextView
-			android:id="@+id/track_duration"
-			android:layout_width="wrap_content"
-			android:layout_height="wrap_content"
-			android:layout_weight="0"
-			android:singleLine="true"
-			android:textColor="?android:attr/textColorTertiary"
-			android:textSize="12sp"
-			android:textStyle="bold"/>
-	</LinearLayout>
+	<include layout="@layout/list_item_common"/>
 
 </LinearLayout>

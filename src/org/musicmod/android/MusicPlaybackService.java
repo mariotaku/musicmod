@@ -1281,38 +1281,38 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 	/**
 	 * Moves the item at index1 to index2.
 	 * 
-	 * @param index1
-	 * @param index2
+	 * @param from
+	 * @param to
 	 */
-	public void moveQueueItem(int index1, int index2) {
+	public void moveQueueItem(int from, int to) {
 
 		synchronized (this) {
-			if (index1 >= mPlayListLen) {
-				index1 = mPlayListLen - 1;
+			if (from >= mPlayListLen) {
+				from = mPlayListLen - 1;
 			}
-			if (index2 >= mPlayListLen) {
-				index2 = mPlayListLen - 1;
+			if (to >= mPlayListLen) {
+				to = mPlayListLen - 1;
 			}
-			if (index1 < index2) {
-				long tmp = mPlayList[index1];
-				for (int i = index1; i < index2; i++) {
+			if (from < to) {
+				long tmp = mPlayList[from];
+				for (int i = from; i < to; i++) {
 					mPlayList[i] = mPlayList[i + 1];
 				}
-				mPlayList[index2] = tmp;
-				if (mPlayPos == index1) {
-					mPlayPos = index2;
-				} else if (mPlayPos >= index1 && mPlayPos <= index2) {
+				mPlayList[to] = tmp;
+				if (mPlayPos == from) {
+					mPlayPos = to;
+				} else if (mPlayPos >= from && mPlayPos <= to) {
 					mPlayPos--;
 				}
-			} else if (index2 < index1) {
-				long tmp = mPlayList[index1];
-				for (int i = index1; i > index2; i--) {
+			} else if (to < from) {
+				long tmp = mPlayList[from];
+				for (int i = from; i > to; i--) {
 					mPlayList[i] = mPlayList[i - 1];
 				}
-				mPlayList[index2] = tmp;
-				if (mPlayPos == index1) {
-					mPlayPos = index2;
-				} else if (mPlayPos >= index2 && mPlayPos <= index1) {
+				mPlayList[to] = tmp;
+				if (mPlayPos == from) {
+					mPlayPos = to;
+				} else if (mPlayPos >= to && mPlayPos <= from) {
 					mPlayPos++;
 				}
 			}
@@ -1323,15 +1323,15 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 	public void addToFavorites(long id) {
 		MusicUtils.addToFavorites(this, id);
 	}
-	
+
 	public void removeFromFavorites(long id) {
 		MusicUtils.removeFromFavorites(this, id);
 	}
-	
+
 	public boolean isFavorite(long id) {
 		return MusicUtils.isFavorite(this, id);
 	}
-	
+
 	/**
 	 * Returns the current play list
 	 * 
@@ -2693,15 +2693,15 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 
 			mService.get().reloadSettings();
 		}
-		
+
 		public void addToFavorites(long id) {
 			mService.get().addToFavorites(id);
 		}
-		
+
 		public void removeFromFavorites(long id) {
 			mService.get().removeFromFavorites(id);
 		}
-		
+
 		public boolean isFavorite(long id) {
 			return mService.get().isFavorite(id);
 		}

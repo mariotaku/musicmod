@@ -124,13 +124,10 @@ public class MusicBrowserActivity extends FragmentActivity implements Constants,
 
 	private void configureTabs() {
 
-		mTabsAdapter.addFragment(new ArtistBrowserFragment(), getString(R.string.artists)
-				.toUpperCase());
-		mTabsAdapter.addFragment(new AlbumBrowserFragment(), getString(R.string.albums)
-				.toUpperCase());
-		mTabsAdapter.addFragment(new TrackBrowserFragment(), getString(R.string.tracks)
-				.toUpperCase());
-		mTabsAdapter.addFragment(new PlaylistsTabFragment(), getString(R.string.playlists)
+		mTabsAdapter.addFragment(new ArtistFragment(), getString(R.string.artists).toUpperCase());
+		mTabsAdapter.addFragment(new AlbumFragment(), getString(R.string.albums).toUpperCase());
+		mTabsAdapter.addFragment(new TrackFragment(), getString(R.string.tracks).toUpperCase());
+		mTabsAdapter.addFragment(new PlaylistFragment(), getString(R.string.playlists)
 				.toUpperCase());
 
 		mViewPager.setAdapter(mTabsAdapter);

@@ -23,7 +23,7 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-public class PlaylistsTabFragment extends ListFragment implements
+public class PlaylistFragment extends ListFragment implements
 		LoaderManager.LoaderCallbacks<Cursor>, Constants {
 
 	private PlaylistsAdapter mPlaylistsAdapter;
@@ -72,6 +72,11 @@ public class PlaylistsTabFragment extends ListFragment implements
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 
+		if (data == null) {
+			getActivity().finish();
+			return;
+		}
+
 		mIdIdx = data.getColumnIndexOrThrow(MediaStore.Audio.Playlists._ID);
 		mNameIdx = data.getColumnIndexOrThrow(MediaStore.Audio.Playlists.NAME);
 
@@ -111,7 +116,7 @@ public class PlaylistsTabFragment extends ListFragment implements
 
 		if (mDualPane) {
 
-			TrackBrowserFragment fragment = new TrackBrowserFragment();
+			TrackFragment fragment = new TrackFragment();
 			fragment.setArguments(bundle);
 
 			FragmentTransaction ft = getFragmentManager().beginTransaction();

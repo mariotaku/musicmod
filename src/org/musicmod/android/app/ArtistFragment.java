@@ -20,7 +20,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v4.widget.CursorAdapter;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -31,17 +31,17 @@ import android.view.View.OnCreateContextMenuListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.CursorTreeAdapter;
 import android.widget.ExpandableListView;
 import android.widget.AdapterView;
 import android.widget.ExpandableListView.ExpandableListContextMenuInfo;
 import android.widget.ExpandableListView.OnGroupExpandListener;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.SimpleCursorTreeAdapter;
 import android.widget.TextView;
 
-public class ArtistBrowserFragment extends Fragment implements
-		LoaderManager.LoaderCallbacks<Cursor>, Constants, OnGroupExpandListener {
+public class ArtistFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>,
+		Constants, OnGroupExpandListener {
 
 	private ArtistsAdapter mArtistsAdapter;
 	private ExpandableListView mListView;
@@ -60,7 +60,9 @@ public class ArtistBrowserFragment extends Fragment implements
 
 		setHasOptionsMenu(true);
 
-		mArtistsAdapter = new ArtistsAdapter(null, getActivity(), false);
+		mArtistsAdapter = new ArtistsAdapter(getActivity(), null, R.layout.artist_list_item_group,
+				new String[] {}, new int[] {}, R.layout.artist_list_item_child, new String[] {},
+				new int[] {});
 		mListView = (ExpandableListView) getView().findViewById(R.id.artist_expandable_list);
 		mListView.setAdapter(mArtistsAdapter);
 		mListView.setOnGroupExpandListener(this);
@@ -104,6 +106,11 @@ public class ArtistBrowserFragment extends Fragment implements
 
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+
+		if (data == null) {
+			getActivity().finish();
+			return;
+		}
 
 		mGroupCursor = data;
 
@@ -222,7 +229,7 @@ public class ArtistBrowserFragment extends Fragment implements
 
 			mListView.setSelectedGroup(groupPosition);
 
-			TrackBrowserFragment fragment = new TrackBrowserFragment();
+			TrackFragment fragment = new TrackFragment();
 			Bundle args = new Bundle();
 			args.putString(INTENT_KEY_TYPE, MediaStore.Audio.Artists.CONTENT_TYPE);
 			args.putLong(Audio.Artists._ID, id);
@@ -246,11 +253,12 @@ public class ArtistBrowserFragment extends Fragment implements
 
 	};
 
-	private class ArtistsAdapter extends CursorTreeAdapter implements OnItemClickListener,
+	private class ArtistsAdapter extends SimpleCursorTreeAdapter implements OnItemClickListener,
 			OnCreateContextMenuListener {
 
-		public ArtistsAdapter(Cursor cursor, Context context, boolean autoRequery) {
-			super(cursor, context, autoRequery);
+		public ArtistsAdapter(Context context, Cursor cursor, int glayout, String[] gfrom,
+				int[] gto, int clayout, String[] cfrom, int[] cto) {
+			super(context, cursor, glayout, gfrom, gto, clayout, cfrom, cto);
 		}
 
 		private class ViewHolderGroup {
@@ -259,8 +267,8 @@ public class ArtistBrowserFragment extends Fragment implements
 			TextView album_track_count;
 
 			public ViewHolderGroup(View view) {
-				artist_name = (TextView) view.findViewById(R.id.artist_name);
-				album_track_count = (TextView) view.findViewById(R.id.album_track_count);
+				artist_name = (TextView) view.findViewById(R.id.name);
+				album_track_count = (TextView) view.findViewById(R.id.summary);
 			}
 		}
 
@@ -298,8 +306,7 @@ public class ArtistBrowserFragment extends Fragment implements
 		public View newGroupView(Context context, Cursor cursor, boolean isExpanded,
 				ViewGroup parent) {
 
-			View view = getLayoutInflater(getArguments()).inflate(R.layout.artist_list_item_group,
-					null);
+			View view = super.newGroupView(context, cursor, isExpanded, parent);
 			ViewHolderGroup viewholder = new ViewHolderGroup(view);
 			view.setTag(viewholder);
 			return view;
@@ -339,8 +346,7 @@ public class ArtistBrowserFragment extends Fragment implements
 		public View newChildView(Context context, Cursor cursor, boolean isLastChild,
 				ViewGroup parent) {
 
-			View view = getLayoutInflater(getArguments()).inflate(R.layout.artist_list_item_child,
-					null);
+			View view = super.newChildView(context, cursor, isLastChild, parent);
 			ViewHolderChild viewholder = new ViewHolderChild(view);
 			view.setTag(viewholder);
 
@@ -351,7 +357,8 @@ public class ArtistBrowserFragment extends Fragment implements
 		public void bindChildView(View view, Context context, Cursor cursor, boolean isLastChild) {
 
 			ViewHolderChild viewholder = (ViewHolderChild) view.getTag();
-			viewholder.gridview.setAdapter(new AlbumChildAdapter(context, cursor, false));
+			viewholder.gridview.setAdapter(new AlbumChildAdapter(context, R.layout.album_grid_item,
+					cursor, new String[] {}, new int[] {}, 0));
 			viewholder.gridview.setOnItemClickListener(this);
 			viewholder.gridview.setOnCreateContextMenuListener(this);
 
@@ -366,10 +373,10 @@ public class ArtistBrowserFragment extends Fragment implements
 
 			int default_padding = getResources().getDimensionPixelOffset(
 					R.dimen.default_element_spacing);
-			int paddings_count = default_padding * gridview_rows * 2 * 2;
+			int paddings_sum = default_padding * (gridview_rows + 2);
 
 			viewholder.gridview.getLayoutParams().height = item_height * gridview_rows
-					+ paddings_count;
+					+ paddings_sum;
 
 		}
 
@@ -431,7 +438,7 @@ public class ArtistBrowserFragment extends Fragment implements
 
 			if (mDualPane) {
 
-				TrackBrowserFragment fragment = new TrackBrowserFragment();
+				TrackFragment fragment = new TrackFragment();
 				fragment.setArguments(bundle);
 
 				FragmentTransaction ft = getFragmentManager().beginTransaction();
@@ -449,7 +456,7 @@ public class ArtistBrowserFragment extends Fragment implements
 
 	}
 
-	private class AlbumChildAdapter extends CursorAdapter {
+	private class AlbumChildAdapter extends SimpleCursorAdapter {
 
 		private int mAlbumIndex;
 		private int mArtistIndex;
@@ -470,9 +477,9 @@ public class ArtistBrowserFragment extends Fragment implements
 			}
 		}
 
-		private AlbumChildAdapter(Context context, Cursor cursor, boolean autoRequery) {
-
-			super(context, cursor, autoRequery);
+		private AlbumChildAdapter(Context context, int layout, Cursor cursor, String[] from,
+				int[] to, int flags) {
+			super(context, layout, cursor, from, to, flags);
 
 			mUnknownAlbum = context.getString(R.string.unknown_album);
 			mUnknownArtist = context.getString(R.string.unknown_artist);

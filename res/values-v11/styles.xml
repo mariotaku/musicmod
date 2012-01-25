@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
+
+	<style name="Theme" parent="android:style/Theme.Holo.Wallpaper">
+		<item name="android:windowBackground">@drawable/default_background</item>
+	</style>
+
+	<style name="Theme.MusicBrowser">
+		<item name="vpiTitlePageIndicatorStyle">@style/Widget.TitlePageIndicator.MusicBrowser</item>
+	</style>
+
+	<style name="Theme.MusicPlayback">
+		<item name="android:windowBackground">@drawable/music_playback_background</item>
+	</style>
+
+	<style name="Widget.TitlePageIndicator.MusicBrowser" parent="Widget.TitlePageIndicator">
+		<item name="selectedBold">false</item>
+	</style>
+
+</resources>

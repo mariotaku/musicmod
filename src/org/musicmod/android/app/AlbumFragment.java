@@ -22,6 +22,7 @@ import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
@@ -36,7 +37,7 @@ import android.widget.TextView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 
-public class AlbumBrowserFragment extends Fragment implements Constants, OnItemClickListener,
+public class AlbumFragment extends Fragment implements Constants, OnItemClickListener,
 		LoaderManager.LoaderCallbacks<Cursor> {
 
 	private AlbumsAdapter mAdapter;
@@ -54,7 +55,8 @@ public class AlbumBrowserFragment extends Fragment implements Constants, OnItemC
 		// We have a menu item to show in action bar.
 		setHasOptionsMenu(true);
 
-		mAdapter = new AlbumsAdapter(getActivity(), null, false);
+		mAdapter = new AlbumsAdapter(getActivity(), R.layout.album_grid_item, null,
+				new String[] {}, new int[] {}, 0);
 
 		View fragmentView = getView();
 		mGridView = (GridView) fragmentView.findViewById(R.id.album_gridview);
@@ -101,6 +103,11 @@ public class AlbumBrowserFragment extends Fragment implements Constants, OnItemC
 
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+
+		if (data == null) {
+			getActivity().finish();
+			return;
+		}
 
 		mCursor = data;
 
@@ -211,7 +218,7 @@ public class AlbumBrowserFragment extends Fragment implements Constants, OnItemC
 		if (mDualPane) {
 			mGridView.setSelection(index);
 
-			TrackBrowserFragment fragment = new TrackBrowserFragment();
+			TrackFragment fragment = new TrackFragment();
 			fragment.setArguments(bundle);
 
 			FragmentTransaction ft = getFragmentManager().beginTransaction();
@@ -236,7 +243,7 @@ public class AlbumBrowserFragment extends Fragment implements Constants, OnItemC
 
 	};
 
-	private class AlbumsAdapter extends CursorAdapter {
+	private class AlbumsAdapter extends SimpleCursorAdapter {
 
 		private class ViewHolder {
 
@@ -252,16 +259,15 @@ public class AlbumBrowserFragment extends Fragment implements Constants, OnItemC
 
 		}
 
-		private AlbumsAdapter(Context context, Cursor cursor, boolean autoRequery) {
-
-			super(context, cursor, autoRequery);
-
+		private AlbumsAdapter(Context context, int layout, Cursor cursor, String[] from, int[] to,
+				int flags) {
+			super(context, layout, cursor, from, to, flags);
 		}
 
 		@Override
 		public View newView(Context context, Cursor cursor, ViewGroup parent) {
 
-			View view = LayoutInflater.from(context).inflate(R.layout.album_grid_item, null);
+			View view = super.newView(context, cursor, parent);
 			ViewHolder viewholder = new ViewHolder(view);
 			view.setTag(viewholder);
 			return view;

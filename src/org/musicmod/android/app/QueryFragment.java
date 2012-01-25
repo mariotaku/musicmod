@@ -44,19 +44,18 @@ import org.musicmod.android.Constants;
 import org.musicmod.android.R;
 import org.musicmod.android.util.MusicUtils;
 
-public class QueryBrowserFragment extends ListFragment implements Constants,
-		LoaderCallbacks<Cursor> {
+public class QueryFragment extends ListFragment implements Constants, LoaderCallbacks<Cursor> {
 
 	private QueryListAdapter mAdapter;
 	private String mFilterString = "";
 	private Cursor mQueryCursor;
 	private ListView mTrackList;
 
-	public QueryBrowserFragment() {
+	public QueryFragment() {
 
 	}
 
-	public QueryBrowserFragment(Bundle arguments) {
+	public QueryFragment(Bundle arguments) {
 		setArguments(arguments);
 	}
 
@@ -173,6 +172,11 @@ public class QueryBrowserFragment extends ListFragment implements Constants,
 	@Override
 	public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
 
+		if (data == null) {
+			getActivity().finish();
+			return;
+		}
+
 		mQueryCursor = data;
 		mAdapter.swapCursor(data);
 
@@ -224,9 +228,9 @@ public class QueryBrowserFragment extends ListFragment implements Constants,
 			TextView result_summary;
 
 			public ViewHolder(View view) {
-				result_icon = (ImageView) view.findViewById(R.id.result_icon);
-				query_result = (TextView) view.findViewById(R.id.query_result);
-				result_summary = (TextView) view.findViewById(R.id.result_summary);
+				result_icon = (ImageView) view.findViewById(R.id.icon);
+				query_result = (TextView) view.findViewById(R.id.name);
+				result_summary = (TextView) view.findViewById(R.id.summary);
 			}
 
 		}
