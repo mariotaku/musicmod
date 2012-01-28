@@ -47,16 +47,19 @@ public class CheckableRelativeLayout extends RelativeLayout implements Checkable
 		return drawableState;
 	}
 
+	@Override
 	public void toggle() {
 
 		setChecked(!mChecked);
 	}
 
+	@Override
 	public boolean isChecked() {
 
 		return mChecked;
 	}
 
+	@Override
 	public void setChecked(boolean checked) {
 
 		if (mChecked != checked) {

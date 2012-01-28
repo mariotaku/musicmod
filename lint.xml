@@ -4,6 +4,7 @@
         <ignore path="res/layout/track_list_item_edit_mode.xml" />
     </issue>
     <issue id="UselessParent">
+        <ignore path="res/layout/actionbar_common.xml" />
         <ignore path="res/layout/track_list_item_edit_mode.xml" />
     </issue>
 </lint>

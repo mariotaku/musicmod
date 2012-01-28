@@ -23,15 +23,12 @@
 	<string name="durationformatlong" translatable="false"><xliff:g id="format">%1$d:%3$02d:%5$02d</xliff:g></string>
 	<string name="goto_start">Library</string>
 	<string name="goto_playback">Playback</string>
-	<string name="party_shuffle">Party shuffle</string>
-	<string name="party_shuffle_off">Party shuffle off</string>
 	<string name="shuffle_all">Shuffle all</string>
 	<string name="play_all">Play all</string>
 	<string name="delete_artist_desc">All songs by <xliff:g id="artist">%s</xliff:g> will be permanently deleted from your device.</string>
 	<string name="delete_album_desc">The entire album \"<xliff:g id="album">%s</xliff:g>\" will be permanently deleted from your device.</string>
 	<string name="delete_song_desc">\"<xliff:g id="song">%s</xliff:g>\" will be permanently deleted from your device.</string>
 	<string name="scanning">Scanning for media…</string>
-	<string name="partyshuffle_title">Party shuffle</string>
 	<string name="all_media">All media</string>
 	<string name="no_tracks">No songs</string>
 	<string name="no_playlists">No playlists</string>
@@ -218,5 +215,6 @@
 	<string name="app_version">1.5.0</string>
 	<string name="special_thanks_to">Speical thanks to</string>
 	<string name="special_thanks_to_summary">\@JavranC: Testing\n\@oliver661: Testing\n\@leytwit: Japanese translation</string>
+	<string name="default_time_format">--:--</string>
 
 </resources>

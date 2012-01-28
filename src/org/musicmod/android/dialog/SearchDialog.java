@@ -272,16 +272,19 @@ public class SearchDialog extends Activity implements Constants, TextWatcher, On
 		button.invalidate();
 	}
 
+	@Override
 	public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
 		// don't care about this one
 	}
 
+	@Override
 	public void onTextChanged(CharSequence s, int start, int before, int count) {
 
 		setSaveButton();
 	};
 
+	@Override
 	public void afterTextChanged(Editable s) {
 
 		// don't care about this one

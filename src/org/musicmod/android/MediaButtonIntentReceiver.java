@@ -16,8 +16,6 @@
 
 package org.musicmod.android;
 
-import org.musicmod.android.app.MusicBrowserActivity;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -31,33 +29,13 @@ import android.view.KeyEvent;
  */
 public class MediaButtonIntentReceiver extends BroadcastReceiver implements Constants {
 
-	private static final int MSG_LONGPRESS_TIMEOUT = 1;
-	private static final int LONG_PRESS_DELAY = 1000;
+	private static final int MSG_PRESSED = 1, MSG_TIMEOUT = 2;
+	private static final long CLICK_DELAY = 300, LONG_PRESS_DELAY = 1000;
+	private static final int SINGLE_CLICK = 1, DOUBLE_CLICK = 2, TRIPLE_CLICK = 3;
 
-	private static long mLastClickTime = 0;
-	private static boolean mDown = false;
-	private static boolean mLaunched = false;
-
-	private static Handler mHandler = new Handler() {
-
-		@Override
-		public void handleMessage(Message msg) {
-
-			switch (msg.what) {
-				case MSG_LONGPRESS_TIMEOUT:
-					if (!mLaunched) {
-						Context context = (Context) msg.obj;
-						Intent i = new Intent();
-						i.putExtra("autoshuffle", "true");
-						i.setClass(context, MusicBrowserActivity.class);
-						i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-						context.startActivity(i);
-						mLaunched = true;
-					}
-					break;
-			}
-		}
-	};
+	private static boolean mPressedDown, mLongPressed = false;
+	private static long mFirstTime;
+	private static int mPressedCount = 0;
 
 	@Override
 	public void onReceive(Context context, Intent intent) {
@@ -79,64 +57,89 @@ public class MediaButtonIntentReceiver extends BroadcastReceiver implements Cons
 			int action = event.getAction();
 			long eventtime = event.getEventTime();
 
-			// single quick press: pause/resume.
-			// double press: next track
-			// long press: start auto-shuffle mode.
-
-			String command = null;
 			switch (keycode) {
 				case KeyEvent.KEYCODE_MEDIA_STOP:
-					command = CMDSTOP;
+					sendMediaCommand(context, CMDSTOP);
 					break;
-				case KeyEvent.KEYCODE_HEADSETHOOK:
 				case KeyEvent.KEYCODE_MEDIA_PLAY_PAUSE:
-					command = CMDTOGGLEPAUSE;
+					sendMediaCommand(context, CMDTOGGLEPAUSE);
 					break;
 				case KeyEvent.KEYCODE_MEDIA_NEXT:
-					command = CMDNEXT;
+					sendMediaCommand(context, CMDNEXT);
 					break;
 				case KeyEvent.KEYCODE_MEDIA_PREVIOUS:
-					command = CMDPREVIOUS;
+					sendMediaCommand(context, CMDPREVIOUS);
 					break;
-			}
-
-			if (command != null) {
-				if (action == KeyEvent.ACTION_DOWN) {
-					if (mDown) {
-						if (CMDTOGGLEPAUSE.equals(command) && mLastClickTime != 0
-								&& eventtime - mLastClickTime > LONG_PRESS_DELAY) {
-							mHandler.sendMessage(mHandler.obtainMessage(MSG_LONGPRESS_TIMEOUT,
-									context));
-						}
-					} else {
-						// if this isn't a repeat event
-
-						// The service may or may not be running, but we need to
-						// send it a command.
-						Intent i = new Intent(context, MusicPlaybackService.class);
-						i.setAction(SERVICECMD);
-						if (keycode == KeyEvent.KEYCODE_HEADSETHOOK
-								&& eventtime - mLastClickTime < 300) {
-							i.putExtra(CMDNAME, CMDNEXT);
-							context.startService(i);
-							mLastClickTime = 0;
-						} else {
-							i.putExtra(CMDNAME, command);
-							context.startService(i);
-							mLastClickTime = eventtime;
-						}
-
-						mLaunched = false;
-						mDown = true;
-					}
-				} else {
-					mHandler.removeMessages(MSG_LONGPRESS_TIMEOUT);
-					mDown = false;
-				}
-				if (isOrderedBroadcast()) {
-					abortBroadcast();
-				}
+				case KeyEvent.KEYCODE_HEADSETHOOK:
+					processHeadsetHookEvent(context, action, eventtime);
+					break;
 			}
 		}
 	}
+
+	private void sendMediaCommand(Context context, String command) {
+		Intent i = new Intent(context, MusicPlaybackService.class);
+		i.setAction(SERVICECMD);
+		i.putExtra(CMDNAME, command);
+		context.startService(i);
+	}
+
+	private void processHeadsetHookEvent(Context context, int action, long eventtime) {
+		switch (action) {
+			case KeyEvent.ACTION_DOWN:
+				if (!mPressedDown) {
+					mPressedDown = true;
+					mFirstTime = eventtime;
+					mHandler.sendEmptyMessage(MSG_PRESSED);
+				} else if (!mLongPressed) {
+					if (eventtime - mFirstTime >= LONG_PRESS_DELAY) {
+						mPressedCount = 0;
+						mLongPressed = true;
+						sendMediaCommand(context, CMDTOGGLEFAVORITE);
+						mHandler.removeCallbacksAndMessages(null);
+					}
+				}
+				break;
+			case KeyEvent.ACTION_UP:
+				if (!mLongPressed) {
+					mHandler.sendMessageDelayed(mHandler.obtainMessage(MSG_TIMEOUT, context),
+							CLICK_DELAY);
+				}
+				mPressedDown = false;
+				mLongPressed = false;
+				break;
+			default:
+				break;
+		}
+	}
+
+	private Handler mHandler = new Handler() {
+
+		@Override
+		public void handleMessage(Message msg) {
+
+			switch (msg.what) {
+				case MSG_PRESSED:
+					mHandler.removeMessages(MSG_TIMEOUT);
+					if (mPressedCount < Integer.MAX_VALUE) mPressedCount++;
+					break;
+				case MSG_TIMEOUT:
+					mHandler.removeCallbacksAndMessages(null);
+					switch (mPressedCount) {
+						case SINGLE_CLICK:
+							sendMediaCommand((Context) msg.obj, CMDTOGGLEPAUSE);
+							break;
+						case DOUBLE_CLICK:
+							sendMediaCommand((Context) msg.obj, CMDNEXT);
+							break;
+						case TRIPLE_CLICK:
+							sendMediaCommand((Context) msg.obj, CMDPREVIOUS);
+							break;
+					}
+					mPressedCount = 0;
+					break;
+			}
+
+		}
+	};
 }

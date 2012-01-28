@@ -54,6 +54,14 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
 
 	private int mGroupArtistIdIdx, mGroupArtistIdx, mGroupAlbumIdx, mGroupSongIdx;
 
+	public ArtistFragment() {
+
+	}
+
+	public ArtistFragment(Bundle args) {
+		setArguments(args);
+	}
+
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
@@ -78,6 +86,12 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
 	}
 
 	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		outState.putAll(getArguments() != null ? getArguments() : new Bundle());
+		super.onSaveInstanceState(outState);
+	}
+
+	@Override
 	public void onStart() {
 		super.onStart();
 
@@ -98,7 +112,6 @@ public class ArtistFragment extends Fragment implements LoaderManager.LoaderCall
 
 		String[] cols = new String[] { Audio.Artists._ID, Audio.Artists.ARTIST,
 				Audio.Artists.NUMBER_OF_ALBUMS, Audio.Artists.NUMBER_OF_TRACKS };
-
 		Uri uri = Audio.Artists.EXTERNAL_CONTENT_URI;
 		return new CursorLoader(getActivity(), uri, cols, null, null,
 				Audio.Artists.DEFAULT_SORT_ORDER);

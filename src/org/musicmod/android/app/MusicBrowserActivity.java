@@ -37,13 +37,11 @@ import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.provider.MediaStore;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -52,13 +50,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.Window;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-public class MusicBrowserActivity extends FragmentActivity implements Constants, ServiceConnection {
+public class MusicBrowserActivity extends ActionBarActivity implements Constants, ServiceConnection {
 
 	private ViewPager mViewPager;
 	private TabsAdapter mTabsAdapter;
@@ -80,61 +77,8 @@ public class MusicBrowserActivity extends FragmentActivity implements Constants,
 		mPrefs = new PreferencesEditor(getApplicationContext());
 
 		configureActivity();
-		configureTabs();
+		configureTabs(icicle);
 
-	}
-
-	private void configureActivity() {
-
-		View mCustomView;
-
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB)
-			requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
-
-		setContentView(R.layout.music_browser);
-
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-			getActionBar().setCustomView(R.layout.actionbar_music_browser);
-			mCustomView = getActionBar().getCustomView();
-		} else {
-			getWindow()
-					.setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.actionbar_music_browser);
-			mCustomView = findViewById(R.id.actionbar_view);
-		}
-
-		mCustomView.setOnClickListener(mActionBarClickListener);
-
-		mAlbumArt = (ImageView) mCustomView.findViewById(R.id.album_art);
-		mTrackName = (TextView) mCustomView.findViewById(R.id.track_name);
-		mTrackDetail = (TextView) mCustomView.findViewById(R.id.track_detail);
-		mPlayPauseButton = (ImageButton) mCustomView.findViewById(R.id.play_pause);
-		mPlayPauseButton.setOnClickListener(mPlayPauseClickListener);
-		mNextButton = (ImageButton) mCustomView.findViewById(R.id.next);
-		mNextButton.setOnClickListener(mNextClickListener);
-
-		mTabsAdapter = new TabsAdapter(getSupportFragmentManager());
-		mViewPager = (ViewPager) findViewById(R.id.pager);
-
-		mIndicator = (TitlePageIndicator) mCustomView.findViewById(R.id.indicator);
-		if (mIndicator == null) {
-			mIndicator = (TitlePageIndicator) findViewById(R.id.indicator);
-		}
-
-	}
-
-	private void configureTabs() {
-
-		mTabsAdapter.addFragment(new ArtistFragment(), getString(R.string.artists).toUpperCase());
-		mTabsAdapter.addFragment(new AlbumFragment(), getString(R.string.albums).toUpperCase());
-		mTabsAdapter.addFragment(new TrackFragment(), getString(R.string.tracks).toUpperCase());
-		mTabsAdapter.addFragment(new PlaylistFragment(), getString(R.string.playlists)
-				.toUpperCase());
-
-		mViewPager.setAdapter(mTabsAdapter);
-		mIndicator.setViewPager(mViewPager);
-		int currenttab = mPrefs.getIntState(STATE_KEY_CURRENTTAB, 0);
-		mIndicator.setCurrentItem(currenttab);
-		mIndicator.setOnPageChangeListener(mOnPageChangeListener);
 	}
 
 	@Override
@@ -147,6 +91,12 @@ public class MusicBrowserActivity extends FragmentActivity implements Constants,
 		filter.addAction(BROADCAST_PLAYSTATE_CHANGED);
 		registerReceiver(mMediaStatusReceiver, filter);
 
+	}
+
+	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		outState.putAll(getIntent().getExtras() != null ? getIntent().getExtras() : new Bundle());
+		super.onSaveInstanceState(outState);
 	}
 
 	@Override
@@ -212,6 +162,52 @@ public class MusicBrowserActivity extends FragmentActivity implements Constants,
 	public void onServiceDisconnected(ComponentName name) {
 		mService = null;
 		finish();
+	}
+
+	private void configureActivity() {
+
+		setContentView(R.layout.music_browser);
+
+		View mCustomView = setCustomView(R.layout.actionbar_music_browser);
+		setHomeButtonEnabled(false);
+		setTitleViewEnabled(false);
+		setCustomViewEnabled(true);
+
+		mCustomView.setOnClickListener(mActionBarClickListener);
+
+		mAlbumArt = (ImageView) mCustomView.findViewById(R.id.album_art);
+		mTrackName = (TextView) mCustomView.findViewById(R.id.track_name);
+		mTrackDetail = (TextView) mCustomView.findViewById(R.id.track_detail);
+		mPlayPauseButton = (ImageButton) mCustomView.findViewById(R.id.play_pause);
+		mPlayPauseButton.setOnClickListener(mPlayPauseClickListener);
+		mNextButton = (ImageButton) mCustomView.findViewById(R.id.next);
+		mNextButton.setOnClickListener(mNextClickListener);
+
+		mTabsAdapter = new TabsAdapter(getSupportFragmentManager());
+		mViewPager = (ViewPager) findViewById(R.id.pager);
+
+		mIndicator = (TitlePageIndicator) mCustomView.findViewById(R.id.indicator);
+		if (mIndicator == null) {
+			mIndicator = (TitlePageIndicator) findViewById(R.id.indicator);
+		}
+
+	}
+
+	private void configureTabs(Bundle args) {
+
+		mTabsAdapter.addFragment(new ArtistFragment(args), getString(R.string.artists)
+				.toUpperCase());
+		mTabsAdapter.addFragment(new AlbumFragment(args), getString(R.string.albums).toUpperCase());
+		mTabsAdapter.addFragment(new TrackFragment(args), getString(R.string.tracks).toUpperCase());
+		mTabsAdapter.addFragment(new PlaylistFragment(args), getString(R.string.playlists)
+				.toUpperCase());
+
+		mViewPager.setAdapter(mTabsAdapter);
+		mIndicator.setViewPager(mViewPager);
+		int currenttab = mPrefs.getIntState(STATE_KEY_CURRENTTAB, 0);
+		mIndicator.setCurrentItem(currenttab < mTabsAdapter.getCount() ? currenttab : mTabsAdapter
+				.getCount() - 1);
+		mIndicator.setOnPageChangeListener(mOnPageChangeListener);
 	}
 
 	private void updateNowplaying() {

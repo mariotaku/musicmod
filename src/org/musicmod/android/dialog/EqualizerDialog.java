@@ -19,7 +19,6 @@ package org.musicmod.android.dialog;
 import java.util.ArrayList;
 import java.util.List;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.DialogInterface;
@@ -27,6 +26,7 @@ import android.content.ServiceConnection;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.app.FragmentActivity;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.Menu;
@@ -45,7 +45,7 @@ import org.musicmod.android.IMusicPlaybackService;
 import org.musicmod.android.R;
 import org.musicmod.android.util.*;
 
-public class EqualizerDialog extends Activity implements Constants {
+public class EqualizerDialog extends FragmentActivity implements Constants {
 
 	private IMusicPlaybackService mService = null;
 	private ServiceToken mToken;
@@ -215,6 +215,7 @@ public class EqualizerDialog extends Activity implements Constants {
 
 			bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
 
+				@Override
 				public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
 
 					mEqualizer.setBandLevel(band, (short) (minEQLevel + progress));
@@ -222,10 +223,12 @@ public class EqualizerDialog extends Activity implements Constants {
 					reloadEqualizer();
 				}
 
+				@Override
 				public void onStartTrackingTouch(SeekBar seekBar) {
 
 				}
 
+				@Override
 				public void onStopTrackingTouch(SeekBar seekBar) {
 
 				}
@@ -263,6 +266,7 @@ public class EqualizerDialog extends Activity implements Constants {
 			new AlertDialog.Builder(this).setTitle(R.string.equalizer_presets)
 					.setItems(mPresetsItems, new DialogInterface.OnClickListener() {
 
+						@Override
 						public void onClick(DialogInterface dialog, int item) {
 
 							setPreset((short) item);
@@ -304,11 +308,13 @@ public class EqualizerDialog extends Activity implements Constants {
 
 	private ServiceConnection osc = new ServiceConnection() {
 
+		@Override
 		public void onServiceConnected(ComponentName classname, IBinder obj) {
 
 			mService = IMusicPlaybackService.Stub.asInterface(obj);
 		}
 
+		@Override
 		public void onServiceDisconnected(ComponentName classname) {
 
 			mService = null;

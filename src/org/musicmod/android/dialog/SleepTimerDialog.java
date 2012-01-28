@@ -21,7 +21,6 @@ import org.musicmod.android.R;
 import org.musicmod.android.util.MusicUtils;
 import org.musicmod.android.util.PreferencesEditor;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -29,6 +28,7 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.DialogInterface.OnClickListener;
 import android.media.AudioManager;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.util.DisplayMetrics;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
@@ -36,7 +36,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
-public class SleepTimerDialog extends Activity implements OnSeekBarChangeListener, Constants {
+public class SleepTimerDialog extends FragmentActivity implements OnSeekBarChangeListener, Constants {
 
 	private SeekBar mSetTime;
 	private TextView mTimeView;
@@ -47,6 +47,7 @@ public class SleepTimerDialog extends Activity implements OnSeekBarChangeListene
 
 	private String action;
 
+	@Override
 	public void onCreate(Bundle icicle) {
 
 		super.onCreate(icicle);

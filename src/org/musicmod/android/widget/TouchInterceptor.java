@@ -281,7 +281,11 @@ public class TouchInterceptor extends ListView {
 						if (mDropListener != null && mSortDragging && !mRemoveDragging) {
 							mDropListener.onDrop(mSrcDragPos, mDragPos);
 
-						} else if (mRemoveListener != null && mRemoveDragging && !mSortDragging) {
+						} else if (mRemoveListener != null
+								&& mRemoveDragging
+								&& !mSortDragging
+								&& ev.getX() >= mWindowManager.getDefaultDisplay().getWidth()
+										- mItemHeightNormal) {
 							mRemoveListener.onRemove(mDragPos);
 						}
 					}
@@ -296,11 +300,11 @@ public class TouchInterceptor extends ListView {
 					int x = (int) ev.getX();
 					int y = (int) ev.getY();
 
-					if (Math.abs(x - mStartX) >= mItemHeightNormal / 2 && Math.abs(y - mStartY) < mItemHeightNormal / 2
-							&& !mRemoveDragging) {
+					if (Math.abs(x - mStartX) >= mItemHeightNormal / 2
+							&& Math.abs(y - mStartY) < mItemHeightNormal / 2 && !mRemoveDragging) {
 						mRemoveDragging = true;
-					} else if (Math.abs(x - mStartX) < mItemHeightNormal / 2 && Math.abs(y - mStartY) >= mItemHeightNormal / 2
-							&& !mSortDragging) {
+					} else if (Math.abs(x - mStartX) < mItemHeightNormal / 2
+							&& Math.abs(y - mStartY) >= mItemHeightNormal / 2 && !mSortDragging) {
 						mSortDragging = true;
 					}
 

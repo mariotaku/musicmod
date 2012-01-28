@@ -16,23 +16,21 @@
 
 package net.margaritov.preference.colorpicker;
 
-import org.musicmod.android.R;
-
-import android.app.Dialog;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
+import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
-import android.view.LayoutInflater;
-import android.view.View;
+import android.graphics.Bitmap.Config;
+import android.graphics.drawable.BitmapDrawable;
 import android.widget.LinearLayout;
 
-public class ColorPickerDialog extends Dialog implements ColorPickerView.OnColorChangedListener,
-		View.OnClickListener {
+public class ColorPickerDialog extends AlertDialog implements
+		ColorPickerView.OnColorChangedListener, OnClickListener {
 
 	private ColorPickerView mColorPicker;
-
-	private ColorPickerPanelView mOldColor;
-	private ColorPickerPanelView mNewColor;
-
 	private OnColorChangedListener mListener;
 
 	public interface OnColorChangedListener {
@@ -47,50 +45,50 @@ public class ColorPickerDialog extends Dialog implements ColorPickerView.OnColor
 		init(initialColor);
 	}
 
+	@Override
+	public void onColorChanged(int color) {
+
+		setIcon(new BitmapDrawable(getPreviewBitmap(color)));
+
+	}
+
+	@Override
+	public void onClick(DialogInterface dialog, int which) {
+		switch (which) {
+			case BUTTON_POSITIVE:
+				if (mListener != null) {
+					mListener.onColorChanged(mColorPicker.getColor());
+				}
+				break;
+		}
+		dismiss();
+
+	}
+
 	private void init(int color) {
 
 		// To fight color branding.
 		getWindow().setFormat(PixelFormat.RGBA_8888);
 
-		setUp(color);
+		Context context = getContext();
 
-	}
+		LinearLayout mContentView = new LinearLayout(context);
+		mContentView.setOrientation(LinearLayout.VERTICAL);
 
-	private void setUp(int color) {
+		mColorPicker = new ColorPickerView(context);
 
-		LayoutInflater inflater = (LayoutInflater) getContext().getSystemService(
-				Context.LAYOUT_INFLATER_SERVICE);
+		mContentView.addView(mColorPicker);
 
-		View layout = inflater.inflate(R.layout.dialog_color_picker, null);
-
-		setContentView(layout);
-
-		setTitle(R.string.pick_color);
-
-		mColorPicker = (ColorPickerView) layout.findViewById(R.id.color_picker_view);
-		mOldColor = (ColorPickerPanelView) layout.findViewById(R.id.old_color_panel);
-		mNewColor = (ColorPickerPanelView) layout.findViewById(R.id.new_color_panel);
-
-		((LinearLayout) mOldColor.getParent()).setPadding(
-				Math.round(mColorPicker.getDrawingOffset()), 0,
+		mContentView.setPadding(Math.round(mColorPicker.getDrawingOffset()), 0,
 				Math.round(mColorPicker.getDrawingOffset()), 0);
 
-		mOldColor.setOnClickListener(this);
-		mNewColor.setOnClickListener(this);
 		mColorPicker.setOnColorChangedListener(this);
-		mOldColor.setColor(color);
 		mColorPicker.setColor(color, true);
 
-	}
+		setView(mContentView);
 
-	@Override
-	public void onColorChanged(int color) {
-
-		mNewColor.setColor(color);
-
-		/*
-		 * if (mListener != null) { mListener.onColorChanged(color); }
-		 */
+		this.setButton(BUTTON_POSITIVE, context.getString(android.R.string.ok), this);
+		this.setButton(BUTTON_NEGATIVE, context.getString(android.R.string.cancel), this);
 
 	}
 
@@ -115,15 +113,24 @@ public class ColorPickerDialog extends Dialog implements ColorPickerView.OnColor
 		return mColorPicker.getColor();
 	}
 
-	@Override
-	public void onClick(View v) {
+	private Bitmap getPreviewBitmap(int color) {
 
-		if (v.getId() == R.id.new_color_panel) {
-			if (mListener != null) {
-				mListener.onColorChanged(mNewColor.getColor());
+		int d = (int) (getContext().getResources().getDisplayMetrics().density * 32); // 32dip
+		Bitmap bm = Bitmap.createBitmap(d, d, Config.ARGB_8888);
+		int w = bm.getWidth();
+		int h = bm.getHeight();
+		int c = color;
+		for (int i = 0; i < w; i++) {
+			for (int j = i; j < h; j++) {
+				c = (i <= 1 || j <= 1 || i >= w - 2 || j >= h - 2) ? Color.GRAY : color;
+				bm.setPixel(i, j, c);
+				if (i != j) {
+					bm.setPixel(j, i, c);
+				}
 			}
 		}
-		dismiss();
+
+		return bm;
 	}
 
 }

@@ -20,7 +20,6 @@ import org.musicmod.android.R;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.text.TextPaint;
 import android.util.AttributeSet;
@@ -50,8 +49,6 @@ public class VerticalTextSpinner extends View {
 	private static final int MIN_ANIMATIONS = 4;
 
 	private final Drawable mBackgroundFocused;
-	private final Drawable mSelectorFocused;
-	private final Drawable mSelectorNormal;
 	private final int mSelectorDefaultY;
 	private final int mSelectorMinY;
 	private final int mSelectorMaxY;
@@ -115,15 +112,14 @@ public class VerticalTextSpinner extends View {
 		TEXT5_Y = (TEXT_SIZE * (2 + 2)) + (TEXT_SPACING * (2 + 1));
 
 		mBackgroundFocused = context.getResources().getDrawable(R.drawable.pickerbox_background);
-		mSelectorFocused = context.getResources().getDrawable(R.drawable.pickerbox_selected);
-		mSelectorNormal = context.getResources().getDrawable(R.drawable.pickerbox_unselected);
 
-		mSelectorHeight = mSelectorFocused.getIntrinsicHeight();
+		mSelector = context.getResources().getDrawable(R.drawable.pickerbox);
+
+		mSelectorHeight = mSelector.getIntrinsicHeight();
 		mSelectorDefaultY = (mBackgroundFocused.getIntrinsicHeight() - mSelectorHeight) / 2;
 		mSelectorMinY = 0;
 		mSelectorMaxY = mBackgroundFocused.getIntrinsicHeight() - mSelectorHeight;
 
-		mSelector = mSelectorNormal;
 		mSelectorY = mSelectorDefaultY;
 
 		mTextPaintDark = new TextPaint(Paint.ANTI_ALIAS_FLAG);
@@ -200,19 +196,6 @@ public class VerticalTextSpinner extends View {
 	private boolean canScrollUp() {
 
 		return ((mCurrentSelectedPos < (mTextList.length - 1)) || mWrapAround);
-	}
-
-	@Override
-	protected void onFocusChanged(boolean gainFocus, int direction, Rect previouslyFocusedRect) {
-
-		if (gainFocus) {
-			setBackgroundDrawable(mBackgroundFocused);
-			mSelector = mSelectorFocused;
-		} else {
-			setBackgroundDrawable(null);
-			mSelector = mSelectorNormal;
-			mSelectorY = mSelectorDefaultY;
-		}
 	}
 
 	@Override

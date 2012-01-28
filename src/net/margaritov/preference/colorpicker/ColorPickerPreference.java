@@ -17,6 +17,7 @@
 package net.margaritov.preference.colorpicker;
 
 import android.content.Context;
+import android.content.res.Resources.NotFoundException;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Bitmap.Config;
@@ -35,13 +36,18 @@ import android.widget.LinearLayout;
 public class ColorPickerPreference extends Preference implements
 		Preference.OnPreferenceClickListener, ColorPickerDialog.OnColorChangedListener {
 
-	View mView;
-	int mDefaultValue = Color.BLACK;
-	private int mValue = Color.BLACK;
+	private View mView;
+	private int mDefaultValue = Color.WHITE;
+	private int mValue = Color.WHITE;
+	private String mTitle = null;
 	private float mDensity = 0;
 	private boolean mAlphaSliderEnabled = false;
 
 	private static final String ANDROID_NS = "http://schemas.android.com/apk/res/android";
+	private static final String ATTR_DEFAULTVALUE = "defaultValue";
+	private static final String ATTR_ALPHASLIDER = "alphaSlider";
+	private static final String ATTR_DIALOGTITLE = "dialogTitle";
+	private static final String ATTR_TITLE = "title";
 
 	public ColorPickerPreference(Context context) {
 
@@ -72,21 +78,38 @@ public class ColorPickerPreference extends Preference implements
 		mDensity = getContext().getResources().getDisplayMetrics().density;
 		setOnPreferenceClickListener(this);
 		if (attrs != null) {
-			String defaultValue = attrs.getAttributeValue(ANDROID_NS, "defaultValue");
+			try {
+				mTitle = context.getString(attrs.getAttributeResourceValue(ANDROID_NS,
+						ATTR_DIALOGTITLE, -1));
+			} catch (NotFoundException e) {
+				mTitle = attrs.getAttributeValue(ANDROID_NS, ATTR_DIALOGTITLE);
+			}
+
+			if (mTitle == null) {
+				try {
+					mTitle = context.getString(attrs.getAttributeResourceValue(ANDROID_NS,
+							ATTR_TITLE, -1));
+				} catch (NotFoundException e) {
+					mTitle = attrs.getAttributeValue(ANDROID_NS, ATTR_TITLE);
+				}
+			}
+
+			String defaultValue = attrs.getAttributeValue(ANDROID_NS, ATTR_DEFAULTVALUE);
 			if (defaultValue.startsWith("#")) {
 				try {
 					mDefaultValue = convertToColorInt(defaultValue);
 				} catch (NumberFormatException e) {
 					Log.e("ColorPickerPreference", "Wrong color: " + defaultValue);
-					mDefaultValue = convertToColorInt("#FF000000");
+					mDefaultValue = Color.WHITE;
 				}
 			} else {
-				int resourceId = attrs.getAttributeResourceValue(ANDROID_NS, "defaultValue", 0);
-				if (resourceId != 0) {
-					mDefaultValue = context.getResources().getInteger(resourceId);
+				int colorResourceId = attrs.getAttributeResourceValue(ANDROID_NS,
+						ATTR_DEFAULTVALUE, 0);
+				if (colorResourceId != 0) {
+					mDefaultValue = context.getResources().getColor(colorResourceId);
 				}
 			}
-			mAlphaSliderEnabled = attrs.getAttributeBooleanValue(null, "alphaSlider", false);
+			mAlphaSliderEnabled = attrs.getAttributeBooleanValue(null, ATTR_ALPHASLIDER, false);
 		}
 		mValue = mDefaultValue;
 	}
@@ -168,14 +191,20 @@ public class ColorPickerPreference extends Preference implements
 		}
 	}
 
+	@Override
 	public boolean onPreferenceClick(Preference preference) {
 
-		ColorPickerDialog picker = new ColorPickerDialog(getContext(), getValue());
-		picker.setOnColorChangedListener(this);
-		if (mAlphaSliderEnabled) {
-			picker.setAlphaSliderVisible(true);
+		ColorPickerDialog dialog = new ColorPickerDialog(getContext(), getValue());
+		if (mTitle != null) {
+			dialog.setTitle(mTitle);
+		} else {
+			dialog.setTitle("Set Color");
 		}
-		picker.show();
+		dialog.setOnColorChangedListener(this);
+		if (mAlphaSliderEnabled) {
+			dialog.setAlphaSliderVisible(true);
+		}
+		dialog.show();
 
 		return false;
 	}

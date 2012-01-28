@@ -1,9 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-	<item android:id="@+id/party_shuffle" android:title="@string/party_shuffle" android:icon="@drawable/ic_menu_party_shuffle"/>
-	<item android:id="@+id/add_to_playlist" android:title="@string/add_to_playlist" android:icon="@android:drawable/ic_menu_add"/>
-	<item android:id="@+id/equalizer" android:title="@string/equalizer" android:icon="@drawable/ic_menu_equalizer"/>
-	<item android:id="@+id/sleep_timer" android:title="@string/sleep_timer" android:icon="@drawable/ic_menu_sleep_timer"/>
-	<item android:id="@+id/delete_items" android:title="@string/delete" android:icon="@android:drawable/ic_menu_delete"/>
-	<item android:id="@+id/settings" android:title="@string/settings" android:icon="@android:drawable/ic_menu_preferences"/>
+
+	<item
+		android:id="@id/add_to_playlist"
+		android:icon="@android:drawable/ic_menu_add"
+		android:title="@string/add_to_playlist"/>
+	<item
+		android:id="@id/equalizer"
+		android:icon="@drawable/ic_menu_equalizer"
+		android:title="@string/equalizer"/>
+	<item
+		android:id="@id/sleep_timer"
+		android:icon="@drawable/ic_menu_sleep_timer"
+		android:title="@string/sleep_timer"/>
+	<item
+		android:id="@id/delete_items"
+		android:icon="@android:drawable/ic_menu_delete"
+		android:title="@string/delete"/>
+	<item
+		android:id="@id/settings"
+		android:icon="@android:drawable/ic_menu_preferences"
+		android:title="@string/settings"/>
+
 </menu>

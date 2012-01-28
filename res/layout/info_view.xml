@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--          Copyright (C) 2011 The MusicMod Project
+<!--
+ Copyright (C) 2011 The MusicMod Project
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -15,49 +16,11 @@
 -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/info_view"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	android:orientation="vertical"
 	android:gravity="center"
-	android:visibility="invisible"
-	android:id="@+id/info_view">
+	android:orientation="vertical"
+	android:visibility="invisible">
 
-	<TextView
-		android:id="@+id/info"
-		android:text="@string/now_playing"
-		android:textSize="@dimen/textsize_info_album"
-		android:textColor="@android:color/white"
-		android:shadowColor="@android:color/black"
-		android:shadowDx="0"
-		android:shadowDy="0"
-		android:shadowRadius="3"
-		android:gravity="center"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"/>
-		
-	<TextView
-		android:id="@+id/artistname"
-		android:textSize="@dimen/textsize_artist"
-		android:textStyle="bold"
-		android:textColor="@android:color/white"
-		android:shadowColor="@android:color/black"
-		android:shadowDx="0"
-		android:shadowDy="0"
-		android:shadowRadius="3"
-		android:gravity="center"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"/>
-	 		
-	<TextView
-		android:id="@+id/albumname"
-		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:gravity="center"
-		android:shadowColor="@android:color/black"
-		android:shadowDx="0"
-		android:shadowDy="0"
-		android:shadowRadius="3"
-		android:textColor="@android:color/white"
-		android:textSize="@dimen/textsize_info_album"/>
-	
 </LinearLayout>

@@ -32,7 +32,9 @@
 	<uses-permission android:name="android.permission.RECORD_AUDIO"/>
 	<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
 
-	<uses-sdk android:minSdkVersion="8"/>
+	<uses-sdk
+		android:minSdkVersion="8"
+		android:targetSdkVersion="15"/>
 
 	<application
 		android:allowTaskReparenting="true"
@@ -215,7 +217,7 @@
 			</intent-filter>
 		</activity>
 		<activity
-			android:name=".dialog.WeekSelectorDialog"
+			android:name=".dialog.WeekSelector"
 			android:label="@string/set_time"
 			android:theme="@android:style/Theme.NoDisplay">
 			<intent-filter>

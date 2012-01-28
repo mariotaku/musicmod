@@ -69,6 +69,7 @@ interface IMusicPlaybackService {
 	long getSleepTimerRemained();
 	void reloadSettings();
 	void reloadEqualizer();
+	void toggleFavorite();
 	void addToFavorites(long id);
 	void removeFromFavorites(long id);
 	boolean isFavorite(long id);

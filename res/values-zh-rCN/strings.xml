@@ -21,15 +21,12 @@
 
 	<string name="goto_start">媒体库</string>
 	<string name="goto_playback">正在播放</string>
-	<string name="party_shuffle">派对随机播放</string>
-	<string name="party_shuffle_off">派对随机播放已关闭</string>
 	<string name="shuffle_all">全部随机播放</string>
 	<string name="play_all">全部播放</string>
 	<string name="delete_artist_desc">All songs by <xliff:g id="artist">%s</xliff:g> will be permanently deleted from your device.</string>
 	<string name="delete_album_desc">The entire album \"<xliff:g id="album">%s</xliff:g>\" will be permanently deleted from your device.</string>
 	<string name="delete_song_desc">\"<xliff:g id="song">%s</xliff:g>\" will be permanently deleted from your device.</string>
 	<string name="scanning">Scanning for media…</string>
-	<string name="partyshuffle_title">Party shuffle</string>
 	<string name="all_media">All media</string>
 	<string name="no_tracks">No songs</string>
 	<string name="no_playlists">No playlists</string>
@@ -61,25 +58,25 @@
 	<string name="repeat_off_notif">Repeat is off.</string>
 	<string name="repeat_current_notif">Repeating current song.</string>
 	<string name="repeat_all_notif">Repeating all songs.</string>
-	<string name="play_selection">Play</string>
+	<string name="play_selection">播放</string>
 	<string name="add_to_playlist">添加到播放列表</string>
 	<string name="queue">当前播放列表</string>
 	<string name="new_playlist">新建</string>
-	<string name="new_playlist_name_template">New playlist <xliff:g id="number">%d</xliff:g></string>
+	<string name="new_playlist_name_template">新播放列表 <xliff:g id="number">%d</xliff:g></string>
 	<string name="emptyplaylist">选择的播放列表为空。</string>
 	<string name="empty_queue">当前的播放列表为空。</string>
-	<string name="create_playlist_create_text">Save</string>
-	<string name="create_playlist_overwrite_text">Overwrite</string>
+	<string name="create_playlist_create_text">保存</string>
+	<string name="create_playlist_overwrite_text">覆盖</string>
 	<string name="service_start_error_title">Playback problem</string>
 	<string name="service_start_error_msg">Sorry, the song could not be played.</string>
 	<string name="save_as_playlist">Save as playlist</string>
 	<string name="clear_playlist">Clear playlist</string>
 	<string name="shortcut_label">Music playlist</string>
-	<string name="music_label">Music</string>
+	<string name="music_label">音乐</string>
 	<string name="playback_failed">Sorry, the player does not support this type of audio file.</string>
 	<string name="remove_from_playlist">Remove from playlist</string>
 	<string name="streamloadingtext">Connecting to <xliff:g id="host">%s</xliff:g></string>
-	<string name="mediasearch">Search for <xliff:g id="term" example="Beethoven">%s</xliff:g> using:</string>
+	<string name="mediasearch">通过以下方式搜索 <xliff:g id="term" example="久石讓">%s</xliff:g></string>
 	<string name="working_artists">Artists\u2026</string>
 	<string name="working_albums">Albums\u2026</string>
 	<string name="working_songs">Songs\u2026</string>

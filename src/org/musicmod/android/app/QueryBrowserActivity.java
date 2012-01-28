@@ -22,20 +22,30 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 
 import android.media.AudioManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.MediaStore;
 import android.support.v4.app.FragmentActivity;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.View;
+import android.view.Window;
+import android.widget.EditText;
+import android.widget.FrameLayout;
 
 import org.musicmod.android.Constants;
+import org.musicmod.android.R;
 import org.musicmod.android.util.MusicUtils;
 import org.musicmod.android.util.ServiceToken;
 
-public class QueryBrowserActivity extends FragmentActivity implements Constants, ServiceConnection {
+public class QueryBrowserActivity extends FragmentActivity implements Constants, ServiceConnection,
+		TextWatcher {
 
 	private ServiceToken mToken;
 	private Intent intent;
 	private Bundle bundle;
+	private QueryFragment fragment;
 
 	@Override
 	public void onCreate(Bundle icicle) {
@@ -43,6 +53,8 @@ public class QueryBrowserActivity extends FragmentActivity implements Constants,
 		super.onCreate(icicle);
 
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
+
+		configureActivity();
 
 		intent = getIntent();
 		bundle = icicle != null ? icicle : intent.getExtras();
@@ -70,7 +82,7 @@ public class QueryBrowserActivity extends FragmentActivity implements Constants,
 			bundle.putString(MediaStore.EXTRA_MEDIA_TITLE,
 					intent.getStringExtra(MediaStore.EXTRA_MEDIA_TITLE));
 
-		QueryFragment fragment = new QueryFragment(bundle);
+		fragment = new QueryFragment(bundle);
 
 		getSupportFragmentManager().beginTransaction().replace(android.R.id.content, fragment)
 				.commit();
@@ -83,11 +95,13 @@ public class QueryBrowserActivity extends FragmentActivity implements Constants,
 		super.onSaveInstanceState(outcicle);
 	}
 
+	@Override
 	public void onStart() {
 		super.onStart();
 		mToken = MusicUtils.bindToService(this, this);
 	}
 
+	@Override
 	public void onStop() {
 		MusicUtils.unbindFromService(mToken);
 		super.onStop();
@@ -101,6 +115,52 @@ public class QueryBrowserActivity extends FragmentActivity implements Constants,
 	@Override
 	public void onServiceDisconnected(ComponentName name) {
 
+	}
+
+	@Override
+	public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+		// don't care about this one
+	}
+
+	@Override
+	public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+		Bundle args = fragment.getArguments();
+		if (args == null) args = new Bundle();
+		args.putString(INTENT_KEY_FILTER, s.toString());
+
+		fragment.getLoaderManager().restartLoader(0, args, fragment);
+	};
+
+	@Override
+	public void afterTextChanged(Editable s) {
+
+		// don't care about this one
+	}
+
+	private void configureActivity() {
+
+		View mCustomView;
+
+		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB)
+			requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+
+		setContentView(new FrameLayout(this));
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+			getActionBar().setCustomView(R.layout.actionbar_query_browser);
+			mCustomView = getActionBar().getCustomView();
+		} else {
+			getWindow()
+					.setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.actionbar_query_browser);
+			mCustomView = findViewById(R.id.actionbar_view);
+		}
+
+		if (mCustomView != null) {
+			((EditText) mCustomView.findViewById(R.id.query_editor)).addTextChangedListener(this);
+
+		}
 	}
 
 }

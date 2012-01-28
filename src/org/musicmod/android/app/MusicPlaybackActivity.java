@@ -33,14 +33,11 @@ import org.musicmod.android.widget.RepeatingImageButton.RepeatListener;
 import org.musicmod.android.widget.TextScrollView;
 import org.musicmod.android.widget.TextScrollView.OnLineSelectedListener;
 
-import android.app.AlertDialog;
-import android.app.KeyguardManager;
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -53,7 +50,6 @@ import android.graphics.drawable.LayerDrawable;
 import android.media.AudioManager;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -63,7 +59,6 @@ import android.provider.MediaStore;
 import android.provider.MediaStore.Audio;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
-import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
@@ -72,7 +67,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.Window;
+import android.view.View.OnLongClickListener;
+import android.view.View.OnTouchListener;
 import android.view.WindowManager;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.animation.AnimationUtils;
@@ -86,8 +82,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
-public class MusicPlaybackActivity extends FragmentActivity implements Constants,
-		View.OnTouchListener, View.OnLongClickListener, OnLineSelectedListener, ServiceConnection {
+public class MusicPlaybackActivity extends ActionBarActivity implements Constants, OnTouchListener,
+		OnLongClickListener, OnLineSelectedListener, ServiceConnection {
 
 	private boolean mSeeking = false;
 	private boolean mDeviceHasDpad;
@@ -135,6 +131,17 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 	private TextView mTrackNameView, mTrackDetailView;
 	private ImageButton mFavoriteButton;
 
+	private ImageView mAlbum;
+	private TextView mCurrentTime, mTotalTime;
+	private ProgressBar mProgress;
+	private long mPosOverride = -1;
+	private boolean mFromTouch = false;
+	private long mDuration;
+	private boolean paused;
+
+	private static final int REFRESH = 1;
+	private static final int QUIT = 2;
+
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle icicle) {
@@ -146,7 +153,7 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 		mPrefs = new PreferencesEditor(this);
 		configureActivity();
 
-		mVisualizer = new VisualizerWrapper(50, false, false);
+		mVisualizer = new VisualizerWrapper(500, true, false);
 		mVisualizer.setOnDataChangedListener(mDataChangedListener);
 	}
 
@@ -177,21 +184,11 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 
 	private void configureActivity() {
 
-		View mCustomView;
+		setContentView(R.layout.music_playback);
 
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB)
-			requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
-
-		setContentView(R.layout.nowplaying_default);
-
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-			getActionBar().setCustomView(R.layout.actionbar_music_playback);
-			mCustomView = getActionBar().getCustomView();
-		} else {
-			getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
-					R.layout.actionbar_music_playback);
-			mCustomView = findViewById(R.id.actionbar_view);
-		}
+		View mCustomView = setCustomView(R.layout.actionbar_music_playback);
+		setTitleViewEnabled(false);
+		setCustomViewEnabled(true);
 
 		mTrackNameView = (TextView) mCustomView.findViewById(R.id.track_name);
 		mTrackDetailView = (TextView) mCustomView.findViewById(R.id.track_detail);
@@ -209,9 +206,6 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 		mAlbum = (ImageView) findViewById(R.id.album);
 		mAlbum.setOnClickListener(mQueueListener);
 		mAlbum.setOnLongClickListener(mSearchAlbumArtListener);
-
-		mArtistNameView = (TextView) findViewById(R.id.artistname);
-		mAlbumNameView = (TextView) findViewById(R.id.albumname);
 
 		mLyricsView = (LinearLayout) findViewById(R.id.lyrics_view);
 
@@ -359,9 +353,11 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 	@Override
 	public boolean onLongClick(View v) {
 
+		// TODO search media info
+
 		String track = getTitle().toString();
-		String artist = mArtistNameView.getText().toString();
-		String album = mAlbumNameView.getText().toString();
+		String artist = "";// mArtistNameView.getText().toString();
+		String album = "";// mAlbumNameView.getText().toString();
 
 		CharSequence title = getString(R.string.mediasearch, track);
 		Intent i = new Intent();
@@ -486,14 +482,7 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 		public void onClick(View v) {
 
 			try {
-				if (MusicUtils.isFavorite(getApplicationContext(), mService.getAudioId())) {
-					MusicUtils.removeFromFavorites(getApplicationContext(), mService.getAudioId());
-					((ImageButton) v).setImageResource(R.drawable.ic_action_media_favorite_off);
-				} else {
-					MusicUtils.addToFavorites(getApplicationContext(), mService.getAudioId());
-					((ImageButton) v).setImageResource(R.drawable.ic_action_media_favorite);
-				}
-
+				mService.toggleFavorite();
 			} catch (RemoteException e) {
 				e.printStackTrace();
 			}
@@ -505,7 +494,6 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 
 		@Override
 		public void onClick(View v) {
-
 			doPrev();
 		}
 	};
@@ -638,6 +626,7 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 		f.addAction(BROADCAST_META_CHANGED);
 		f.addAction(BROADCAST_NEW_LYRICS_LOADED);
 		f.addAction(BROADCAST_LYRICS_REFRESHED);
+		f.addAction(BROADCAST_FAVORITESTATE_CHANGED);
 		registerReceiver(mStatusListener, new IntentFilter(f));
 
 		IntentFilter s = new IntentFilter();
@@ -667,27 +656,10 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 	}
 
 	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
-
-		if (mService == null) return false;
-
-		MusicUtils.setPartyShuffleMenuIcon(menu);
-
-		KeyguardManager km = (KeyguardManager) getSystemService(Context.KEYGUARD_SERVICE);
-		menu.setGroupVisible(1, !km.inKeyguardRestrictedInputMode());
-
-		return true;
-	}
-
-	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 
 		Intent intent;
 		switch (item.getItemId()) {
-			case PARTY_SHUFFLE:
-				MusicUtils.togglePartyShuffle();
-				setShuffleButtonImage();
-				break;
 			case ADD_TO_PLAYLIST:
 				intent = new Intent(INTENT_ADD_TO_PLAYLIST);
 				long[] list_to_be_added = new long[1];
@@ -1127,16 +1099,15 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 		}
 		try {
 			int shuffle = mService.getShuffleMode();
-			if (shuffle == MusicPlaybackService.SHUFFLE_NONE) {
-				mService.setShuffleMode(MusicPlaybackService.SHUFFLE_NORMAL);
-				if (mService.getRepeatMode() == MusicPlaybackService.REPEAT_CURRENT) {
-					mService.setRepeatMode(MusicPlaybackService.REPEAT_ALL);
+			if (shuffle == SHUFFLE_NONE) {
+				mService.setShuffleMode(SHUFFLE_NORMAL);
+				if (mService.getRepeatMode() == REPEAT_CURRENT) {
+					mService.setRepeatMode(REPEAT_ALL);
 					setRepeatButtonImage();
 				}
 				showToast(R.string.shuffle_on_notif);
-			} else if (shuffle == MusicPlaybackService.SHUFFLE_NORMAL
-					|| shuffle == MusicPlaybackService.SHUFFLE_AUTO) {
-				mService.setShuffleMode(MusicPlaybackService.SHUFFLE_NONE);
+			} else if (shuffle == SHUFFLE_NORMAL) {
+				mService.setShuffleMode(SHUFFLE_NONE);
 				showToast(R.string.shuffle_off_notif);
 			} else {
 				Log.e("MediaPlaybackActivity", "Invalid shuffle mode: " + shuffle);
@@ -1209,6 +1180,7 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 				setRepeatButtonImage();
 				setShuffleButtonImage();
 				setPauseButtonImage();
+				setFavoriteButton();
 			} else {
 				Intent intent = new Intent(Intent.ACTION_MAIN);
 				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -1256,9 +1228,6 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 				case SHUFFLE_NONE:
 					mShuffleButton.setImageResource(R.drawable.ic_mp_shuffle_off_btn);
 					break;
-				case SHUFFLE_AUTO:
-					mShuffleButton.setImageResource(R.drawable.ic_mp_partyshuffle_on_btn);
-					break;
 				default:
 					mShuffleButton.setImageResource(R.drawable.ic_mp_shuffle_on_btn);
 					break;
@@ -1279,17 +1248,20 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 		}
 	}
 
-	private ImageView mAlbum;
-	private TextView mCurrentTime, mTotalTime;
-	private TextView mArtistNameView, mAlbumNameView;
-	private ProgressBar mProgress;
-	private long mPosOverride = -1;
-	private boolean mFromTouch = false;
-	private long mDuration;
-	private boolean paused;
+	private void setFavoriteButton() {
 
-	private static final int REFRESH = 1;
-	private static final int QUIT = 2;
+		if (mService == null) return;
+
+		try {
+			if (mService.isFavorite(mService.getAudioId())) {
+				mFavoriteButton.setImageResource(R.drawable.ic_action_media_favorite);
+			} else {
+				mFavoriteButton.setImageResource(R.drawable.ic_action_media_favorite_off);
+			}
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+	}
 
 	private void queueNextRefresh(long delay) {
 
@@ -1329,13 +1301,14 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 
 				mProgress.setProgress((int) (1000 * pos / mDuration));
 			} else {
-				mCurrentTime.setText("--:--");
+				mCurrentTime.setText(R.string.default_time_format);
 				mProgress.setProgress(1000);
 			}
 			// return the number of milliseconds until the next full second, so
 			// the counter can be updated at just the right time
 			return remaining;
-		} catch (RemoteException ex) {
+		} catch (RemoteException e) {
+			e.printStackTrace();
 		}
 		return 500;
 	}
@@ -1352,21 +1325,9 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 					break;
 
 				case QUIT:
-					// This can be moved back to onCreate once the bug that
-					// prevents
-					// Dialogs from being started from onCreate/onResume is
-					// fixed.
-					new AlertDialog.Builder(MusicPlaybackActivity.this)
-							.setTitle(R.string.service_start_error_title)
-							.setMessage(R.string.service_start_error_msg)
-							.setPositiveButton(android.R.string.ok,
-									new DialogInterface.OnClickListener() {
-
-										public void onClick(DialogInterface dialog, int whichButton) {
-
-											finish();
-										}
-									}).setCancelable(false).show();
+					Toast.makeText(getApplicationContext(), R.string.service_start_error_msg,
+							Toast.LENGTH_SHORT);
+					finish();
 					break;
 
 				default:
@@ -1385,6 +1346,7 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 				// redraw the artist/title info and
 				// set new max for progress bar
 				updateTrackInfo(mShowFadeAnimation);
+				setFavoriteButton();
 				setPauseButtonImage();
 				queueNextRefresh(1);
 			} else if (BROADCAST_PLAYSTATE_CHANGED.equals(action)) {
@@ -1393,6 +1355,8 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 				loadLyricsToView();
 			} else if (BROADCAST_LYRICS_REFRESHED.equals(action)) {
 				scrollLyrics(false);
+			} else if (BROADCAST_FAVORITESTATE_CHANGED.equals(action)) {
+				setFavoriteButton();
 			}
 		}
 	};
@@ -1409,6 +1373,7 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 					f.addAction(BROADCAST_META_CHANGED);
 					f.addAction(BROADCAST_NEW_LYRICS_LOADED);
 					f.addAction(BROADCAST_LYRICS_REFRESHED);
+					f.addAction(BROADCAST_FAVORITESTATE_CHANGED);
 					registerReceiver(mStatusListener, new IntentFilter(f));
 					mIntentDeRegistered = false;
 				}
@@ -1417,6 +1382,7 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 				scrollLyrics(true);
 				long next = refreshNow();
 				queueNextRefresh(next);
+				setFavoriteButton();
 			} else if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
 				paused = true;
 
@@ -1437,7 +1403,6 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 			return;
 		}
 		try {
-
 			mTrackNameView.setText(mService.getTrackName());
 
 			if (mService.getArtistName() != null
@@ -1449,23 +1414,6 @@ public class MusicPlaybackActivity extends FragmentActivity implements Constants
 			} else {
 				mTrackDetailView.setText(R.string.unknown_artist);
 			}
-
-			if (MusicUtils.isFavorite(getApplicationContext(), mService.getAudioId())) {
-				mFavoriteButton.setImageResource(R.drawable.ic_action_media_favorite);
-			} else {
-				mFavoriteButton.setImageResource(R.drawable.ic_action_media_favorite_off);
-			}
-
-			String artistName = mService.getArtistName();
-			if (MediaStore.UNKNOWN_STRING.equals(artistName)) {
-				artistName = getString(R.string.unknown_artist);
-			}
-			mArtistNameView.setText(artistName);
-			String albumName = mService.getAlbumName();
-			if (MediaStore.UNKNOWN_STRING.equals(albumName)) {
-				albumName = getString(R.string.unknown_album);
-			}
-			mAlbumNameView.setText(albumName);
 
 			if (mAlbumArtLoader != null) mAlbumArtLoader.cancel(true);
 			mAlbumArtLoader = new AsyncAlbumArtLoader(mAlbum, animation);

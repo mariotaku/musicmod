@@ -196,12 +196,8 @@ public class MediaAppWidgetProvider4x2 extends AppWidgetProvider implements Cons
 
 		// Set correct drawable for shuffle state
 		switch (service.getShuffleMode()) {
-			case MusicPlaybackService.SHUFFLE_NONE:
+			case SHUFFLE_NONE:
 				views.setImageViewResource(R.id.control_shuffle, R.drawable.ic_mp_shuffle_off_btn);
-				break;
-			case MusicPlaybackService.SHUFFLE_AUTO:
-				views.setImageViewResource(R.id.control_shuffle,
-						R.drawable.ic_mp_partyshuffle_on_btn);
 				break;
 			default:
 				views.setImageViewResource(R.id.control_shuffle, R.drawable.ic_mp_shuffle_on_btn);
@@ -231,66 +227,39 @@ public class MediaAppWidgetProvider4x2 extends AppWidgetProvider implements Cons
 
 		if (playerActive) {
 			intent = new Intent(context, MusicPlaybackActivity.class);
-			pendingIntent = PendingIntent.getActivity(context, 0 /*
-																 * no
-																 * requestCode
-																 */, intent, 0 /*
-																				 * no
-																				 * flags
-																				 */);
+			pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
 			views.setOnClickPendingIntent(R.id.albumart, pendingIntent);
 			views.setOnClickPendingIntent(R.id.info, pendingIntent);
 		} else {
 			intent = new Intent(context, MusicBrowserActivity.class);
-			pendingIntent = PendingIntent.getActivity(context, 0 /*
-																 * no
-																 * requestCode
-																 */, intent, 0 /*
-																				 * no
-																				 * flags
-																				 */);
+			pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
 			views.setOnClickPendingIntent(R.id.albumart, pendingIntent);
 			views.setOnClickPendingIntent(R.id.info, pendingIntent);
 		}
 
 		intent = new Intent(MusicPlaybackService.TOGGLEPAUSE_ACTION);
 		intent.setComponent(serviceName);
-		pendingIntent = PendingIntent.getService(context, 0 /* no requestCode */, intent, 0 /*
-																							 * no
-																							 * flags
-																							 */);
+		pendingIntent = PendingIntent.getService(context, 0, intent, 0);
 		views.setOnClickPendingIntent(R.id.control_play, pendingIntent);
 
 		intent = new Intent(MusicPlaybackService.NEXT_ACTION);
 		intent.setComponent(serviceName);
-		pendingIntent = PendingIntent.getService(context, 0 /* no requestCode */, intent, 0 /*
-																							 * no
-																							 * flags
-																							 */);
+		pendingIntent = PendingIntent.getService(context, 0, intent, 0);
 		views.setOnClickPendingIntent(R.id.control_next, pendingIntent);
 
 		intent = new Intent(MusicPlaybackService.PREVIOUS_ACTION);
 		intent.setComponent(serviceName);
-		pendingIntent = PendingIntent.getService(context, 0 /* no requestCode */, intent, 0 /*
-																							 * no
-																							 * flags
-																							 */);
+		pendingIntent = PendingIntent.getService(context, 0, intent, 0);
 		views.setOnClickPendingIntent(R.id.control_prev, pendingIntent);
 
 		intent = new Intent(MusicPlaybackService.CYCLEREPEAT_ACTION);
 		intent.setComponent(serviceName);
-		pendingIntent = PendingIntent.getService(context, 0 /* no requestCode */, intent, 0 /*
-																							 * no
-																							 * flags
-																							 */);
+		pendingIntent = PendingIntent.getService(context, 0, intent, 0);
 		views.setOnClickPendingIntent(R.id.control_repeat, pendingIntent);
 
 		intent = new Intent(MusicPlaybackService.TOGGLESHUFFLE_ACTION);
 		intent.setComponent(serviceName);
-		pendingIntent = PendingIntent.getService(context, 0 /* no requestCode */, intent, 0 /*
-																							 * no
-																							 * flags
-																							 */);
+		pendingIntent = PendingIntent.getService(context, 0, intent, 0);
 		views.setOnClickPendingIntent(R.id.control_shuffle, pendingIntent);
 	}
 }

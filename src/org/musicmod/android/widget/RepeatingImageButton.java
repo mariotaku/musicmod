@@ -122,6 +122,7 @@ public class RepeatingImageButton extends ImageButton {
 
 	private Runnable mRepeater = new Runnable() {
 
+		@Override
 		public void run() {
 
 			doRepeat(false);

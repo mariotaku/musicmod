@@ -19,7 +19,6 @@ package org.musicmod.android.dialog;
 import org.musicmod.android.R;
 import org.musicmod.android.util.MusicUtils;
 
-import android.app.Activity;
 import android.database.Cursor;
 import android.media.AudioManager;
 import android.os.Bundle;
@@ -27,10 +26,11 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.MediaStore;
+import android.support.v4.app.FragmentActivity;
 import android.view.Window;
 import android.view.WindowManager;
 
-public class ScanningProgress extends Activity {
+public class ScanningProgress extends FragmentActivity {
 
 	private final static int CHECK = 0;
 	private Handler mHandler = new Handler() {

@@ -185,6 +185,7 @@ public class MusicUtils implements Constants {
 			mCallback = callback;
 		}
 
+		@Override
 		public void onServiceConnected(ComponentName className, android.os.IBinder service) {
 
 			mService = IMusicPlaybackService.Stub.asInterface(service);
@@ -194,6 +195,7 @@ public class MusicUtils implements Constants {
 			}
 		}
 
+		@Override
 		public void onServiceDisconnected(ComponentName className) {
 
 			if (mCallback != null) {
@@ -246,36 +248,6 @@ public class MusicUtils implements Constants {
 			}
 		}
 		return mode;
-	}
-
-	public static void togglePartyShuffle() {
-
-		if (mService != null) {
-			int shuffle = getCurrentShuffleMode();
-			try {
-				if (shuffle == SHUFFLE_AUTO) {
-					mService.setShuffleMode(SHUFFLE_NONE);
-				} else {
-					mService.setShuffleMode(SHUFFLE_AUTO);
-				}
-			} catch (RemoteException ex) {
-			}
-		}
-	}
-
-	public static void setPartyShuffleMenuIcon(Menu menu) {
-
-		MenuItem item = menu.findItem(PARTY_SHUFFLE);
-		if (item != null) {
-			int shuffle = MusicUtils.getCurrentShuffleMode();
-			if (shuffle == SHUFFLE_AUTO) {
-				item.setIcon(R.drawable.ic_menu_party_shuffle);
-				item.setTitle(R.string.party_shuffle_off);
-			} else {
-				item.setIcon(R.drawable.ic_menu_party_shuffle);
-				item.setTitle(R.string.party_shuffle);
-			}
-		}
 	}
 
 	/*
@@ -877,15 +849,12 @@ public class MusicUtils implements Constants {
 
 	public static long getFavoritesId(Context context) {
 		long favorites_id = -1;
-		String favorites_where = Audio.Playlists.NAME + "='"
-				+ PLAYLIST_NAME_FAVORITES + "'";
+		String favorites_where = Audio.Playlists.NAME + "='" + PLAYLIST_NAME_FAVORITES + "'";
 		String[] favorites_cols = new String[] { Audio.Playlists._ID };
 		Uri favorites_uri = Audio.Playlists.EXTERNAL_CONTENT_URI;
-		Cursor cursor = query(context, favorites_uri,
-				favorites_cols, favorites_where, null, null);
+		Cursor cursor = query(context, favorites_uri, favorites_cols, favorites_where, null, null);
 		if (cursor.getCount() <= 0) {
-			favorites_id = createPlaylist(context,
-					PLAYLIST_NAME_FAVORITES);
+			favorites_id = createPlaylist(context, PLAYLIST_NAME_FAVORITES);
 		} else {
 			cursor.moveToFirst();
 			favorites_id = cursor.getLong(0);
@@ -893,7 +862,7 @@ public class MusicUtils implements Constants {
 		}
 		return favorites_id;
 	}
-	
+
 	public static void addToFavorites(Context context, long id) {
 
 		long favorites_id;
@@ -1307,18 +1276,19 @@ public class MusicUtils implements Constants {
 			e.printStackTrace();
 		}
 	}
-	
-	public static void movePlaylistItem(Context context, Cursor cursor, long playlist_id, int from, int to) {
-		
+
+	public static void movePlaylistItem(Context context, Cursor cursor, long playlist_id, int from,
+			int to) {
+
 		if (from < 0) from = 0;
 		if (to < 0) to = 0;
-		
+
 		ContentResolver resolver = context.getContentResolver();
 		cursor.moveToPosition(from);
 		long id = cursor.getLong(cursor.getColumnIndexOrThrow(Playlists.Members.AUDIO_ID));
 		Uri uri = Playlists.Members.getContentUri("external", playlist_id);
 		resolver.delete(uri, Playlists.Members.AUDIO_ID + "=" + id, null);
-		
+
 		ContentValues values = new ContentValues();
 		values.put(Playlists.Members.AUDIO_ID, id);
 		values.put(Playlists.Members.PLAY_ORDER, to);

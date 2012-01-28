@@ -20,7 +20,6 @@ import org.musicmod.android.Constants;
 import org.musicmod.android.R;
 import org.musicmod.android.util.MusicUtils;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.ContentResolver;
@@ -32,6 +31,7 @@ import android.database.Cursor;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.v4.app.FragmentActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
@@ -40,7 +40,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-public class PlaylistDialog extends Activity implements Constants, TextWatcher, OnCancelListener,
+public class PlaylistDialog extends FragmentActivity implements Constants, TextWatcher, OnCancelListener,
 		OnShowListener {
 
 	private AlertDialog mPlaylistDialog;

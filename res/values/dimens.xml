@@ -27,5 +27,21 @@
 	<dimen name="default_element_spacing">4dip</dimen>
 	<dimen name="expandable_group_spacing_left">64dip</dimen>
 	<dimen name="item_editmode_spacing_left">36dip</dimen>
+	<dimen name="top_buttons_height">42.0dip</dimen>
+	<dimen name="top_buttons_width">42.0dip</dimen>
+	<dimen name="album_art_height">256dip</dimen>
+	<dimen name="album_art_width">256dip</dimen>
+	<dimen name="album_art_margin_bottom">-15dip</dimen>
+	<dimen name="player_progress_height">36dip</dimen>
+	<dimen name="player_control_height">58.0dip</dimen>
+	<dimen name="textsize_track_title">18dip</dimen>
+	<dimen name="textsize_artist">16dip</dimen>
+	<dimen name="textsize_info_album">12dip</dimen>
+	<dimen name="textsize_lyrics_primary">16dip</dimen>
+	<dimen name="textsize_lyrics_secondary">12dip</dimen>
+	<dimen name="textsize_time">14dip</dimen>
+	<dimen name="lyrics_scroll_fading_edge">80dip</dimen>
+	<dimen name="gridview_item_height">152dip</dimen>
+	<dimen name="gridview_item_width">152dip</dimen>
 
 </resources>

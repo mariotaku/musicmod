@@ -56,8 +56,7 @@ public class TrackBrowserActivity extends FragmentActivity implements Constants,
 		if (bundle.getString(INTENT_KEY_TYPE) == null)
 			bundle.putString(INTENT_KEY_TYPE, intent.getType());
 
-		TrackFragment fragment = new TrackFragment();
-		fragment.setArguments(bundle);
+		TrackFragment fragment = new TrackFragment(bundle);
 
 		getSupportFragmentManager().beginTransaction().replace(android.R.id.content, fragment)
 				.commit();

@@ -33,8 +33,7 @@
 				android:title="@string/ui_color_auto"/>
 
 			<net.margaritov.preference.colorpicker.ColorPickerPreference
-				alphaSlider="false"
-				android:defaultValue="@integer/white"
+				android:defaultValue="@android:color/white"
 				android:key="customized_color"
 				android:summary="@string/ui_color_customize_summary"
 				android:title="@string/ui_color_customize"/>

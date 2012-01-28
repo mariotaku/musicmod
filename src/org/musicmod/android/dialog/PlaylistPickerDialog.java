@@ -8,15 +8,15 @@ import org.musicmod.android.Constants;
 import org.musicmod.android.R;
 import org.musicmod.android.util.MusicUtils;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-public class PlaylistPickerDialog extends Activity implements DialogInterface.OnClickListener,
+public class PlaylistPickerDialog extends FragmentActivity implements DialogInterface.OnClickListener,
 		DialogInterface.OnCancelListener, Constants {
 
 	private AlertDialog mPlayListPickerDialog;

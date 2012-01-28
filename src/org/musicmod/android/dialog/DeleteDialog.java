@@ -20,7 +20,6 @@ import org.musicmod.android.Constants;
 import org.musicmod.android.R;
 import org.musicmod.android.util.MusicUtils;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
@@ -29,6 +28,7 @@ import android.content.DialogInterface.OnShowListener;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore.Audio;
+import android.support.v4.app.FragmentActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -36,7 +36,7 @@ import android.widget.Toast;
 
 //FIXME activity not found error when called by setData()
 
-public class DeleteDialog extends Activity implements Constants, OnMultiChoiceClickListener,
+public class DeleteDialog extends FragmentActivity implements Constants, OnMultiChoiceClickListener,
 		DialogInterface.OnClickListener, OnCancelListener, OnShowListener, View.OnClickListener {
 
 	private AlertDialog mDeleteMultiSelect, mDeleteConfirm;

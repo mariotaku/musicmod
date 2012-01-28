@@ -40,6 +40,7 @@ public class PlayShortcut extends FragmentActivity implements Constants {
 
 	private ServiceConnection osc = new ServiceConnection() {
 
+		@Override
 		public void onServiceConnected(ComponentName classname, IBinder obj) {
 
 			if (getIntent().getAction() != null
@@ -65,6 +66,7 @@ public class PlayShortcut extends FragmentActivity implements Constants {
 			finish();
 		}
 
+		@Override
 		public void onServiceDisconnected(ComponentName classname) {
 
 			finish();

@@ -26,7 +26,6 @@ public interface Constants {
 
 	public final static int SHUFFLE_NONE = 0;
 	public final static int SHUFFLE_NORMAL = 1;
-	public final static int SHUFFLE_AUTO = 2;
 
 	public final static int REPEAT_NONE = 0;
 	public final static int REPEAT_CURRENT = 1;
@@ -74,9 +73,6 @@ public interface Constants {
 	public final static int LYRICS_STATUS_NOT_FOUND = 1;
 	public final static int LYRICS_STATUS_INVALID = 2;
 
-	public final static String APP_NAME = "MusicMod";
-	public final static String PACKAGE_NAME = "org.musicmod.android";
-
 	public final static String PLUGINS_PNAME_PATTERN = "org.musicmod.plugin";
 	public final static String THEMES_PNAME_PATTERN = "org.musicmod.theme";
 
@@ -92,6 +88,7 @@ public interface Constants {
 	public final static String CMDREFRESHLYRICS = "refreshlyrics";
 	public final static String CMDRESENDALLLYRICS = "resendalllyrics";
 	public final static String CMDREFRESHMETADATA = "refreshmetadata";
+	public final static String CMDTOGGLEFAVORITE = "togglefavorite";
 	public final static String CMDMUSICWIDGETUPDATE_4x1 = "musicwidgetupdate4x1";
 	public final static String CMDMUSICWIDGETUPDATE_2x2 = "musicwidgetupdate2x2";
 
@@ -178,12 +175,15 @@ public interface Constants {
 	public final static String BROADCAST_KEY_ALBUM = "album";
 	public final static String BROADCAST_KEY_TRACK = "track";
 	public final static String BROADCAST_KEY_PLAYING = "playing";
+	public final static String BROADCAST_KEY_ISFAVORITE = "isfavorite";
 	public final static String BROADCAST_KEY_SONGID = "songid";
 	public final static String BROADCAST_KEY_ALBUMID = "albumid";
-	public final static String BROADCAST_KEY_POSITION = "pos";
-	public final static String BROADCAST_KEY_DURATION = "dur";
-	public final static String BROADCAST_KEY_SLS_DURATION = "duration";
-	public final static String BROADCAST_KEY_SLS_STATE = "state";
+	public final static String BROADCAST_KEY_POSITION = "position";
+	public final static String BROADCAST_KEY_DURATION = "duration";
+	public final static String BROADCAST_KEY_LISTSIZE = "listsize";
+	public final static String BROADCAST_KEY_STATE = "state";
+	public final static String BROADCAST_KEY_APP_NAME = "app-name";
+	public final static String BROADCAST_KEY_APP_PACKAGE = "app-package";
 	public final static String BROADCAST_KEY_LYRICS_STATUS = "lyrics_status";
 	public final static String BROADCAST_KEY_LYRICS_ID = "lyrics_id";
 	public final static String BROADCAST_KEY_LYRICS = "lyrics";
@@ -230,6 +230,7 @@ public interface Constants {
 
 	public final static String BROADCAST_PLAYSTATE_CHANGED = "org.musicmod.android.playstatechanged";
 	public final static String BROADCAST_META_CHANGED = "org.musicmod.android.metachanged";
+	public final static String BROADCAST_FAVORITESTATE_CHANGED = "org.musicmod.android.favoritestatechanged";
 	public final static String BROADCAST_NEW_LYRICS_LOADED = "org.musicmod.android.newlyricsloaded";
 	public final static String BROADCAST_LYRICS_REFRESHED = "org.musicmod.android.lyricsrefreshed";
 	public final static String BROADCAST_QUEUE_CHANGED = "org.musicmod.android.queuechanged";
@@ -264,5 +265,8 @@ public interface Constants {
 	public final static int SEARCH = R.id.search;
 	public final static int REMOVE = R.id.remove;
 	public final static int CHILD_MENU_BASE = 15; // this should be the last
+
+	public final static String[] HIDE_PLAYLISTS = new String[] { "Sony Ericsson play queue",
+			"Sony Ericsson played tracks", "Sony Ericsson temporary playlist" };
 
 }

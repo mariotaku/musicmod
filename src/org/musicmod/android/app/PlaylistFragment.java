@@ -34,6 +34,14 @@ public class PlaylistFragment extends ListFragment implements
 
 	private int mIdIdx, mNameIdx;
 
+	public PlaylistFragment() {
+
+	}
+
+	public PlaylistFragment(Bundle args) {
+		setArguments(args);
+	}
+
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
 		super.onActivityCreated(savedInstanceState);
@@ -54,6 +62,12 @@ public class PlaylistFragment extends ListFragment implements
 	}
 
 	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		outState.putAll(getArguments() != null ? getArguments() : new Bundle());
+		super.onSaveInstanceState(outState);
+	}
+
+	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
 		String[] cols = new String[] { MediaStore.Audio.Playlists._ID,
@@ -64,6 +78,9 @@ public class PlaylistFragment extends ListFragment implements
 		StringBuilder where = new StringBuilder();
 
 		where.append(MediaStore.Audio.Playlists.NAME + " != '" + PLAYLIST_NAME_FAVORITES + "'");
+		for (String hide_playlist : HIDE_PLAYLISTS) {
+			where.append(" AND " + MediaStore.Audio.Playlists.NAME + " != '" + hide_playlist + "'");
+		}
 
 		return new CursorLoader(getActivity(), uri, cols, where.toString(), null,
 				MediaStore.Audio.Playlists.DEFAULT_SORT_ORDER);

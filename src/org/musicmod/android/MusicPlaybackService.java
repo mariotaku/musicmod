@@ -1,11 +1,11 @@
 /*
- * Copyright (C) 2007 The Android Open Source Project
+ *			Copyright (C) 2012 The MusicMod Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *      http://www.apache.org/licenses/LICENSE-2.0
+ *			http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -101,7 +101,6 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 	private int mShuffleMode = SHUFFLE_NONE;
 	private int mRepeatMode = REPEAT_NONE;
 	private int mMediaMountedCount = 0;
-	private long[] mAutoShuffleList = null;
 	private long[] mPlayList = null;
 	private int mPlayListLen = 0;
 	private Vector<Integer> mHistory = new Vector<Integer>(MAX_HISTORY_SIZE);
@@ -375,6 +374,12 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 				cycleRepeat();
 			} else if (CMDTOGGLESHUFFLE.equals(cmd) || TOGGLESHUFFLE_ACTION.equals(action)) {
 				toggleShuffle();
+			} else if (CMDTOGGLEFAVORITE.equals(cmd)) {
+				if (!isFavorite()) {
+					addToFavorites();
+				} else {
+					removeFromFavorites();
+				}
 			} else if (MediaAppWidgetProvider4x1.CMDAPPWIDGETUPDATE.equals(cmd)) {
 				// Someone asked us to refresh a set of specific widgets,
 				// probably
@@ -393,6 +398,7 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 
 	private OnAudioFocusChangeListener mAudioFocusListener = new OnAudioFocusChangeListener() {
 
+		@Override
 		public void onAudioFocusChange(int focusChange) {
 
 			mMediaplayerHandler.obtainMessage(FOCUSCHANGE, focusChange, 0).sendToTarget();
@@ -401,6 +407,7 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 
 	private PhoneStateListener mPhoneStateListener = new PhoneStateListener() {
 
+		@Override
 		public void onCallStateChanged(int state, String incomingNumber) {
 
 			switch (state) {
@@ -433,6 +440,7 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 		super.onCreate();
 
 		mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+
 		mAudioManager.registerMediaButtonEventReceiver(new ComponentName(getPackageName(),
 				MediaButtonIntentReceiver.class.getName()));
 
@@ -724,7 +732,7 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 			mRepeatMode = repmode;
 
 			int shufmode = mPrefs.getIntState(STATE_KEY_SHUFFLEMODE, SHUFFLE_NONE);
-			if (shufmode != SHUFFLE_AUTO && shufmode != SHUFFLE_NORMAL) {
+			if (shufmode != SHUFFLE_NORMAL) {
 				shufmode = SHUFFLE_NONE;
 			}
 			if (shufmode != SHUFFLE_NONE) {
@@ -762,11 +770,6 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 					}
 				}
 			}
-			if (shufmode == SHUFFLE_AUTO) {
-				if (!makeAutoShuffleList()) {
-					shufmode = SHUFFLE_NONE;
-				}
-			}
 			mShuffleMode = shufmode;
 		}
 	}
@@ -800,18 +803,19 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 			if (CMDNEXT.equals(cmd) || NEXT_ACTION.equals(action)) {
 				next(true);
 			} else if (CMDPREVIOUS.equals(cmd) || PREVIOUS_ACTION.equals(action)) {
-				if (position() < 2000) {
-					prev();
-				} else {
-					seek(0);
-					play();
-				}
+				prev();
 			} else if (CMDTOGGLEPAUSE.equals(cmd) || TOGGLEPAUSE_ACTION.equals(action)) {
 				if (isPlaying()) {
 					pause();
 					mPausedByTransientLossOfFocus = false;
 				} else {
 					play();
+				}
+			} else if (CMDTOGGLEFAVORITE.equals(cmd)) {
+				if (!isFavorite()) {
+					addToFavorites();
+				} else {
+					removeFromFavorites();
 				}
 			} else if (CMDPAUSE.equals(cmd) || PAUSE_ACTION.equals(action)) {
 				pause();
@@ -970,19 +974,20 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 	private void notifyChange(String what) {
 
 		Intent i = new Intent(what);
-		i.putExtra(BROADCAST_KEY_ID, Long.valueOf(getAudioId()));
+		i.putExtra(BROADCAST_KEY_ID, getAudioId());
 		i.putExtra(BROADCAST_KEY_ARTIST, getArtistName());
 		i.putExtra(BROADCAST_KEY_ALBUM, getAlbumName());
 		i.putExtra(BROADCAST_KEY_TRACK, getTrackName());
 		i.putExtra(BROADCAST_KEY_PLAYING, isPlaying());
+		i.putExtra(BROADCAST_KEY_ISFAVORITE, isFavorite());
 		i.putExtra(BROADCAST_KEY_SONGID, getAudioId());
 		i.putExtra(BROADCAST_KEY_ALBUMID, getAlbumId());
 		i.putExtra(BROADCAST_KEY_DURATION, duration());
 		i.putExtra(BROADCAST_KEY_POSITION, position());
 		if (mPlayList != null)
-			i.putExtra("ListSize", Long.valueOf(mPlayList.length));
+			i.putExtra(BROADCAST_KEY_LISTSIZE, Long.valueOf(mPlayList.length));
 		else
-			i.putExtra("ListSize", Long.valueOf(mPlayListLen));
+			i.putExtra(BROADCAST_KEY_LISTSIZE, Long.valueOf(mPlayListLen));
 		sendStickyBroadcast(i);
 
 		if (BROADCAST_META_CHANGED.equals(what)) {
@@ -1041,15 +1046,15 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 		if (mScrobbleEnabled) {
 			Intent i = new Intent(SCROBBLE_SLS_API);
 
-			i.putExtra("app-name", APP_NAME);
-			i.putExtra("app-package", PACKAGE_NAME);
+			i.putExtra(BROADCAST_KEY_APP_NAME, getString(R.string.app_name));
+			i.putExtra(BROADCAST_KEY_APP_PACKAGE, getPackageName());
 
-			i.putExtra(BROADCAST_KEY_SLS_STATE, state);
+			i.putExtra(BROADCAST_KEY_STATE, state);
 
 			i.putExtra(BROADCAST_KEY_ARTIST, getArtistName());
 			i.putExtra(BROADCAST_KEY_ALBUM, getAlbumName());
 			i.putExtra(BROADCAST_KEY_TRACK, getTrackName());
-			i.putExtra(BROADCAST_KEY_SLS_DURATION, (int) (duration() / 1000));
+			i.putExtra(BROADCAST_KEY_DURATION, (int) (duration() / 1000));
 
 			sendBroadcast(i);
 		}
@@ -1243,9 +1248,6 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 	public void open(long[] list, int position) {
 
 		synchronized (this) {
-			if (mShuffleMode == SHUFFLE_AUTO) {
-				mShuffleMode = SHUFFLE_NORMAL;
-			}
 			long oldId = getAudioId();
 			int listlength = list.length;
 			boolean newlist = true;
@@ -1320,12 +1322,41 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 		}
 	}
 
+	public void toggleFavorite() {
+		if (!isFavorite()) {
+			addToFavorites();
+		} else {
+			removeFromFavorites();
+		}
+	}
+
+	public void addToFavorites() {
+		if (getAudioId() >= 0) {
+			addToFavorites(getAudioId());
+		}
+	}
+
+	public void removeFromFavorites() {
+		if (getAudioId() >= 0) {
+			removeFromFavorites(getAudioId());
+		}
+	}
+
+	public boolean isFavorite() {
+		if (getAudioId() >= 0) {
+			return isFavorite(getAudioId());
+		}
+		return false;
+	}
+
 	public void addToFavorites(long id) {
 		MusicUtils.addToFavorites(this, id);
+		notifyChange(BROADCAST_FAVORITESTATE_CHANGED);
 	}
 
 	public void removeFromFavorites(long id) {
 		MusicUtils.removeFromFavorites(this, id);
+		notifyChange(BROADCAST_FAVORITESTATE_CHANGED);
 	}
 
 	public boolean isFavorite(long id) {
@@ -1521,7 +1552,7 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 			// This is mostly so that if you press 'play' on a bluetooth headset
 			// without every having played anything before, it will still play
 			// something.
-			setShuffleMode(SHUFFLE_AUTO);
+			setShuffleMode(SHUFFLE_NORMAL);
 		}
 	}
 
@@ -1703,9 +1734,6 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 					}
 				}
 				mPlayPos = cnt;
-			} else if (mShuffleMode == SHUFFLE_AUTO) {
-				doAutoShuffleUpdate();
-				mPlayPos++;
 			} else {
 				if (mPlayPos >= mPlayListLen - 1) {
 					// we're at the end of the list
@@ -1751,9 +1779,10 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 			if (mRepeatMode == REPEAT_CURRENT) {
 				setRepeatMode(REPEAT_ALL);
 			}
-		} else if (mShuffleMode == SHUFFLE_NORMAL || mShuffleMode == SHUFFLE_AUTO) {
+		} else if (mShuffleMode == SHUFFLE_NORMAL) {
 			setShuffleMode(SHUFFLE_NONE);
 		} else {
+			setShuffleMode(SHUFFLE_NONE);
 			Log.e("MediaPlaybackService", "Invalid shuffle mode: " + mShuffleMode);
 		}
 	}
@@ -1792,44 +1821,6 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 				getContentResolver().update(uri, values, null, null);
 			}
 		} catch (SQLiteException ex) {
-		}
-	}
-
-	// Make sure there are at least 5 items after the currently playing item
-	// and no more than 10 items before.
-	private void doAutoShuffleUpdate() {
-
-		boolean notify = false;
-
-		// remove old entries
-		if (mPlayPos > 10) {
-			removeTracks(0, mPlayPos - 9);
-			notify = true;
-		}
-		// add new entries if needed
-		int to_add = 7 - (mPlayListLen - (mPlayPos < 0 ? -1 : mPlayPos));
-		for (int i = 0; i < to_add; i++) {
-			// pick something at random from the list
-
-			int lookback = mHistory.size();
-			int idx = -1;
-			while (true) {
-				idx = mRand.nextInt(mAutoShuffleList.length);
-				if (!wasRecentlyUsed(idx, lookback)) {
-					break;
-				}
-				lookback /= 2;
-			}
-			mHistory.add(idx);
-			if (mHistory.size() > MAX_HISTORY_SIZE) {
-				mHistory.remove(0);
-			}
-			ensurePlayListCapacity(mPlayListLen + 1);
-			mPlayList[mPlayListLen++] = mAutoShuffleList[idx];
-			notify = true;
-		}
-		if (notify) {
-			notifyChange(BROADCAST_QUEUE_CHANGED);
 		}
 	}
 
@@ -1875,34 +1866,6 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 			return ret;
 		}
 	};
-
-	private boolean makeAutoShuffleList() {
-
-		ContentResolver res = getContentResolver();
-		Cursor c = null;
-		try {
-			c = res.query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-					new String[] { MediaStore.Audio.Media._ID }, MediaStore.Audio.Media.IS_MUSIC
-							+ "=1", null, null);
-			if (c == null || c.getCount() == 0) {
-				return false;
-			}
-			int len = c.getCount();
-			long[] list = new long[len];
-			for (int i = 0; i < len; i++) {
-				c.moveToNext();
-				list[i] = c.getLong(0);
-			}
-			mAutoShuffleList = list;
-			return true;
-		} catch (RuntimeException ex) {
-		} finally {
-			if (c != null) {
-				c.close();
-			}
-		}
-		return false;
-	}
 
 	/**
 	 * Removes the range of tracks specified from the play list. If a file
@@ -2001,20 +1964,6 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 			}
 			mShuffleMode = shufflemode;
 			notifyChange(BROADCAST_SHUFFLEMODE_CHANGED);
-			if (mShuffleMode == SHUFFLE_AUTO) {
-				if (makeAutoShuffleList()) {
-					mPlayListLen = 0;
-					doAutoShuffleUpdate();
-					mPlayPos = 0;
-					openCurrent();
-					play();
-					notifyChange(BROADCAST_META_CHANGED);
-					return;
-				} else {
-					// failed to build a list of files to shuffle
-					mShuffleMode = SHUFFLE_NONE;
-				}
-			}
 			saveQueue(false);
 		}
 	}
@@ -2161,9 +2110,6 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 			openCurrent();
 			play();
 			notifyChange(BROADCAST_META_CHANGED);
-			if (mShuffleMode == SHUFFLE_AUTO) {
-				doAutoShuffleUpdate();
-			}
 		}
 	}
 
@@ -2370,6 +2316,7 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 
 		private MediaPlayer.OnCompletionListener listener = new MediaPlayer.OnCompletionListener() {
 
+			@Override
 			public void onCompletion(MediaPlayer mp) {
 
 				// Acquire a temporary wakelock, since when we return from
@@ -2385,6 +2332,7 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 
 		private MediaPlayer.OnErrorListener errorListener = new MediaPlayer.OnErrorListener() {
 
+			@Override
 			public boolean onError(MediaPlayer mp, int what, int extra) {
 
 				switch (what) {
@@ -2459,249 +2407,304 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 			mService = new WeakReference<MusicPlaybackService>(service);
 		}
 
+		@Override
 		public void reloadLyrics() {
 
 			mService.get().reloadLyrics();
 		}
 
+		@Override
 		public void refreshLyrics() {
 
 			mService.get().notifyLyricsChange(BROADCAST_LYRICS_REFRESHED);
 		}
 
+		@Override
 		public void openFile(String path) {
 
 			mService.get().open(path);
 		}
 
+		@Override
 		public void open(long[] list, int position) {
 
 			mService.get().open(list, position);
 		}
 
+		@Override
 		public int getQueuePosition() {
 
 			return mService.get().getQueuePosition();
 		}
 
+		@Override
 		public void setQueuePosition(int index) {
 
 			mService.get().setQueuePosition(index);
 		}
 
+		@Override
 		public boolean isPlaying() {
 
 			return mService.get().isPlaying();
 		}
 
+		@Override
 		public void stop() {
 
 			mService.get().stop();
 		}
 
+		@Override
 		public void pause() {
 
 			mService.get().pause();
 		}
 
+		@Override
 		public void play() {
 
 			mService.get().play();
 		}
 
+		@Override
 		public void prev() {
 
 			mService.get().prev();
 		}
 
+		@Override
 		public void next() {
 
 			mService.get().next(true);
 		}
 
+		@Override
 		public void cycleRepeat() {
 
 			mService.get().cycleRepeat();
 		}
 
+		@Override
 		public void toggleShuffle() {
 
 			mService.get().toggleShuffle();
 		}
 
+		@Override
 		public String getTrackName() {
 
 			return mService.get().getTrackName();
 		}
 
+		@Override
 		public String getAlbumName() {
 
 			return mService.get().getAlbumName();
 		}
 
+		@Override
 		public long getAlbumId() {
 
 			return mService.get().getAlbumId();
 		}
 
+		@Override
 		public String getArtistName() {
 
 			return mService.get().getArtistName();
 		}
 
+		@Override
 		public long getArtistId() {
 
 			return mService.get().getArtistId();
 		}
 
+		@Override
 		public void enqueue(long[] list, int action) {
 
 			mService.get().enqueue(list, action);
 		}
 
+		@Override
 		public long[] getQueue() {
 
 			return mService.get().getQueue();
 		}
 
+		@Override
 		public void moveQueueItem(int from, int to) {
 
 			mService.get().moveQueueItem(from, to);
 		}
 
+		@Override
 		public String getPath() {
 
 			return mService.get().getPath();
 		}
 
+		@Override
 		public String getMediaPath() {
 
 			return mService.get().getMediaPath();
 		}
 
+		@Override
 		public Bitmap getAlbumArt() {
 
 			return mService.get().getAlbumArt();
 		}
 
+		@Override
 		public Uri getArtworkUri() {
 
 			return mService.get().getArtworkUri();
 		}
 
+		@Override
 		public String[] getLyrics() {
 
 			return mService.get().getLyrics();
 		}
 
+		@Override
 		public int getLyricsStatus() {
 
 			return mService.get().getLyricsStatus();
 		}
 
+		@Override
 		public int getCurrentLyricsId() {
 
 			return mService.get().getCurrentLyricsId();
 		}
 
+		@Override
 		public long getPositionByLyricsId(int id) {
 
 			return mService.get().getPositionByLyricsId(id);
 		}
 
+		@Override
 		public void reloadEqualizer() {
 
 			mService.get().reloadEqualizer();
 		}
 
+		@Override
 		public long getAudioId() {
 
 			return mService.get().getAudioId();
 		}
 
+		@Override
 		public long position() {
 
 			return mService.get().position();
 		}
 
+		@Override
 		public long duration() {
 
 			return mService.get().duration();
 		}
 
+		@Override
 		public long seek(long pos) {
 
 			return mService.get().seek(pos);
 		}
 
+		@Override
 		public void setShuffleMode(int shufflemode) {
 
 			mService.get().setShuffleMode(shufflemode);
 		}
 
+		@Override
 		public int getShuffleMode() {
 
 			return mService.get().getShuffleMode();
 		}
 
+		@Override
 		public int removeTracks(int first, int last) {
 
 			return mService.get().removeTracks(first, last);
 		}
 
+		@Override
 		public int removeTrack(long id) {
 
 			return mService.get().removeTrack(id);
 		}
 
+		@Override
 		public void setRepeatMode(int repeatmode) {
 
 			mService.get().setRepeatMode(repeatmode);
 		}
 
+		@Override
 		public int getRepeatMode() {
 
 			return mService.get().getRepeatMode();
 		}
 
+		@Override
 		public int getMediaMountedCount() {
 
 			return mService.get().getMediaMountedCount();
 		}
 
+		@Override
 		public int getAudioSessionId() {
 
 			return mService.get().getAudioSessionId();
 		}
 
+		@Override
 		public void startSleepTimer(long milliseconds, boolean gentle) {
 
 			mService.get().startSleepTimer(milliseconds, gentle);
 		}
 
+		@Override
 		public void stopSleepTimer() {
 
 			mService.get().stopSleepTimer();
 		}
 
+		@Override
 		public long getSleepTimerRemained() {
 
 			return mService.get().getSleepTimerRemained();
 		}
 
+		@Override
 		public void reloadSettings() {
 
 			mService.get().reloadSettings();
 		}
 
+		@Override
+		public void toggleFavorite() {
+			mService.get().toggleFavorite();
+		}
+
+		@Override
 		public void addToFavorites(long id) {
 			mService.get().addToFavorites(id);
 		}
 
+		@Override
 		public void removeFromFavorites(long id) {
 			mService.get().removeFromFavorites(id);
 		}
 
+		@Override
 		public boolean isFavorite(long id) {
 			return mService.get().isFavorite(id);
 		}

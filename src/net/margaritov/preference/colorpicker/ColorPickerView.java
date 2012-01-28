@@ -17,6 +17,7 @@
 package net.margaritov.preference.colorpicker;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ComposeShader;
@@ -637,7 +638,8 @@ public class ColorPickerView extends View {
 
 			// If calculated height (based on the width) is more than the
 			// allowed height.
-			if (height > heightAllowed || getTag().equals("landscape")) {
+			if (height > heightAllowed
+					|| getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
 				height = heightAllowed;
 				width = (int) (height + PANEL_SPACING + HUE_PANEL_WIDTH);
 			} else {

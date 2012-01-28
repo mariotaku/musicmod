@@ -18,9 +18,6 @@ import android.widget.TextView;
 
 public class TextScrollView extends ScrollView implements OnLongClickListener {
 
-	// Namespaces to read attributes
-	private static final String TEXTSCROLLVIEW_NS = "http://schemas.android.com/apk/res/org.musicmod.android";
-
 	private LinearLayout mScrollContainer;
 	private LinearLayout mContentContainer, mContentEmptyView;
 	private boolean mSmoothScrolling = false;

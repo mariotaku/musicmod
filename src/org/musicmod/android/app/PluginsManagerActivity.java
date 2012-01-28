@@ -102,6 +102,7 @@ public class PluginsManagerActivity extends ListActivity implements Constants {
 					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		}
 
+		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 
 			return createViewFromResource(position, convertView, parent, appResource);
@@ -227,6 +228,7 @@ public class PluginsManagerActivity extends ListActivity implements Constants {
 		mListView.setOnItemClickListener(mPluginClickedListener);
 		mListView.setOnCreateContextMenuListener(new OnCreateContextMenuListener() {
 
+			@Override
 			public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 
 				menu.add(0, CONFIGURE_PLUGIN, 0, getString(R.string.open_configure));

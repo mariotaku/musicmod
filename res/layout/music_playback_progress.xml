@@ -17,23 +17,24 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="match_parent"
-	android:layout_height="@dimen/player_progress_height"
+	android:layout_height="@dimen/default_element_height"
 	android:layout_gravity="bottom"
-	android:gravity="center_vertical"
+	android:gravity="center_vertical|bottom"
 	android:orientation="horizontal"
-	android:padding="8dip">
+	android:paddingLeft="@dimen/default_element_spacing"
+	android:paddingRight="@dimen/default_element_spacing">
 
 	<TextView
 		android:id="@+id/currenttime"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
+		android:layout_gravity="left|center_vertical"
 		android:layout_weight="0"
-		android:gravity="left|center_vertical"
 		android:shadowColor="@android:color/black"
 		android:shadowDx="0"
 		android:shadowDy="0"
 		android:shadowRadius="3"
-		android:text="--:--"
+		android:text="@string/default_time_format"
 		android:textColor="@android:color/white"
 		android:textSize="@dimen/textsize_time"
 		android:textStyle="bold"/>
@@ -53,13 +54,13 @@
 		android:id="@+id/totaltime"
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
+		android:layout_gravity="right|center_vertical"
 		android:layout_weight="0"
-		android:gravity="right|center_vertical"
 		android:shadowColor="@android:color/black"
 		android:shadowDx="0"
 		android:shadowDy="0"
 		android:shadowRadius="3"
-		android:text="--:--"
+		android:text="@string/default_time_format"
 		android:textColor="@android:color/white"
 		android:textSize="@dimen/textsize_time"
 		android:textStyle="bold"/>

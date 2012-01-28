@@ -21,7 +21,6 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v4.widget.CursorAdapter;
 import android.support.v4.widget.SimpleCursorAdapter;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -47,6 +46,14 @@ public class AlbumFragment extends Fragment implements Constants, OnItemClickLis
 	private long mSelectedId;
 	private String mCurrentAlbumName, mCurrentArtistNameForAlbum;
 	private int mIdIdx, mAlbumIdx, mArtistIdx;
+
+	public AlbumFragment() {
+
+	}
+
+	public AlbumFragment(Bundle args) {
+		setArguments(args);
+	}
 
 	@Override
 	public void onActivityCreated(Bundle savedInstanceState) {
@@ -74,6 +81,12 @@ public class AlbumFragment extends Fragment implements Constants, OnItemClickLis
 	}
 
 	@Override
+	public void onSaveInstanceState(Bundle outState) {
+		outState.putAll(getArguments() != null ? getArguments() : new Bundle());
+		super.onSaveInstanceState(outState);
+	}
+
+	@Override
 	public void onStart() {
 		super.onStart();
 
@@ -92,13 +105,10 @@ public class AlbumFragment extends Fragment implements Constants, OnItemClickLis
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
-		String[] cols = new String[] { MediaStore.Audio.Albums._ID, MediaStore.Audio.Albums.ALBUM,
-				MediaStore.Audio.Albums.ARTIST };
-
-		Uri uri = MediaStore.Audio.Albums.EXTERNAL_CONTENT_URI;
-
+		String[] cols = new String[] { Audio.Albums._ID, Audio.Albums.ALBUM, Audio.Albums.ARTIST };
+		Uri uri = Audio.Albums.EXTERNAL_CONTENT_URI;
 		return new CursorLoader(getActivity(), uri, cols, null, null,
-				MediaStore.Audio.Albums.DEFAULT_SORT_ORDER);
+				Audio.Albums.DEFAULT_SORT_ORDER);
 	}
 
 	@Override
@@ -111,18 +121,18 @@ public class AlbumFragment extends Fragment implements Constants, OnItemClickLis
 
 		mCursor = data;
 
-		mIdIdx = data.getColumnIndexOrThrow(MediaStore.Audio.Albums._ID);
-		mAlbumIdx = data.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM);
-		mArtistIdx = data.getColumnIndexOrThrow(MediaStore.Audio.Albums.ARTIST);
+		mIdIdx = data.getColumnIndexOrThrow(Audio.Albums._ID);
+		mAlbumIdx = data.getColumnIndexOrThrow(Audio.Albums.ALBUM);
+		mArtistIdx = data.getColumnIndexOrThrow(Audio.Albums.ARTIST);
 
-		mAdapter.swapCursor(data);
+		mAdapter.changeCursor(data);
 
 	}
 
 	@Override
 	public void onLoaderReset(Loader<Cursor> loader) {
 
-		mAdapter.swapCursor(null);
+		mAdapter.changeCursor(null);
 	}
 
 	@Override
@@ -149,6 +159,7 @@ public class AlbumFragment extends Fragment implements Constants, OnItemClickLis
 		mCurrentArtistNameForAlbum = mCursor.getString(mArtistIdx);
 
 		mCurrentAlbumName = mCursor.getString(mAlbumIdx);
+
 		menu.setHeaderTitle(mCurrentAlbumName);
 	}
 
@@ -168,7 +179,7 @@ public class AlbumFragment extends Fragment implements Constants, OnItemClickLis
 			case DELETE_ITEMS:
 				intent = new Intent(INTENT_DELETE_ITEMS);
 				Uri data = Uri.withAppendedPath(Audio.Albums.EXTERNAL_CONTENT_URI,
-						String.valueOf(mSelectedId));
+						Uri.encode(String.valueOf(mSelectedId)));
 				intent.setData(data);
 				startActivity(intent);
 				return true;
