@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--          Copyright (C) 2011 The MusicMod Project
+<!--
+ Copyright (C) 2011 The MusicMod Project
 
  Licensed under the Apache License, Version 2.0 (the "License");
  you may not use this file except in compliance with the License.
@@ -14,17 +15,8 @@
  limitations under the License.
 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<org.musicmod.android.widget.TextScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+	android:id="@+id/lyrics_scroll"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	android:orientation="vertical"
-	android:visibility="invisible"
-	android:id="@+id/lyrics_view">
-	
-    <org.musicmod.android.widget.TextScrollView
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:fadingEdgeLength="@dimen/lyrics_scroll_fading_edge"
-		android:id="@+id/lyrics_scroll"/>
-    
-</LinearLayout>
+	android:fadingEdgeLength="@dimen/lyrics_scroll_fading_edge"/>

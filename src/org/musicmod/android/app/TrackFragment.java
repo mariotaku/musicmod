@@ -110,7 +110,7 @@ public class TrackFragment extends ListFragment implements LoaderCallbacks<Curso
 		IntentFilter filter = new IntentFilter();
 		filter.addAction(BROADCAST_META_CHANGED);
 		filter.addAction(BROADCAST_QUEUE_CHANGED);
-		
+
 		getActivity().registerReceiver(mMediaStatusReceiver, filter);
 	}
 
@@ -371,7 +371,7 @@ public class TrackFragment extends ListFragment implements LoaderCallbacks<Curso
 		}
 
 	};
-	
+
 	// TODO make drag-n-drop move item work.
 	private OnDropListener mDropListener = new OnDropListener() {
 

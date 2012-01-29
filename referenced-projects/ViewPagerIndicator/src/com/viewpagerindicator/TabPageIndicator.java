@@ -36,7 +36,8 @@ public class TabPageIndicator extends HorizontalScrollView implements PageIndica
     Runnable mTabSelector;
 
     private OnClickListener mTabClickListener = new OnClickListener() {
-        public void onClick(View view) {
+        @Override
+		public void onClick(View view) {
             TabView tabView = (TabView)view;
             mViewPager.setCurrentItem(tabView.getIndex());
         }
@@ -98,7 +99,8 @@ public class TabPageIndicator extends HorizontalScrollView implements PageIndica
             removeCallbacks(mTabSelector);
         }
         mTabSelector = new Runnable() {
-            public void run() {
+            @Override
+			public void run() {
                 final int scrollPos = tabView.getLeft() - (getWidth() - tabView.getWidth()) / 2;
                 smoothScrollTo(scrollPos, 0);
                 mTabSelector = null;
@@ -170,7 +172,8 @@ public class TabPageIndicator extends HorizontalScrollView implements PageIndica
         notifyDataSetChanged();
     }
 
-    public void notifyDataSetChanged() {
+    @Override
+	public void notifyDataSetChanged() {
         mTabLayout.removeAllViews();
         TitleProvider adapter = (TitleProvider)mViewPager.getAdapter();
         final int count = ((PagerAdapter)adapter).getCount();

@@ -182,6 +182,8 @@ public class TextScrollView extends ScrollView implements OnLongClickListener {
 	public void onSizeChanged(int width, int height, int old_width, int old_height) {
 
 		mContentEmptyView.setLayoutParams(new LinearLayout.LayoutParams(width, height));
+		mContentContainer.setLayoutParams(new LinearLayout.LayoutParams(
+				LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT));
 		mContentContainer.setPadding(0, height / 2, 0, height / 2);
 	}
 

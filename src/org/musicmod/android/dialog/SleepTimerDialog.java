@@ -36,7 +36,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 
-public class SleepTimerDialog extends FragmentActivity implements OnSeekBarChangeListener, Constants {
+public class SleepTimerDialog extends FragmentActivity implements OnSeekBarChangeListener,
+		Constants {
 
 	private SeekBar mSetTime;
 	private TextView mTimeView;

@@ -248,7 +248,8 @@ public class CirclePageIndicator extends View implements PageIndicator {
         canvas.drawCircle(dX, dY, mRadius, mPaintFill);
     }
 
-    public boolean onTouchEvent(android.view.MotionEvent ev) {
+    @Override
+	public boolean onTouchEvent(android.view.MotionEvent ev) {
         if ((mViewPager == null) || (mViewPager.getAdapter().getCount() == 0)) {
             return false;
         }

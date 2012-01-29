@@ -15,90 +15,105 @@
  limitations under the License.
 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="match_parent"
-	android:layout_height="match_parent"
-	android:baselineAligned="false"
-	android:orientation="vertical">
+	android:layout_height="match_parent">
 
 	<FrameLayout
+		android:id="@+id/queue_frame"
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		android:layout_weight="1">
+		android:layout_gravity="bottom"
+		android:paddingTop="@dimen/album_art_height">
 
-		<LinearLayout
+		<FrameLayout
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
-			android:orientation="vertical">
+			android:layout_gravity="bottom"
+			android:paddingBottom="@dimen/player_control_height">
 
-			<FrameLayout
-				android:layout_width="@dimen/album_art_width"
-				android:layout_height="@dimen/album_art_height"
-				android:layout_gravity="top|center_horizontal"
-				android:gravity="center_horizontal">
+			<include layout="@layout/visualizer_view"/>
 
-				<ImageButton
-					android:id="@+id/curplaylist"
-					android:layout_width="match_parent"
-					android:layout_height="match_parent"
-					android:layout_gravity="center"
-					android:adjustViewBounds="true"
-					android:background="@drawable/ic_mp_albumart_border"
-					android:src="@drawable/ic_mp_albumart_empty"/>
-
-				<ImageView
-					android:id="@+id/album"
-					android:layout_width="match_parent"
-					android:layout_height="match_parent"
-					android:layout_gravity="center"
-					android:adjustViewBounds="true"
-					android:background="@drawable/ic_mp_albumart_placeholder"
-					android:src="@drawable/ic_mp_albumart_unknown"/>
-
-				<ImageView
-					android:layout_width="match_parent"
-					android:layout_height="match_parent"
-					android:layout_gravity="center"
-					android:adjustViewBounds="true"
-					android:background="@drawable/ic_mp_albumart_mask"
-					android:src="@drawable/ic_mp_albumart_empty"/>
-			</FrameLayout>
-
-			<FrameLayout
-				android:layout_width="match_parent"
-				android:layout_height="match_parent"
-				android:layout_gravity="bottom">
-
-				<include layout="@layout/visualizer_view"/>
-
-				<include layout="@layout/info_view"/>
-
-				<include layout="@layout/lyrics_view"/>
-			</FrameLayout>
-		</LinearLayout>
-
-		<LinearLayout
-			android:layout_width="match_parent"
-			android:layout_height="match_parent">
-
-			<include layout="@layout/volume_slider"/>
-		</LinearLayout>
-
-		<LinearLayout
-			android:layout_width="match_parent"
-			android:layout_height="match_parent">
+			<include layout="@layout/lyrics_view"/>
 
 			<include layout="@layout/music_playback_progress"/>
+		</FrameLayout>
+
+		<LinearLayout
+			android:layout_width="match_parent"
+			android:layout_height="wrap_content"
+			android:layout_gravity="bottom">
+
+			<include layout="@layout/music_playback_control"/>
 		</LinearLayout>
 	</FrameLayout>
 
 	<LinearLayout
 		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:layout_weight="0"
-		android:gravity="bottom">
+		android:layout_height="match_parent"
+		android:paddingBottom="@dimen/player_control_height">
 
-		<include layout="@layout/music_playback_control"/>
+		<include layout="@layout/volume_slider"/>
 	</LinearLayout>
 
-</LinearLayout>
+	<FrameLayout
+		android:id="@+id/album_buttons_view"
+		android:layout_width="match_parent"
+		android:layout_height="@dimen/album_art_height"
+		android:gravity="top|center"
+		android:orientation="horizontal">
+
+		<FrameLayout
+			android:id="@+id/album_art_view"
+			android:layout_width="@dimen/album_art_width"
+			android:layout_height="match_parent"
+			android:layout_gravity="center"
+			android:gravity="center">
+
+			<ImageView
+				android:layout_width="match_parent"
+				android:layout_height="match_parent"
+				android:layout_gravity="center"
+				android:adjustViewBounds="true"
+				android:background="@drawable/ic_mp_albumart_border"
+				android:src="@drawable/ic_mp_albumart_empty"/>
+
+			<ImageView
+				android:id="@+id/album_art"
+				android:layout_width="match_parent"
+				android:layout_height="match_parent"
+				android:layout_gravity="center"
+				android:adjustViewBounds="true"
+				android:background="@drawable/ic_mp_albumart_placeholder"
+				android:src="@drawable/ic_mp_albumart_unknown"/>
+
+			<ImageView
+				android:layout_width="match_parent"
+				android:layout_height="match_parent"
+				android:layout_gravity="center"
+				android:adjustViewBounds="true"
+				android:background="@drawable/ic_mp_albumart_mask"
+				android:src="@drawable/ic_mp_albumart_empty"/>
+		</FrameLayout>
+
+		<LinearLayout
+			android:id="@+id/buttons"
+			android:layout_width="wrap_content"
+			android:layout_height="match_parent"
+			android:layout_gravity="right"
+			android:orientation="vertical"
+			android:visibility="gone">
+
+			<ImageButton
+				android:layout_width="48dip"
+				android:layout_height="48dip"
+				android:src="@drawable/ic_mp_shuffle_off_btn"/>
+
+			<ImageButton
+				android:layout_width="48dip"
+				android:layout_height="48dip"
+				android:src="@drawable/ic_mp_repeat_off_btn"/>
+		</LinearLayout>
+	</FrameLayout>
+
+</FrameLayout>

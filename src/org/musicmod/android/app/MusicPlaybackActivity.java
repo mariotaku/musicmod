@@ -33,6 +33,9 @@ import org.musicmod.android.widget.RepeatingImageButton.RepeatListener;
 import org.musicmod.android.widget.TextScrollView;
 import org.musicmod.android.widget.TextScrollView.OnLineSelectedListener;
 
+import com.nineoldandroids.animation.AnimatorSet;
+import com.nineoldandroids.animation.ObjectAnimator;
+
 import android.app.SearchManager;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
@@ -59,6 +62,7 @@ import android.provider.MediaStore;
 import android.provider.MediaStore.Audio;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Gravity;
@@ -69,9 +73,12 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnLongClickListener;
 import android.view.View.OnTouchListener;
-import android.view.WindowManager;
 import android.view.GestureDetector.OnGestureListener;
+import android.view.WindowManager.LayoutParams;
 import android.view.animation.AnimationUtils;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -93,13 +100,13 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 	private RepeatingImageButton mPrevButton;
 	private ImageButton mPauseButton;
 	private RepeatingImageButton mNextButton;
-	private ImageButton mRepeatButton;
-	private ImageButton mShuffleButton;
+	private ImageButton mRepeatButton, mShuffleButton;
 	private AsyncAlbumArtLoader mAlbumArtLoader;
 	private AsyncColorAnalyser mColorAnalyser;
 	private Toast mToast;
 	private ServiceToken mToken;
 	private boolean mIntentDeRegistered = false;
+	private boolean mQueueShowed = false;
 
 	private PreferencesEditor mPrefs;
 
@@ -122,14 +129,13 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 	private TextScrollView mLyricsScrollView;
 	private TextView mLyricsInfoMessage;
 
-	private LinearLayout mLyricsView, mInfoView, mVolumeSlider;
+	private LinearLayout mVolumeSlider;
 
-	private boolean mDisplayLyrics = true;
 	private boolean mShowFadeAnimation = false;
 	private boolean mLyricsWakelock = DEFAULT_LYRICS_WAKELOCK;
 
 	private TextView mTrackNameView, mTrackDetailView;
-	private ImageButton mFavoriteButton;
+	private CheckBox mFavoriteButton;
 
 	private ImageView mAlbum;
 	private TextView mCurrentTime, mTotalTime;
@@ -192,7 +198,7 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 
 		mTrackNameView = (TextView) mCustomView.findViewById(R.id.track_name);
 		mTrackDetailView = (TextView) mCustomView.findViewById(R.id.track_detail);
-		mFavoriteButton = (ImageButton) mCustomView.findViewById(R.id.favorite_button);
+		mFavoriteButton = (CheckBox) mCustomView.findViewById(R.id.favorite_button);
 		mFavoriteButton.setOnClickListener(mFavoriteListener);
 
 		mCurrentTime = (TextView) findViewById(R.id.currenttime);
@@ -203,19 +209,15 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 
 		mProgress = (ProgressBar) findViewById(android.R.id.progress);
 
-		mAlbum = (ImageView) findViewById(R.id.album);
+		mAlbum = (ImageView) findViewById(R.id.album_art);
 		mAlbum.setOnClickListener(mQueueListener);
 		mAlbum.setOnLongClickListener(mSearchAlbumArtListener);
-
-		mLyricsView = (LinearLayout) findViewById(R.id.lyrics_view);
 
 		mLyricsScrollView = (TextScrollView) findViewById(R.id.lyrics_scroll);
 		mLyricsScrollView.setContentGravity(Gravity.CENTER_HORIZONTAL);
 
 		mLyricsInfoMessage = (TextView) findViewById(R.id.message);
 		mLyricsInfoMessage.setOnLongClickListener(mSearchLyricsListener);
-
-		mInfoView = (LinearLayout) findViewById(R.id.info_view);
 
 		mVolumeSlider = (LinearLayout) findViewById(R.id.volume_layout);
 
@@ -268,11 +270,9 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		mProgress.setMax(1000);
 	}
 
-	// TODO loadPreferences
 	private void loadPreferences() {
 
 		mLyricsWakelock = mPrefs.getBooleanPref(KEY_LYRICS_WAKELOCK, DEFAULT_LYRICS_WAKELOCK);
-		mDisplayLyrics = mPrefs.getBooleanState(KEY_DISPLAY_LYRICS, DEFAULT_DISPLAY_LYRICS);
 		mAutoColor = mPrefs.getBooleanPref(KEY_AUTO_COLOR, true);
 		mBlurBackground = mPrefs.getBooleanPref(KEY_BLUR_BACKGROUND, false);
 	}
@@ -394,6 +394,7 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
 	}
 
 	private OnSeekBarChangeListener mSeekListener = new OnSeekBarChangeListener() {
@@ -434,18 +435,57 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		}
 	};
 
+	// TODO show queue
 	private View.OnClickListener mQueueListener = new View.OnClickListener() {
 
 		@Override
 		public void onClick(View v) {
 
-			Bundle bundle = new Bundle();
-			bundle.putString(INTENT_KEY_TYPE, MediaStore.Audio.Playlists.CONTENT_TYPE);
-			bundle.putLong(MediaStore.Audio.Playlists._ID, PLAYLIST_QUEUE);
-			Intent intent = new Intent(getApplicationContext(), TrackBrowserActivity.class);
-			intent.putExtras(bundle);
+			View mButtons = findViewById(R.id.buttons);
+			View mAlbumArtView = findViewById(R.id.album_art_view);
 
-			startActivity(intent);
+			View mQueueFrame = findViewById(R.id.queue_frame);
+
+			AnimatorSet set = new AnimatorSet().setDuration(200);
+			FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+
+			if (!mQueueShowed) {
+				mButtons.setVisibility(View.VISIBLE);
+				mButtons.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(),
+						android.R.anim.fade_in));
+				mQueueFrame.setPadding(mQueueFrame.getPaddingLeft(),
+						(int) (mQueueFrame.getPaddingTop() * 0.75),
+						mQueueFrame.getPaddingRight(),
+						mQueueFrame.getPaddingBottom());
+				set.playTogether(
+						ObjectAnimator.ofFloat(mAlbumArtView, "scaleX", 0.75f),
+						ObjectAnimator.ofFloat(mAlbumArtView, "scaleY", 0.75f),
+						ObjectAnimator.ofFloat(mAlbumArtView, "translationX",
+								-(mAlbumArtView.getLeft() + mAlbumArtView.getWidth() * 0.25f / 2)),
+						ObjectAnimator.ofFloat(mAlbumArtView, "translationY",
+								-mAlbumArtView.getHeight() * 0.25f / 2));
+
+				Bundle bundle = new Bundle();
+				bundle.putString(INTENT_KEY_TYPE, MediaStore.Audio.Playlists.CONTENT_TYPE);
+				bundle.putLong(MediaStore.Audio.Playlists._ID, PLAYLIST_QUEUE);
+
+				TrackFragment fragment = new TrackFragment(bundle);
+				ft.replace(R.id.queue_frame, fragment);
+				ft.commit();
+			} else {
+				mButtons.setVisibility(View.GONE);
+				mButtons.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(),
+						android.R.anim.fade_out));
+				mQueueFrame.setPadding(mQueueFrame.getPaddingLeft(), getResources()
+						.getDimensionPixelSize(R.dimen.album_art_height), mQueueFrame
+						.getPaddingRight(), mQueueFrame.getPaddingBottom());
+				set.playTogether(ObjectAnimator.ofFloat(mAlbumArtView, "scaleX", 1f),
+						ObjectAnimator.ofFloat(mAlbumArtView, "scaleY", 1f),
+						ObjectAnimator.ofFloat(mAlbumArtView, "translationX", 0),
+						ObjectAnimator.ofFloat(mAlbumArtView, "translationY", 0));
+			}
+			mQueueShowed = !mQueueShowed;
+			set.start();
 		}
 	};
 
@@ -566,6 +606,8 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		mLyricsScrollView.unregisterLineSelectedListener(this);
 		unregisterReceiver(mScreenTimeoutListener);
 		if (mAlbumArtLoader != null) mAlbumArtLoader.cancel(true);
+		
+		getWindow().clearFlags(LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 		// TODO visualizer
 		mVisualizer.stop();
@@ -589,16 +631,15 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		mLyricsScrollView.registerLineSelectedListener(this);
 
 		if (mBlurBackground) {
-			getWindow().addFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+			getWindow().addFlags(LayoutParams.FLAG_BLUR_BEHIND);
 		} else {
-			getWindow().clearFlags(WindowManager.LayoutParams.FLAG_BLUR_BEHIND);
+			getWindow().clearFlags(LayoutParams.FLAG_BLUR_BEHIND);
 		}
 
-		// show lyrics
-		if (mDisplayLyrics) {
-			displayLyrics(mShowFadeAnimation, false);
+		if (mLyricsWakelock) {
+			getWindow().addFlags(LayoutParams.FLAG_KEEP_SCREEN_ON);
 		} else {
-			displayInfo(mShowFadeAnimation, false);
+			getWindow().clearFlags(LayoutParams.FLAG_KEEP_SCREEN_ON);
 		}
 
 		// TODO visualizer
@@ -804,10 +845,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 				toggleShuffle();
 				return true;
 
-			case KeyEvent.KEYCODE_L:
-				toggleLyrics();
-				return true;
-
 			case KeyEvent.KEYCODE_N:
 				if (mService != null) {
 					try {
@@ -838,45 +875,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 				return true;
 		}
 		return super.onKeyDown(keyCode, event);
-	}
-
-	private void displayLyrics(boolean show_animation, boolean fromuser) {
-
-		if (mLyricsWakelock) {
-			getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-		}
-
-		if (mInfoView.getVisibility() != View.INVISIBLE) {
-
-			mInfoView.setVisibility(View.INVISIBLE);
-			mInfoView.startAnimation(AnimationUtils.loadAnimation(this, android.R.anim.fade_out));
-		}
-
-		if (mLyricsView.getVisibility() != View.VISIBLE) {
-
-			mLyricsView.setVisibility(View.VISIBLE);
-			mLyricsView.startAnimation(AnimationUtils.loadAnimation(this, android.R.anim.fade_in));
-
-		}
-
-	}
-
-	private void displayInfo(boolean show_animation, boolean fromuser) {
-
-		getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
-		if (mInfoView.getVisibility() != View.VISIBLE) {
-
-			mInfoView.setVisibility(View.VISIBLE);
-			mInfoView.startAnimation(AnimationUtils.loadAnimation(this, android.R.anim.fade_in));
-		}
-
-		if (mLyricsView.getVisibility() != View.INVISIBLE) {
-
-			mLyricsView.setVisibility(View.INVISIBLE);
-			mLyricsView.startAnimation(AnimationUtils.loadAnimation(this, android.R.anim.fade_out));
-
-		}
 	}
 
 	private void searchLyrics() {
@@ -934,8 +932,9 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 	// TODO lyrics load animation
 	private void loadLyricsToView() {
 
-		try {
+		if (mLyricsScrollView == null || mService == null) return;
 
+		try {
 			mLyricsScrollView.setTextContent(mService.getLyrics(), this);
 
 			if (mService.getLyricsStatus() == LYRICS_STATUS_OK) {
@@ -1144,18 +1143,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 
 	}
 
-	private void toggleLyrics() {
-
-		if (mDisplayLyrics) {
-			displayInfo(mShowFadeAnimation, true);
-			mDisplayLyrics = false;
-		} else {
-			displayLyrics(mShowFadeAnimation, true);
-			mDisplayLyrics = true;
-		}
-		mPrefs.setBooleanState(KEY_DISPLAY_LYRICS, mDisplayLyrics);
-	}
-
 	private void showToast(int resid) {
 
 		if (mToast == null) {
@@ -1253,11 +1240,7 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		if (mService == null) return;
 
 		try {
-			if (mService.isFavorite(mService.getAudioId())) {
-				mFavoriteButton.setImageResource(R.drawable.ic_action_media_favorite);
-			} else {
-				mFavoriteButton.setImageResource(R.drawable.ic_action_media_favorite_off);
-			}
+			mFavoriteButton.setChecked(mService.isFavorite(mService.getAudioId()));
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
@@ -1546,4 +1529,5 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 			return super.isStateful();
 		}
 	}
+
 }

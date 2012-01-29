@@ -459,7 +459,8 @@ public class TitlePageIndicator extends View implements PageIndicator {
         }
     }
 
-    public boolean onTouchEvent(android.view.MotionEvent ev) {
+    @Override
+	public boolean onTouchEvent(android.view.MotionEvent ev) {
         if ((mViewPager == null) || (mViewPager.getAdapter().getCount() == 0)) {
             return false;
         }

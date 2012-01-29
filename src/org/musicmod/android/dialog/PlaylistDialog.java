@@ -40,8 +40,8 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-public class PlaylistDialog extends FragmentActivity implements Constants, TextWatcher, OnCancelListener,
-		OnShowListener {
+public class PlaylistDialog extends FragmentActivity implements Constants, TextWatcher,
+		OnCancelListener, OnShowListener {
 
 	private AlertDialog mPlaylistDialog;
 

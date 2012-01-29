@@ -25,6 +25,7 @@ import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.graphics.Bitmap.Config;
 import android.graphics.drawable.BitmapDrawable;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.LinearLayout;
 
 public class ColorPickerDialog extends AlertDialog implements
@@ -77,7 +78,7 @@ public class ColorPickerDialog extends AlertDialog implements
 
 		mColorPicker = new ColorPickerView(context);
 
-		mContentView.addView(mColorPicker);
+		mContentView.addView(mColorPicker, LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
 
 		mContentView.setPadding(Math.round(mColorPicker.getDrawingOffset()), 0,
 				Math.round(mColorPicker.getDrawingOffset()), 0);

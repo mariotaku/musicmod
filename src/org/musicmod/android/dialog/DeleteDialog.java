@@ -36,8 +36,9 @@ import android.widget.Toast;
 
 //FIXME activity not found error when called by setData()
 
-public class DeleteDialog extends FragmentActivity implements Constants, OnMultiChoiceClickListener,
-		DialogInterface.OnClickListener, OnCancelListener, OnShowListener, View.OnClickListener {
+public class DeleteDialog extends FragmentActivity implements Constants,
+		OnMultiChoiceClickListener, DialogInterface.OnClickListener, OnCancelListener,
+		OnShowListener, View.OnClickListener {
 
 	private AlertDialog mDeleteMultiSelect, mDeleteConfirm;
 

@@ -16,8 +16,8 @@ import android.support.v4.app.FragmentActivity;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-public class PlaylistPickerDialog extends FragmentActivity implements DialogInterface.OnClickListener,
-		DialogInterface.OnCancelListener, Constants {
+public class PlaylistPickerDialog extends FragmentActivity implements
+		DialogInterface.OnClickListener, DialogInterface.OnCancelListener, Constants {
 
 	private AlertDialog mPlayListPickerDialog;
 
