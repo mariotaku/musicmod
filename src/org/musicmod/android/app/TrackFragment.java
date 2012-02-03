@@ -133,7 +133,7 @@ public class TrackFragment extends ListFragment implements LoaderCallbacks<Curso
 				Audio.Media.ALBUM, Audio.Media.ARTIST, Audio.Media.ARTIST_ID, Audio.Media.DURATION };
 
 		StringBuilder where = new StringBuilder();
-		String sort_order = Audio.Media.TITLE;
+		String sort_order = null;
 
 		where.append(Audio.Media.IS_MUSIC + "=1");
 		where.append(" AND " + Audio.Media.TITLE + " != ''");
@@ -166,7 +166,6 @@ public class TrackFragment extends ListFragment implements LoaderCallbacks<Curso
 							}
 						}
 						where.append(")");
-						sort_order = null;
 						break;
 					case (int) PLAYLIST_FAVORITES:
 						long favorites_id = MusicUtils.getFavoritesId(getActivity());
@@ -205,6 +204,7 @@ public class TrackFragment extends ListFragment implements LoaderCallbacks<Curso
 
 			} else {
 
+				sort_order = Audio.Media.TITLE;
 				if (Audio.Albums.CONTENT_TYPE.equals(mimetype)) {
 					long album_id = getArguments().getLong(Audio.Albums._ID);
 					where.append(" AND " + Audio.Media.ALBUM_ID + "=" + album_id);
@@ -324,9 +324,13 @@ public class TrackFragment extends ListFragment implements LoaderCallbacks<Curso
 				return true;
 			case DELETE_ITEMS:
 				intent = new Intent(INTENT_DELETE_ITEMS);
-				Uri data = Uri.withAppendedPath(Audio.Media.EXTERNAL_CONTENT_URI,
-						String.valueOf(mSelectedId));
-				intent.setData(data);
+				Bundle bundle = new Bundle();
+				bundle.putString(
+						INTENT_KEY_PATH,
+						Uri.withAppendedPath(Audio.Media.EXTERNAL_CONTENT_URI,
+								Uri.encode(String.valueOf(mSelectedId))).toString());
+				intent.putExtras(bundle);
+				startActivity(intent);
 				return true;
 			case SEARCH:
 				doSearch();

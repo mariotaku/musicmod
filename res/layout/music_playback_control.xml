@@ -15,7 +15,6 @@
  limitations under the License.
 -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:id="@+id/playback_control"
 	android:layout_width="match_parent"
 	android:layout_height="@dimen/player_control_height"
 	android:layout_gravity="bottom"
@@ -24,37 +23,25 @@
 
 	<org.musicmod.android.widget.RepeatingImageButton
 		android:id="@+id/prev"
-		android:layout_width="match_parent"
+		android:layout_width="0dip"
 		android:layout_height="match_parent"
-		android:layout_weight="3"
+		android:layout_weight="1"
 		android:background="@drawable/btn_mp_playback"
 		android:src="@drawable/btn_playback_ic_prev"/>
 
-	<ImageView
-		android:layout_width="wrap_content"
-		android:layout_height="match_parent"
-		android:layout_weight="0"
-		android:src="@drawable/divider_mp_btn_vertical"/>
-
 	<ImageButton
 		android:id="@+id/pause"
-		android:layout_width="match_parent"
+		android:layout_width="0dip"
 		android:layout_height="match_parent"
 		android:layout_weight="2"
 		android:background="@drawable/btn_mp_playback"
 		android:src="@drawable/btn_playback_ic_play"/>
 
-	<ImageView
-		android:layout_width="wrap_content"
-		android:layout_height="match_parent"
-		android:layout_weight="0"
-		android:src="@drawable/divider_mp_btn_vertical"/>
-
 	<org.musicmod.android.widget.RepeatingImageButton
 		android:id="@+id/next"
-		android:layout_width="match_parent"
+		android:layout_width="0dip"
 		android:layout_height="match_parent"
-		android:layout_weight="3"
+		android:layout_weight="1"
 		android:background="@drawable/btn_mp_playback"
 		android:src="@drawable/btn_playback_ic_next"/>
 

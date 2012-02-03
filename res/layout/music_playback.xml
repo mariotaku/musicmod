@@ -27,6 +27,7 @@
 		android:paddingTop="@dimen/album_art_height">
 
 		<FrameLayout
+			android:id="@+id/lyrics_frame"
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
 			android:layout_gravity="bottom"
@@ -40,6 +41,7 @@
 		</FrameLayout>
 
 		<LinearLayout
+			android:id="@+id/control_buttons"
 			android:layout_width="match_parent"
 			android:layout_height="wrap_content"
 			android:layout_gravity="bottom">
@@ -97,22 +99,30 @@
 		</FrameLayout>
 
 		<LinearLayout
-			android:id="@+id/buttons"
+			android:id="@+id/option_buttons"
 			android:layout_width="wrap_content"
 			android:layout_height="match_parent"
 			android:layout_gravity="right"
 			android:orientation="vertical"
 			android:visibility="gone">
 
-			<ImageButton
-				android:layout_width="48dip"
-				android:layout_height="48dip"
-				android:src="@drawable/ic_mp_shuffle_off_btn"/>
+			<LinearLayout
+				android:id="@+id/option_buttons"
+				android:layout_width="wrap_content"
+				android:layout_height="wrap_content"
+				android:layout_gravity="right"
+				android:orientation="horizontal">
 
-			<ImageButton
-				android:layout_width="48dip"
-				android:layout_height="48dip"
-				android:src="@drawable/ic_mp_repeat_off_btn"/>
+				<ImageButton
+					android:layout_width="48dip"
+					android:layout_height="48dip"
+					android:src="@drawable/ic_mp_shuffle_off_btn"/>
+
+				<ImageButton
+					android:layout_width="48dip"
+					android:layout_height="48dip"
+					android:src="@drawable/ic_mp_repeat_off_btn"/>
+			</LinearLayout>
 		</LinearLayout>
 	</FrameLayout>
 

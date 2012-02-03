@@ -24,7 +24,7 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
 
-public class VisualizerViewFftSpectrum extends View {
+public class VisualizerViewWaveForm22 extends View {
 
 	// Namespaces to read attributes
 	private static final String VISUALIZER_NS = "http://schemas.android.com/apk/res/org.musicmod.android";
@@ -40,37 +40,37 @@ public class VisualizerViewFftSpectrum extends View {
 	// Real defaults
 	private final boolean mAntiAlias;
 	private final int mColor;
-	private int mFftSamples = 48;
 
-	private byte[] mBytes = null;
+	private short[] mData = null;
 	private float[] mPoints;
 	private Rect mRect = new Rect();
 	private Paint mForePaint = new Paint();
 
-	public VisualizerViewFftSpectrum(Context context) {
+	public VisualizerViewWaveForm22(Context context) {
 		super(context);
 
 		mAntiAlias = DEFAULT_ANTIALIAS;
 		mColor = DEFAULT_COLOR;
-		mForePaint.setStrokeWidth((float) getWidth() / (float) mFftSamples / 2.0f);
+		mForePaint.setStrokeWidth(1.0f);
 		setAntiAlias(mAntiAlias);
 		setColor(mColor);
 	}
 
-	public VisualizerViewFftSpectrum(Context context, AttributeSet attrs) {
+	public VisualizerViewWaveForm22(Context context, AttributeSet attrs) {
 		super(context, attrs);
 
 		// Read parameters from attributes
 		mAntiAlias = attrs.getAttributeBooleanValue(VISUALIZER_NS, ATTR_ANTIALIAS,
 				DEFAULT_ANTIALIAS);
 		mColor = attrs.getAttributeIntValue(VISUALIZER_NS, ATTR_COLOR, DEFAULT_COLOR);
-		mForePaint.setStrokeWidth((float) getWidth() / (float) mFftSamples / 2.0f);
+
+		mForePaint.setStrokeWidth(1.0f);
 		setAntiAlias(mAntiAlias);
 		setColor(mColor);
 	}
 
-	public void updateVisualizer(byte[] bytes) {
-		mBytes = bytes;
+	public void updateVisualizer(short[] data) {
+		mData = data;
 		invalidate();
 	}
 
@@ -79,43 +79,36 @@ public class VisualizerViewFftSpectrum extends View {
 	}
 
 	public void setColor(int color) {
-		mForePaint.setColor(Color.argb(0xA0, Color.red(color), Color.green(color),
+		mForePaint.setColor(Color.argb(0xFF, Color.red(color), Color.green(color),
 				Color.blue(color)));
-	}
-
-	public void setFftSamples(int samples) {
-		mFftSamples = samples;
-		mForePaint.setStrokeWidth((float) getWidth() / (float) samples / 2.0f);
-		mPoints = null;
 	}
 
 	@Override
 	protected void onSizeChanged(int width, int height, int old_width, int old_height) {
-		mForePaint.setStrokeWidth((float) width / (float) mFftSamples / 2.0f);
+		mForePaint.setStrokeWidth(1.0f);
 	}
 
 	@Override
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
 
-		if (mBytes == null) {
+		if (mData == null) {
 			return;
 		}
 
-		if (mPoints == null || mPoints.length < mBytes.length * 4) {
-			mPoints = new float[mBytes.length * 4];
-		}
-		mRect.set(0, 0, getWidth(), getHeight() * 2);
+		mRect.setEmpty();
 
-		for (int i = 0; i <= mFftSamples; i++) {
-			if (mBytes[i] < 0) {
-				mBytes[i] = 127;
-			}
-			mPoints[i * 4] = mRect.width() * i / mFftSamples + (getWidth() / mFftSamples / 2.0f);
-			mPoints[i * 4 + 1] = mRect.height() / 2;
-			mPoints[i * 4 + 2] = mRect.width() * i / mFftSamples
-					+ (getWidth() / mFftSamples / 2.0f);
-			mPoints[i * 4 + 3] = mRect.height() / 2 - 2 - mBytes[i] * 2;
+		if (mPoints == null || mPoints.length < mData.length * 4) {
+			mPoints = new float[mData.length * 4];
+		}
+
+		mRect.set(0, 0, getWidth(), getHeight());
+
+		for (int i = 0; i < mData.length - 1; i++) {
+			mPoints[i * 4] = mRect.width() * i / (mData.length - 1);
+			mPoints[i * 4 + 1] = (mData[i] / 64 + 128) * (mRect.height() / 2) / 128;
+			mPoints[i * 4 + 2] = mRect.width() * (i + 1) / (mData.length - 1);
+			mPoints[i * 4 + 3] = (mData[i + 1] / 64 + 128) * (mRect.height() / 2) / 128;
 		}
 		canvas.drawLines(mPoints, mForePaint);
 

@@ -178,9 +178,12 @@ public class AlbumFragment extends Fragment implements Constants, OnItemClickLis
 				return true;
 			case DELETE_ITEMS:
 				intent = new Intent(INTENT_DELETE_ITEMS);
-				Uri data = Uri.withAppendedPath(Audio.Albums.EXTERNAL_CONTENT_URI,
-						Uri.encode(String.valueOf(mSelectedId)));
-				intent.setData(data);
+				Bundle bundle = new Bundle();
+				bundle.putString(
+						INTENT_KEY_PATH,
+						Uri.withAppendedPath(Audio.Albums.EXTERNAL_CONTENT_URI,
+								Uri.encode(String.valueOf(mSelectedId))).toString());
+				intent.putExtras(bundle);
 				startActivity(intent);
 				return true;
 			case SEARCH:
@@ -351,18 +354,20 @@ public class AlbumFragment extends Fragment implements Constants, OnItemClickLis
 
 			@Override
 			protected void onPostExecute(Bitmap result) {
-
-				if (result != null) {
-					viewholder.album_art.setImageBitmap(result);
-				} else {
-					viewholder.album_art.setImageResource(R.drawable.ic_mp_albumart_unknown);
+				if (viewholder != null && viewholder.album_art != null) {
+					if (result != null) {
+						viewholder.album_art.setImageBitmap(result);
+					} else {
+						viewholder.album_art.setImageResource(R.drawable.ic_mp_albumart_unknown);
+					}
+					if (enable_animation) {
+						viewholder.album_art.setVisibility(View.VISIBLE);
+						if (getActivity() != null) {
+							viewholder.album_art.startAnimation(AnimationUtils.loadAnimation(
+									getActivity(), android.R.anim.fade_in));
+						}
+					}
 				}
-				if (enable_animation) {
-					viewholder.album_art.setVisibility(View.VISIBLE);
-					viewholder.album_art.startAnimation(AnimationUtils.loadAnimation(getActivity(),
-							android.R.anim.fade_in));
-				}
-
 			}
 		}
 

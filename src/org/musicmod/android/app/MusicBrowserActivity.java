@@ -18,6 +18,8 @@ package org.musicmod.android.app;
 
 import java.util.ArrayList;
 
+import org.mariotaku.actionbarcompat.ActionBarActivity;
+import org.mariotaku.actionbarcompat.ActionBarCompat;
 import org.musicmod.android.Constants;
 import org.musicmod.android.IMusicPlaybackService;
 import org.musicmod.android.R;
@@ -168,10 +170,15 @@ public class MusicBrowserActivity extends ActionBarActivity implements Constants
 
 		setContentView(R.layout.music_browser);
 
-		View mCustomView = setCustomView(R.layout.actionbar_music_browser);
-		setHomeButtonEnabled(false);
-		setTitleViewEnabled(false);
-		setCustomViewEnabled(true);
+		ActionBarCompat mActionBar = getActionBarCompat();
+
+		mActionBar.setCustomView(R.layout.actionbar_music_browser);
+
+		View mCustomView = mActionBar.getCustomView();
+
+		mActionBar.setDisplayShowHomeEnabled(false);
+		mActionBar.setDisplayShowTitleEnabled(false);
+		mActionBar.setDisplayShowCustomEnabled(true);
 
 		mCustomView.setOnClickListener(mActionBarClickListener);
 

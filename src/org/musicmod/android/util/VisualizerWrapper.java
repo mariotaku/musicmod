@@ -1,11 +1,9 @@
 package org.musicmod.android.util;
 
 import java.lang.reflect.Method;
-import java.util.Arrays;
 
 import android.media.audiofx.Visualizer;
 import android.os.CountDownTimer;
-import android.util.Log;
 
 public class VisualizerWrapper {
 
@@ -23,7 +21,7 @@ public class VisualizerWrapper {
 
 	public static boolean isAudioFXSupported() {
 		try {
-			Class.forName("android.media.audiofx").getMethod("snoop", short[].class, int.class);
+			Class.forName("android.media.audiofx.Visualizer");
 		} catch (Exception e) {
 			return false;
 		}
@@ -44,8 +42,6 @@ public class VisualizerWrapper {
 						int len = snoop(wave_data, 0);
 						if (len != 0) {
 							mListener.onWaveDataChanged(wave_data, len);
-							Arrays.sort(wave_data);
-							Log.d("WAVE", "min = " + wave_data[len - 1] + ", max = " + wave_data[0]);
 						}
 					}
 					if (fft) {
@@ -68,28 +64,27 @@ public class VisualizerWrapper {
 	public VisualizerWrapper(long duration, final boolean wave, final boolean fft,
 			final int audioSessionId) {
 
-		mCountDownTimer = new CountDownTimer(60000, duration) {
+		final Visualizer mVisualizer = new Visualizer(audioSessionId);
+		mVisualizer.setEnabled(true);
 
-			Visualizer mVisualizer = new Visualizer(audioSessionId);
+		mCountDownTimer = new CountDownTimer(60000, duration) {
 
 			@Override
 			public void onTick(long millisUntilFinished) {
 
-				byte[] wave_data = new byte[1024];
-				byte[] fft_data = new byte[1024];
+				byte[] wave_data = new byte[mVisualizer.getCaptureSize()];
+				byte[] fft_data = new byte[mVisualizer.getCaptureSize()];
 				if (mListener != null) {
 					if (wave) {
 						int ret = mVisualizer.getWaveForm(wave_data);
 						if (ret == Visualizer.SUCCESS && wave_data != null) {
-							// mListener.onWaveDataChanged(wave_data,
-							// wave_data.length);
+							mListener.onWaveDataChanged(wave_data, wave_data.length);
 						}
 					}
 					if (fft) {
-						int ret = mVisualizer.getWaveForm(fft_data);
-						if (ret == Visualizer.SUCCESS) {
-							// mListener.onFftDataChanged(fft_data,
-							// fft_data.length);
+						int ret = mVisualizer.getFft(fft_data);
+						if (ret == Visualizer.SUCCESS && fft_data != null) {
+							mListener.onFftDataChanged(fft_data, fft_data.length);
 						}
 					}
 				}
@@ -100,6 +95,7 @@ public class VisualizerWrapper {
 
 				start();
 			}
+
 		};
 	}
 
@@ -107,7 +103,11 @@ public class VisualizerWrapper {
 
 		public void onWaveDataChanged(short[] data, int len);
 
+		public void onWaveDataChanged(byte[] data, int len);
+
 		public void onFftDataChanged(short[] data, int len);
+
+		public void onFftDataChanged(byte[] data, int len);
 	}
 
 	public void start() {

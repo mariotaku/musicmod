@@ -199,40 +199,22 @@ public class MediaAppWidgetProvider4x1 extends AppWidgetProvider implements Cons
 
 		if (playerActive) {
 			intent = new Intent(context, MusicPlaybackActivity.class);
-			pendingIntent = PendingIntent.getActivity(context, 0 /*
-																 * no
-																 * requestCode
-																 */, intent, 0 /*
-																				 * no
-																				 * flags
-																				 */);
+			pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
 			views.setOnClickPendingIntent(R.id.album_appwidget, pendingIntent);
 		} else {
 			intent = new Intent(context, MusicBrowserActivity.class);
-			pendingIntent = PendingIntent.getActivity(context, 0 /*
-																 * no
-																 * requestCode
-																 */, intent, 0 /*
-																				 * no
-																				 * flags
-																				 */);
+			pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
 			views.setOnClickPendingIntent(R.id.album_appwidget, pendingIntent);
 		}
 
-		intent = new Intent(MusicPlaybackService.TOGGLEPAUSE_ACTION);
+		intent = new Intent(TOGGLEPAUSE_ACTION);
 		intent.setComponent(serviceName);
-		pendingIntent = PendingIntent.getService(context, 0 /* no requestCode */, intent, 0 /*
-																							 * no
-																							 * flags
-																							 */);
+		pendingIntent = PendingIntent.getService(context, 0, intent, 0);
 		views.setOnClickPendingIntent(R.id.control_play, pendingIntent);
 
-		intent = new Intent(MusicPlaybackService.NEXT_ACTION);
+		intent = new Intent(NEXT_ACTION);
 		intent.setComponent(serviceName);
-		pendingIntent = PendingIntent.getService(context, 0 /* no requestCode */, intent, 0 /*
-																							 * no
-																							 * flags
-																							 */);
+		pendingIntent = PendingIntent.getService(context, 0, intent, 0);
 		views.setOnClickPendingIntent(R.id.control_next, pendingIntent);
 	}
 }

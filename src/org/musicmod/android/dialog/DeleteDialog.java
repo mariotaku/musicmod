@@ -59,6 +59,8 @@ public class DeleteDialog extends FragmentActivity implements Constants,
 
 		setContentView(new LinearLayout(this));
 
+		icicle = icicle != null ? icicle : getIntent().getExtras();
+
 		action = getIntent().getAction();
 
 		if (INTENT_DELETE_ITEMS.equals(action)) {
@@ -70,6 +72,8 @@ public class DeleteDialog extends FragmentActivity implements Constants,
 					.getBooleanExtra(KEY_DELETE_MUSIC, false);
 
 			path = icicle != null ? icicle.getString(INTENT_KEY_PATH) : getIntent().getDataString();
+
+			if (path == null) path = "";
 
 			if (path.startsWith(Audio.Media.EXTERNAL_CONTENT_URI.toString())) {
 				long id = Long.valueOf(Uri.parse(path).getLastPathSegment());

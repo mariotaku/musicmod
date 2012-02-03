@@ -16,6 +16,8 @@
 
 package org.musicmod.android.app;
 
+import org.mariotaku.actionbarcompat.ActionBarActivity;
+import org.mariotaku.actionbarcompat.ActionBarCompat;
 import org.musicmod.android.Constants;
 import org.musicmod.android.IMusicPlaybackService;
 import org.musicmod.android.MusicPlaybackService;
@@ -28,6 +30,7 @@ import org.musicmod.android.util.VisualizerWrapper;
 import org.musicmod.android.util.VisualizerWrapper.OnDataChangedListener;
 import org.musicmod.android.view.VisualizerViewFftSpectrum;
 import org.musicmod.android.view.VisualizerViewWaveForm;
+import org.musicmod.android.view.VisualizerViewWaveForm22;
 import org.musicmod.android.widget.RepeatingImageButton;
 import org.musicmod.android.widget.RepeatingImageButton.RepeatListener;
 import org.musicmod.android.widget.TextScrollView;
@@ -77,8 +80,6 @@ import android.view.GestureDetector.OnGestureListener;
 import android.view.WindowManager.LayoutParams;
 import android.view.animation.AnimationUtils;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
-import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -118,7 +119,7 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 	private View mVolumeSliderLeft, mVolumeSliderRight;
 	private AudioManager mAudioManager;
 	private VisualizerViewFftSpectrum mVisualizerViewFftSpectrum;
-	private VisualizerViewWaveForm mVisualizerViewWaveForm;
+	private VisualizerViewWaveForm22 mVisualizerViewWaveForm22;
 	private FrameLayout mVisualizerView;
 
 	private VisualizerWrapper mVisualizer;
@@ -148,6 +149,10 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 	private static final int REFRESH = 1;
 	private static final int QUIT = 2;
 
+	TrackFragment mQueueFragment;
+
+	private View mOptionButtons, mAlbumArtView, mQueueFrame, mLyricsFrame, mControlButtons;
+
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle icicle) {
@@ -159,8 +164,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		mPrefs = new PreferencesEditor(this);
 		configureActivity();
 
-		mVisualizer = new VisualizerWrapper(500, true, false);
-		mVisualizer.setOnDataChangedListener(mDataChangedListener);
 	}
 
 	private OnDataChangedListener mDataChangedListener = new OnDataChangedListener() {
@@ -168,7 +171,13 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		@Override
 		public void onFftDataChanged(short[] data, int len) {
 
-			Log.d("MusicMod", "onFftDataChanged, len = " + len);
+			if (mVisualizerViewFftSpectrum != null) {
+				// mVisualizerViewFftSpectrum.updateVisualizer(data);
+			}
+		}
+
+		@Override
+		public void onFftDataChanged(byte[] data, int len) {
 
 			if (mVisualizerViewFftSpectrum != null) {
 				// mVisualizerViewFftSpectrum.updateVisualizer(data);
@@ -178,9 +187,16 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		@Override
 		public void onWaveDataChanged(short[] data, int len) {
 
-			Log.d("MusicMod", "onWaveDataChanged, len = " + len);
+			if (mVisualizerViewWaveForm22 != null) {
+				mVisualizerViewWaveForm22.updateVisualizer(data);
+			}
 
-			if (mVisualizerViewWaveForm != null) {
+		}
+
+		@Override
+		public void onWaveDataChanged(byte[] data, int len) {
+
+			if (mVisualizerViewWaveForm22 != null) {
 				// mVisualizerViewWaveForm.updateVisualizer(data);
 			}
 
@@ -192,9 +208,14 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 
 		setContentView(R.layout.music_playback);
 
-		View mCustomView = setCustomView(R.layout.actionbar_music_playback);
-		setTitleViewEnabled(false);
-		setCustomViewEnabled(true);
+		ActionBarCompat mActionBar = getActionBarCompat();
+
+		mActionBar.setCustomView(R.layout.actionbar_music_playback);
+
+		View mCustomView = mActionBar.getCustomView();
+
+		mActionBar.setDisplayShowTitleEnabled(false);
+		mActionBar.setDisplayShowCustomEnabled(true);
 
 		mTrackNameView = (TextView) mCustomView.findViewById(R.id.track_name);
 		mTrackDetailView = (TextView) mCustomView.findViewById(R.id.track_detail);
@@ -202,10 +223,7 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		mFavoriteButton.setOnClickListener(mFavoriteListener);
 
 		mCurrentTime = (TextView) findViewById(R.id.currenttime);
-		((View) mCurrentTime.getParent()).setOnLongClickListener(mToggleVisualizerListener);
-
 		mTotalTime = (TextView) findViewById(R.id.totaltime);
-		((View) mTotalTime.getParent()).setOnLongClickListener(mToggleVisualizerListener);
 
 		mProgress = (ProgressBar) findViewById(android.R.id.progress);
 
@@ -223,9 +241,11 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 
 		mVolumeSliderLeft = findViewById(R.id.volume_slider_left);
 		mVolumeSliderLeft.setOnTouchListener(this);
+		mVolumeSliderLeft.setOnLongClickListener(mToggleVisualizerListener);
 
 		mVolumeSliderRight = findViewById(R.id.volume_slider_right);
 		mVolumeSliderRight.setOnTouchListener(this);
+		mVolumeSliderRight.setOnLongClickListener(mToggleVisualizerListener);
 
 		mPrevButton = (RepeatingImageButton) findViewById(R.id.prev);
 		mPrevButton.setBackgroundDrawable(new ButtonStateDrawable(new Drawable[] { getResources()
@@ -258,16 +278,24 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		mRepeatButton.setOnClickListener(mRepeatListener);
 
 		mVisualizerViewFftSpectrum = new VisualizerViewFftSpectrum(this);
-		mVisualizerViewWaveForm = new VisualizerViewWaveForm(this);
+		mVisualizerViewWaveForm22 = new VisualizerViewWaveForm22(this);
 		mVisualizerView = (FrameLayout) findViewById(R.id.visualizer_view);
 		mVisualizerView.addView(mVisualizerViewFftSpectrum);
-		mVisualizerView.addView(mVisualizerViewWaveForm);
+		mVisualizerView.addView(mVisualizerViewWaveForm22);
+
+		mOptionButtons = findViewById(R.id.option_buttons);
+		mAlbumArtView = findViewById(R.id.album_art_view);
+		mQueueFrame = findViewById(R.id.queue_frame);
+		mLyricsFrame = findViewById(R.id.lyrics_frame);
+		mControlButtons = findViewById(R.id.control_buttons);
 
 		if (mProgress instanceof SeekBar) {
 			SeekBar seeker = (SeekBar) mProgress;
 			seeker.setOnSeekBarChangeListener(mSeekListener);
 		}
 		mProgress.setMax(1000);
+
+		mQueueFragment = new TrackFragment();
 	}
 
 	private void loadPreferences() {
@@ -441,21 +469,15 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		@Override
 		public void onClick(View v) {
 
-			View mButtons = findViewById(R.id.buttons);
-			View mAlbumArtView = findViewById(R.id.album_art_view);
-
-			View mQueueFrame = findViewById(R.id.queue_frame);
-
-			AnimatorSet set = new AnimatorSet().setDuration(200);
+			AnimatorSet set = new AnimatorSet().setDuration(150);
 			FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
 
 			if (!mQueueShowed) {
-				mButtons.setVisibility(View.VISIBLE);
-				mButtons.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(),
+				mOptionButtons.setVisibility(View.VISIBLE);
+				mOptionButtons.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(),
 						android.R.anim.fade_in));
 				mQueueFrame.setPadding(mQueueFrame.getPaddingLeft(),
-						(int) (mQueueFrame.getPaddingTop() * 0.75),
-						mQueueFrame.getPaddingRight(),
+						(int) (mQueueFrame.getPaddingTop() * 0.75), mQueueFrame.getPaddingRight(),
 						mQueueFrame.getPaddingBottom());
 				set.playTogether(
 						ObjectAnimator.ofFloat(mAlbumArtView, "scaleX", 0.75f),
@@ -464,17 +486,20 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 								-(mAlbumArtView.getLeft() + mAlbumArtView.getWidth() * 0.25f / 2)),
 						ObjectAnimator.ofFloat(mAlbumArtView, "translationY",
 								-mAlbumArtView.getHeight() * 0.25f / 2));
-
+				mVolumeSlider.setVisibility(View.GONE);
+				mLyricsFrame.setVisibility(View.GONE);
+				mLyricsFrame.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(),
+						android.R.anim.fade_out));
+				mControlButtons.setVisibility(View.GONE);
 				Bundle bundle = new Bundle();
 				bundle.putString(INTENT_KEY_TYPE, MediaStore.Audio.Playlists.CONTENT_TYPE);
 				bundle.putLong(MediaStore.Audio.Playlists._ID, PLAYLIST_QUEUE);
 
-				TrackFragment fragment = new TrackFragment(bundle);
-				ft.replace(R.id.queue_frame, fragment);
-				ft.commit();
+				mQueueFragment.setArguments(bundle);
+				ft.replace(R.id.queue_frame, mQueueFragment);
 			} else {
-				mButtons.setVisibility(View.GONE);
-				mButtons.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(),
+				mOptionButtons.setVisibility(View.GONE);
+				mOptionButtons.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(),
 						android.R.anim.fade_out));
 				mQueueFrame.setPadding(mQueueFrame.getPaddingLeft(), getResources()
 						.getDimensionPixelSize(R.dimen.album_art_height), mQueueFrame
@@ -483,9 +508,17 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 						ObjectAnimator.ofFloat(mAlbumArtView, "scaleY", 1f),
 						ObjectAnimator.ofFloat(mAlbumArtView, "translationX", 0),
 						ObjectAnimator.ofFloat(mAlbumArtView, "translationY", 0));
+				mVolumeSlider.setVisibility(View.VISIBLE);
+				mLyricsFrame.setVisibility(View.VISIBLE);
+				mLyricsFrame.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(),
+						android.R.anim.fade_in));
+				mControlButtons.setVisibility(View.VISIBLE);
+				ft.remove(mQueueFragment);
 			}
 			mQueueShowed = !mQueueShowed;
 			set.start();
+			ft.setTransitionStyle(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+			ft.commit();
 		}
 	};
 
@@ -606,11 +639,8 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		mLyricsScrollView.unregisterLineSelectedListener(this);
 		unregisterReceiver(mScreenTimeoutListener);
 		if (mAlbumArtLoader != null) mAlbumArtLoader.cancel(true);
-		
-		getWindow().clearFlags(LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-		// TODO visualizer
-		mVisualizer.stop();
+		getWindow().clearFlags(LayoutParams.FLAG_KEEP_SCREEN_ON);
 
 		MusicUtils.unbindFromService(mToken);
 		mService = null;
@@ -641,9 +671,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		} else {
 			getWindow().clearFlags(LayoutParams.FLAG_KEEP_SCREEN_ON);
 		}
-
-		// TODO visualizer
-		mVisualizer.start();
 
 		try {
 			float mWindowAnimation = Settings.System.getFloat(this.getContentResolver(),
@@ -718,9 +745,13 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 				break;
 			case DELETE_ITEMS:
 				intent = new Intent(INTENT_DELETE_ITEMS);
-				Uri data = Uri.withAppendedPath(Audio.Media.EXTERNAL_CONTENT_URI,
-						String.valueOf(MusicUtils.getCurrentAudioId()));
-				intent.setData(data);
+				Bundle bundle = new Bundle();
+				bundle.putString(
+						INTENT_KEY_PATH,
+						Uri.withAppendedPath(Audio.Media.EXTERNAL_CONTENT_URI,
+								Uri.encode(String.valueOf(MusicUtils.getCurrentAudioId())))
+								.toString());
+				intent.putExtras(bundle);
 				startActivity(intent);
 				break;
 			case SETTINGS:
@@ -1176,6 +1207,15 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 				finish();
 			}
 
+			if (VisualizerWrapper.isAudioFXSupported()) {
+				mVisualizer = new VisualizerWrapper(50, true, false, mService.getAudioSessionId());
+			} else {
+				mVisualizer = new VisualizerWrapper(50, true, false);
+			}
+
+			mVisualizer.setOnDataChangedListener(mDataChangedListener);
+			mVisualizer.start();
+
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
@@ -1185,6 +1225,7 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 	@Override
 	public void onServiceDisconnected(ComponentName classname) {
 
+		mVisualizer.stop();
 		mService = null;
 	}
 

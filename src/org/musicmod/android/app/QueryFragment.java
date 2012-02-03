@@ -31,7 +31,7 @@ import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
-import android.support.v4.widget.CursorAdapter;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -66,7 +66,8 @@ public class QueryFragment extends ListFragment implements Constants, LoaderCall
 		// We have a menu item to show in action bar.
 		setHasOptionsMenu(true);
 
-		mAdapter = new QueryListAdapter(getActivity(), null, false);
+		mAdapter = new QueryListAdapter(getActivity(), R.layout.query_list_item, null,
+				new String[] {}, new int[] {}, 0);
 
 		setListAdapter(mAdapter);
 
@@ -153,20 +154,26 @@ public class QueryFragment extends ListFragment implements Constants, LoaderCall
 	@Override
 	public Loader<Cursor> onCreateLoader(int id, Bundle args) {
 
-		String filter = args.getString(INTENT_KEY_FILTER);
+		String filter = "";
 
-		String[] cols = new String[] {
-				BaseColumns._ID, // this will be the artist, album or track ID
-				MediaStore.Audio.Media.MIME_TYPE, // mimetype of audio file, or
-													// "artist" or "album"
-				MediaStore.Audio.Artists.ARTIST, MediaStore.Audio.Albums.ALBUM,
-				MediaStore.Audio.Media.TITLE, "data1", "data2" };
+		if (args != null) {
+			filter = args.getString(INTENT_KEY_FILTER) != null ? args.getString(INTENT_KEY_FILTER)
+					: "";
+		}
+
+		StringBuilder where = new StringBuilder();
+
+		where.append(Audio.Media.IS_MUSIC + "=1");
+		where.append(" AND " + Audio.Media.TITLE + " != ''");
+
+		String[] cols = new String[] { BaseColumns._ID, Audio.Media.MIME_TYPE,
+				Audio.Artists.ARTIST, Audio.Albums.ALBUM, Audio.Media.TITLE, "data1", "data2" };
 
 		Uri uri = Uri.parse("content://media/external/audio/search/fancy/" + Uri.encode(filter));
 
 		// Now create and return a CursorLoader that will take care of
 		// creating a Cursor for the data being displayed.
-		return new CursorLoader(getActivity(), uri, cols, null, null, null);
+		return new CursorLoader(getActivity(), uri, cols, where.toString(), null, null);
 	}
 
 	@Override
@@ -197,7 +204,7 @@ public class QueryFragment extends ListFragment implements Constants, LoaderCall
 			return;
 		}
 		String selectedType = mQueryCursor.getString(mQueryCursor
-				.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
+				.getColumnIndexOrThrow(Audio.Media.MIME_TYPE));
 
 		if ("artist".equals(selectedType)) {
 			Intent intent = new Intent(Intent.ACTION_PICK);
@@ -219,7 +226,7 @@ public class QueryFragment extends ListFragment implements Constants, LoaderCall
 		}
 	}
 
-	private class QueryListAdapter extends CursorAdapter {
+	private class QueryListAdapter extends SimpleCursorAdapter {
 
 		private class ViewHolder {
 
@@ -235,14 +242,15 @@ public class QueryFragment extends ListFragment implements Constants, LoaderCall
 
 		}
 
-		private QueryListAdapter(Context context, Cursor cursor, boolean autoRequery) {
-			super(context, cursor, autoRequery);
+		private QueryListAdapter(Context context, int layout, Cursor cursor, String[] from,
+				int[] to, int flags) {
+			super(context, layout, cursor, from, to, flags);
 		}
 
 		@Override
 		public View newView(Context context, Cursor cursor, ViewGroup parent) {
 
-			View view = LayoutInflater.from(context).inflate(R.layout.query_list_item, null);
+			View view = super.newView(context, cursor, parent);
 			ViewHolder viewholder = new ViewHolder(view);
 			view.setTag(viewholder);
 			return view;
@@ -253,16 +261,14 @@ public class QueryFragment extends ListFragment implements Constants, LoaderCall
 
 			ViewHolder viewholder = (ViewHolder) view.getTag();
 
-			String mimetype = cursor.getString(cursor
-					.getColumnIndexOrThrow(MediaStore.Audio.Media.MIME_TYPE));
+			String mimetype = cursor.getString(cursor.getColumnIndexOrThrow(Audio.Media.MIME_TYPE));
 
 			if (mimetype == null) {
 				mimetype = "audio/";
 			}
 			if (mimetype.equals("artist")) {
 				viewholder.result_icon.setImageResource(R.drawable.ic_mp_list_artist);
-				String name = cursor.getString(cursor
-						.getColumnIndexOrThrow(MediaStore.Audio.Artists.ARTIST));
+				String name = cursor.getString(cursor.getColumnIndexOrThrow(Audio.Artists.ARTIST));
 				String displayname = name;
 				boolean isunknown = false;
 				if (name == null || name.equals(MediaStore.UNKNOWN_STRING)) {
@@ -281,16 +287,14 @@ public class QueryFragment extends ListFragment implements Constants, LoaderCall
 
 			} else if (mimetype.equals("album")) {
 				viewholder.result_icon.setImageResource(R.drawable.ic_mp_list_album);
-				String name = cursor.getString(cursor
-						.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM));
+				String name = cursor.getString(cursor.getColumnIndexOrThrow(Audio.Albums.ALBUM));
 				String displayname = name;
 				if (name == null || name.equals(MediaStore.UNKNOWN_STRING)) {
 					displayname = context.getString(R.string.unknown_album);
 				}
 				viewholder.query_result.setText(displayname);
 
-				name = cursor.getString(cursor
-						.getColumnIndexOrThrow(MediaStore.Audio.Artists.ARTIST));
+				name = cursor.getString(cursor.getColumnIndexOrThrow(Audio.Artists.ARTIST));
 				displayname = name;
 				if (name == null || name.equals(MediaStore.UNKNOWN_STRING)) {
 					displayname = context.getString(R.string.unknown_artist);
@@ -300,17 +304,15 @@ public class QueryFragment extends ListFragment implements Constants, LoaderCall
 			} else if (mimetype.startsWith("audio/") || mimetype.equals("application/ogg")
 					|| mimetype.equals("application/x-ogg")) {
 				viewholder.result_icon.setImageResource(R.drawable.ic_mp_list_song);
-				String name = cursor.getString(cursor
-						.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE));
+				String name = cursor.getString(cursor.getColumnIndexOrThrow(Audio.Media.TITLE));
 				viewholder.query_result.setText(name);
 
 				String displayname = cursor.getString(cursor
-						.getColumnIndexOrThrow(MediaStore.Audio.Artists.ARTIST));
+						.getColumnIndexOrThrow(Audio.Artists.ARTIST));
 				if (displayname == null || displayname.equals(MediaStore.UNKNOWN_STRING)) {
 					displayname = context.getString(R.string.unknown_artist);
 				}
-				name = cursor
-						.getString(cursor.getColumnIndexOrThrow(MediaStore.Audio.Albums.ALBUM));
+				name = cursor.getString(cursor.getColumnIndexOrThrow(Audio.Albums.ALBUM));
 				if (name == null || name.equals(MediaStore.UNKNOWN_STRING)) {
 					name = context.getString(R.string.unknown_album);
 				}

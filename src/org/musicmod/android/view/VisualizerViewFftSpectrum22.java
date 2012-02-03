@@ -24,7 +24,7 @@ import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
 
-public class VisualizerViewFftSpectrum extends View {
+public class VisualizerViewFftSpectrum22 extends View {
 
 	// Namespaces to read attributes
 	private static final String VISUALIZER_NS = "http://schemas.android.com/apk/res/org.musicmod.android";
@@ -47,7 +47,7 @@ public class VisualizerViewFftSpectrum extends View {
 	private Rect mRect = new Rect();
 	private Paint mForePaint = new Paint();
 
-	public VisualizerViewFftSpectrum(Context context) {
+	public VisualizerViewFftSpectrum22(Context context) {
 		super(context);
 
 		mAntiAlias = DEFAULT_ANTIALIAS;
@@ -57,7 +57,7 @@ public class VisualizerViewFftSpectrum extends View {
 		setColor(mColor);
 	}
 
-	public VisualizerViewFftSpectrum(Context context, AttributeSet attrs) {
+	public VisualizerViewFftSpectrum22(Context context, AttributeSet attrs) {
 		super(context, attrs);
 
 		// Read parameters from attributes
@@ -70,6 +70,17 @@ public class VisualizerViewFftSpectrum extends View {
 	}
 
 	public void updateVisualizer(byte[] bytes) {
+
+		byte[] model = new byte[bytes.length / 2 + 1];
+		model[0] = (byte) Math.abs(bytes[1]);
+		int j = 1;
+		for (int i = 2; i <= bytes.length * 2;) {
+			model[j] = (byte) Math.hypot(bytes[i], bytes[i + 1]);
+			i += 2;
+			j++;
+
+		}
+
 		mBytes = bytes;
 		invalidate();
 	}

@@ -41,13 +41,12 @@ public class VisualizerViewWaveForm extends View {
 	private final boolean mAntiAlias;
 	private final int mColor;
 
-	private short[] mData = null;
+	private byte[] mBytes = null;
 	private float[] mPoints;
 	private Rect mRect = new Rect();
 	private Paint mForePaint = new Paint();
 
 	public VisualizerViewWaveForm(Context context) {
-
 		super(context);
 
 		mAntiAlias = DEFAULT_ANTIALIAS;
@@ -58,7 +57,6 @@ public class VisualizerViewWaveForm extends View {
 	}
 
 	public VisualizerViewWaveForm(Context context, AttributeSet attrs) {
-
 		super(context, attrs);
 
 		// Read parameters from attributes
@@ -71,52 +69,47 @@ public class VisualizerViewWaveForm extends View {
 		setColor(mColor);
 	}
 
-	public void updateVisualizer(short[] data) {
-
-		mData = data;
+	public void updateVisualizer(byte[] bytes) {
+		mBytes = bytes;
 		invalidate();
 	}
 
 	public void setAntiAlias(boolean antialias) {
-
 		mForePaint.setAntiAlias(antialias);
 	}
 
 	public void setColor(int color) {
-
 		mForePaint.setColor(Color.argb(0xFF, Color.red(color), Color.green(color),
 				Color.blue(color)));
 	}
 
 	@Override
 	protected void onSizeChanged(int width, int height, int old_width, int old_height) {
-
 		mForePaint.setStrokeWidth(1.0f);
 	}
 
 	@Override
 	protected void onDraw(Canvas canvas) {
-
 		super.onDraw(canvas);
 
-		if (mData == null) {
+		if (mBytes == null) {
 			return;
 		}
 
 		mRect.setEmpty();
 
-		if (mPoints == null || mPoints.length < mData.length * 4) {
-			mPoints = new float[mData.length * 4];
+		if (mPoints == null || mPoints.length < mBytes.length * 4) {
+			mPoints = new float[mBytes.length * 4];
 		}
 
 		mRect.set(0, 0, getWidth(), getHeight());
 
-		for (int i = 0; i < mData.length - 1; i++) {
-			mPoints[i * 4] = mRect.width() * i / (mData.length - 1);
-			mPoints[i * 4 + 1] = mRect.height() / 2 + ((byte) (mData[i] + 128))
+		for (int i = 0; i < mBytes.length - 1; i++) {
+			mPoints[i * 4] = mRect.width() * i / (mBytes.length - 1);
+			mPoints[i * 4 + 1] = mRect.height() / 2 + ((byte) (mBytes[i] + 128))
 					* (mRect.height() / 2) / 128;
-			mPoints[i * 4 + 2] = mRect.width() * (i + 1) / (mData.length - 1);
-			mPoints[i * 4 + 3] = mRect.height() / 2 + ((byte) (mData[i + 1] + 128))
+			mPoints[i * 4 + 2] = mRect.width() * (i + 1) / (mBytes.length - 1);
+			mPoints[i * 4 + 3] = mRect.height() / 2 + ((byte) (mBytes[i + 1] + 128))
 					* (mRect.height() / 2) / 128;
 		}
 		canvas.drawLines(mPoints, mForePaint);
