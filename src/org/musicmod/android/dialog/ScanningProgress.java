@@ -17,50 +17,26 @@
 package org.musicmod.android.dialog;
 
 import org.musicmod.android.R;
-import org.musicmod.android.util.MusicUtils;
+import org.musicmod.android.app.MusicBrowserActivity;
 
-import android.database.Cursor;
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.DialogInterface.OnCancelListener;
+import android.content.DialogInterface.OnClickListener;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.Message;
-import android.provider.MediaStore;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
-import android.view.Window;
-import android.view.WindowManager;
 
 public class ScanningProgress extends FragmentActivity {
 
-	private final static int CHECK = 0;
-	private Handler mHandler = new Handler() {
-
-		@Override
-		public void handleMessage(Message msg) {
-
-			if (msg.what == CHECK) {
-				String status = Environment.getExternalStorageState();
-				if (!status.equals(Environment.MEDIA_MOUNTED)) {
-					// If the card suddenly got unmounted again, there's
-					// really no need to keep waiting for the media scanner.
-					finish();
-					return;
-				}
-				Cursor c = MusicUtils.query(ScanningProgress.this,
-						MediaStore.Audio.Playlists.EXTERNAL_CONTENT_URI, null, null, null, null);
-				if (c != null) {
-					// The external media database is now ready for querying
-					// (though it may still be in the process of being filled).
-					c.close();
-					setResult(RESULT_OK);
-					finish();
-					return;
-				}
-				Message next = obtainMessage(CHECK);
-				sendMessageDelayed(next, 3000);
-			}
-		}
-	};
+	private DialogFragment mFragment;
 
 	@Override
 	public void onCreate(Bundle icicle) {
@@ -68,20 +44,78 @@ public class ScanningProgress extends FragmentActivity {
 		super.onCreate(icicle);
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
-		requestWindowFeature(Window.FEATURE_NO_TITLE);
-		setContentView(R.layout.scanning);
-		getWindow().setLayout(WindowManager.LayoutParams.WRAP_CONTENT,
-				WindowManager.LayoutParams.WRAP_CONTENT);
-		setResult(RESULT_CANCELED);
+		mFragment = new ScanningDialogFragment();
+		mFragment.show(getSupportFragmentManager(), "scanning_dialog");
 
-		Message msg = mHandler.obtainMessage(CHECK);
-		mHandler.sendMessageDelayed(msg, 1000);
 	}
 
 	@Override
-	public void onDestroy() {
+	public void onStart() {
+		super.onStart();
+		registerReceiver(mMountStateReceiver, new IntentFilter(Intent.ACTION_MEDIA_MOUNTED));
+	}
 
-		mHandler.removeMessages(CHECK);
-		super.onDestroy();
+	@Override
+	public void onStop() {
+		unregisterReceiver(mMountStateReceiver);
+		super.onStop();
+	}
+
+	private BroadcastReceiver mMountStateReceiver = new BroadcastReceiver() {
+
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			if (Intent.ACTION_MEDIA_MOUNTED.equals(intent.getAction())) {
+				startActivity(new Intent(getApplicationContext(), MusicBrowserActivity.class));
+				finish();
+			}
+		}
+
+	};
+
+	public static class ScanningDialogFragment extends DialogFragment implements OnClickListener,
+			OnCancelListener {
+
+		@Override
+		public Dialog onCreateDialog(Bundle savedInstanceState) {
+
+			String mount_state = Environment.getExternalStorageState();
+			AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+
+			builder.setIcon(android.R.drawable.ic_dialog_alert);
+			builder.setTitle(R.string.media_storage_error_title);
+
+			if (Environment.MEDIA_MOUNTED.equals(mount_state)
+					|| Environment.MEDIA_MOUNTED_READ_ONLY.equals(mount_state)) {
+				getActivity().finish();
+			} else if (Environment.MEDIA_CHECKING.equals(mount_state)) {
+				builder.setMessage(R.string.media_storage_error_checking);
+			} else if (Environment.MEDIA_BAD_REMOVAL.equals(mount_state)
+					|| Environment.MEDIA_REMOVED.equals(mount_state)) {
+				builder.setMessage(R.string.media_storage_error_removed);
+			} else if (Environment.MEDIA_NOFS.equals(mount_state)
+					|| Environment.MEDIA_UNMOUNTABLE.equals(mount_state)) {
+				builder.setMessage(R.string.media_storage_error_corrupted);
+			} else if (Environment.MEDIA_SHARED.equals(mount_state)) {
+				builder.setMessage(R.string.media_storage_error_shared);
+			} else if (Environment.MEDIA_UNMOUNTED.equals(mount_state)) {
+				builder.setMessage(R.string.media_storage_error_unmounted);
+			} else {
+				builder.setMessage(R.string.media_storage_error_unknown);
+			}
+
+			return builder.create();
+
+		}
+
+		@Override
+		public void onCancel(DialogInterface dialog) {
+			getActivity().finish();
+		}
+
+		@Override
+		public void onClick(DialogInterface dialog, int which) {
+
+		}
 	}
 }

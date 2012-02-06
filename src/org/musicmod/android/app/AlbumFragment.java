@@ -18,7 +18,7 @@ import android.provider.MediaStore;
 import android.provider.MediaStore.Audio;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.app.LoaderManager;
+import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.SimpleCursorAdapter;
@@ -37,7 +37,7 @@ import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 
 public class AlbumFragment extends Fragment implements Constants, OnItemClickListener,
-		LoaderManager.LoaderCallbacks<Cursor> {
+		LoaderCallbacks<Cursor> {
 
 	private AlbumsAdapter mAdapter;
 	private GridView mGridView;

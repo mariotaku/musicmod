@@ -26,7 +26,7 @@
 	<string name="delete_artist_desc">All songs by <xliff:g id="artist">%s</xliff:g> will be permanently deleted from your device.</string>
 	<string name="delete_album_desc">The entire album \"<xliff:g id="album">%s</xliff:g>\" will be permanently deleted from your device.</string>
 	<string name="delete_song_desc">\"<xliff:g id="song">%s</xliff:g>\" will be permanently deleted from your device.</string>
-	<string name="scanning">Scanning for media…</string>
+	<string name="scanning">正在扫描媒体库…</string>
 	<string name="all_media">All media</string>
 	<string name="no_tracks">No songs</string>
 	<string name="no_playlists">No playlists</string>
@@ -116,10 +116,12 @@
 	<string name="albums">专辑</string>
 	<string name="tracks">曲目</string>
 	<string name="playlists">播放列表</string>
+	<string name="genres">流派</string>
 	<string name="artist">艺术家</string>
 	<string name="album">专辑</string>
 	<string name="track">曲目</string>
 	<string name="playlist">播放列表</string>
+	<string name="genre">流派</string>
 	<string name="recently_added">最近添加</string>
 	<string name="error_bad_parameters">你以错误的方式启动了这个Activity！请参阅项目页面上的文档解决出现的问题。</string>
 	<string name="added_to_favorites">已添加到收藏。</string>
@@ -205,5 +207,12 @@
 	<string name="open_configure">打开/配置</string>
 	<string name="special_thanks_to">特别感谢</string>
 	<string name="special_thanks_to_summary">\@JavranC: Testing\n\@oliver661: Testing\n\@leytwit: Japanese translation</string>
+	<string name="media_storage_error_title">音沐暂时不能启动</string>
+	<string name="media_storage_error_checking">系统正在检查存储器。请稍等。音沐将在检查结束后启动。</string>
+	<string name="media_storage_error_removed">存储设备已经移除。在你连接存储设备之前，音沐无法启动。</string>
+	<string name="media_storage_error_corrupted">存储设备的文件系统已经损坏。\n你可以尝试修复文件系统，如果失败就将只能通过格式化继续使用存储设备。</string>
+	<string name="media_storage_error_shared">存储设备正在通过USB大容量存储方式连接。断开连接后稍等，音沐就能够启动。</string>
+	<string name="media_storage_error_unmounted">存储设备已经卸载。在你重新挂载它之前，音沐无法启动。</string>
+	<string name="media_storage_error_unknown">未知错误，你可以尝试重启设备，如果重启后问题依然存在，而你确信自己的设备没有故障，请将此情况通知我。</string>
 
 </resources>

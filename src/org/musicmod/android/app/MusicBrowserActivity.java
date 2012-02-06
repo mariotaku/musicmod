@@ -23,6 +23,7 @@ import org.mariotaku.actionbarcompat.ActionBarCompat;
 import org.musicmod.android.Constants;
 import org.musicmod.android.IMusicPlaybackService;
 import org.musicmod.android.R;
+import org.musicmod.android.dialog.ScanningProgress;
 import org.musicmod.android.util.MusicUtils;
 import org.musicmod.android.util.ServiceToken;
 import org.musicmod.android.util.PreferencesEditor;
@@ -40,6 +41,7 @@ import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.provider.MediaStore;
@@ -48,6 +50,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -77,6 +80,14 @@ public class MusicBrowserActivity extends ActionBarActivity implements Constants
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
 
 		mPrefs = new PreferencesEditor(getApplicationContext());
+
+		String mount_state = Environment.getExternalStorageState();
+
+		if (!Environment.MEDIA_MOUNTED.equals(mount_state)
+				&& !Environment.MEDIA_MOUNTED_READ_ONLY.equals(mount_state)) {
+			startActivity(new Intent(this, ScanningProgress.class));
+			finish();
+		}
 
 		configureActivity();
 		configureTabs(icicle);
@@ -208,6 +219,7 @@ public class MusicBrowserActivity extends ActionBarActivity implements Constants
 		mTabsAdapter.addFragment(new TrackFragment(args), getString(R.string.tracks).toUpperCase());
 		mTabsAdapter.addFragment(new PlaylistFragment(args), getString(R.string.playlists)
 				.toUpperCase());
+		mTabsAdapter.addFragment(new GenreFragment(args), getString(R.string.genres).toUpperCase());
 
 		mViewPager.setAdapter(mTabsAdapter);
 		mIndicator.setViewPager(mViewPager);

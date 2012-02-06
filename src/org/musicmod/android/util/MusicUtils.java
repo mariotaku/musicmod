@@ -43,6 +43,7 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Audio;
+import android.provider.MediaStore.Audio.Genres;
 import android.provider.MediaStore.Audio.Playlists;
 import android.text.TextUtils;
 import android.text.format.Time;
@@ -387,6 +388,93 @@ public class MusicUtils implements Constants {
 
 	}
 
+	public static String getGenreName(Context context, long genre_id, boolean default_name) {
+		String where = Audio.Genres._ID + "=" + genre_id;
+		String[] cols = new String[] { Audio.Genres.NAME };
+		Uri uri = Audio.Genres.EXTERNAL_CONTENT_URI;
+		Cursor cursor = context.getContentResolver().query(uri, cols, where, null, null);
+		if (cursor.getCount() <= 0) {
+			if (default_name) {
+				return context.getString(R.string.unknown_genre);
+			} else {
+				return MediaStore.UNKNOWN_STRING;
+			}
+		} else {
+			cursor.moveToFirst();
+			String name = cursor.getString(0);
+			cursor.close();
+			if (name == null || MediaStore.UNKNOWN_STRING.equals(name)) {
+				if (default_name) {
+					return context.getString(R.string.unknown_genre);
+				} else {
+					return MediaStore.UNKNOWN_STRING;
+				}
+			}
+			return name;
+		}
+	}
+
+	public static String getBetterGenresWhereClause(Context context) {
+
+		StringBuilder builder = new StringBuilder();
+
+		ContentResolver resolver = context.getContentResolver();
+		String[] genres_cols = new String[] { Audio.Genres._ID };
+		Uri genres_uri = Audio.Genres.EXTERNAL_CONTENT_URI;
+
+		Cursor genres_cursor = resolver.query(genres_uri, genres_cols, null, null, null);
+
+		if (genres_cursor != null) {
+			if (genres_cursor.getCount() <= 0) {
+				genres_cursor.close();
+				return null;
+			}
+		} else {
+			return null;
+		}
+
+		builder.append(Audio.Genres._ID + " IN (");
+		genres_cursor.moveToFirst();
+		while (!genres_cursor.isAfterLast()) {
+			long genre_id = genres_cursor.getLong(0);
+			StringBuilder where = new StringBuilder();
+			where.append(Genres.Members.IS_MUSIC + "=1");
+			where.append(" AND " + Genres.Members.TITLE + "!=''");
+			String[] cols = new String[] { Genres.Members._ID };
+			Uri uri = Genres.Members.getContentUri(EXTERNAL_VOLUME, genre_id);
+			Cursor member_cursor = context.getContentResolver().query(uri, cols, where.toString(),
+					null, null);
+			if (member_cursor != null) {
+				if (member_cursor.getCount() > 0) {
+					builder.append(genre_id + ",");
+				}
+				member_cursor.close();
+			}
+			genres_cursor.moveToNext();
+		}
+		genres_cursor.close();
+		builder.deleteCharAt(builder.length() - 1);
+		builder.append(")");
+
+		return builder.toString();
+	}
+
+	public static String parseGenreName(String orig) {
+		int genre_id = -1;
+		try {
+			genre_id = Integer.parseInt(orig);
+		} catch (NumberFormatException e) {
+			// string is not a valid number, so return original value.
+			return orig;
+		}
+		if (genre_id >= 0 || genre_id < GENRES_DB.length) {
+			return GENRES_DB[genre_id];
+		} else {
+			return "Unknown";
+		}
+
+	}
+
 	public static String getTrackName(Context context, long audio_id) {
 		String where = Audio.Media._ID + "=" + audio_id;
 		String[] cols = new String[] { Audio.Media.TITLE };
@@ -487,6 +575,15 @@ public class MusicUtils implements Constants {
 		}
 	}
 
+	public static void setQueueId(long id) {
+		if (mService == null) return;
+		try {
+			mService.setQueueId(id);
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+	}
+
 	public static void makePlaylistList(Context context, boolean create_shortcut,
 			List<Map<String, String>> list) {
 
@@ -556,6 +653,7 @@ public class MusicUtils implements Constants {
 		return;
 	}
 
+	// XXX
 	public static void deleteTracks(Context context, long[] list) {
 
 		String[] cols = new String[] { MediaStore.Audio.Media._ID, MediaStore.Audio.Media.DATA,

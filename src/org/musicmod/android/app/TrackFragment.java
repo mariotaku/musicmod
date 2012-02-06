@@ -1,7 +1,5 @@
 package org.musicmod.android.app;
 
-import java.util.Arrays;
-
 import org.musicmod.android.Constants;
 import org.musicmod.android.R;
 import org.musicmod.android.util.MusicUtils;
@@ -20,6 +18,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Audio;
+import android.provider.MediaStore.Audio.Genres;
 import android.provider.MediaStore.Audio.Playlists;
 import android.support.v4.app.ListFragment;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
@@ -133,7 +132,7 @@ public class TrackFragment extends ListFragment implements LoaderCallbacks<Curso
 				Audio.Media.ALBUM, Audio.Media.ARTIST, Audio.Media.ARTIST_ID, Audio.Media.DURATION };
 
 		StringBuilder where = new StringBuilder();
-		String sort_order = null;
+		String sort_order = Audio.Media.TITLE;
 
 		where.append(Audio.Media.IS_MUSIC + "=1");
 		where.append(" AND " + Audio.Media.TITLE + " != ''");
@@ -159,13 +158,13 @@ public class TrackFragment extends ListFragment implements LoaderCallbacks<Curso
 						}
 						where = new StringBuilder();
 						where.append(MediaStore.Audio.Media._ID + " IN (");
-						for (int i = 0; i < mNowPlaying.length; i++) {
-							where.append(mNowPlaying[i]);
-							if (i < mNowPlaying.length - 1) {
-								where.append(",");
-							}
+						if (mNowPlaying == null || mNowPlaying.length <= 0) return null;
+						for (long queue_id : mNowPlaying) {
+							where.append(queue_id + ",");
 						}
+						where.deleteCharAt(where.length() - 1);
 						where.append(")");
+						sort_order = null;
 						break;
 					case (int) PLAYLIST_FAVORITES:
 						long favorites_id = MusicUtils.getFavoritesId(getActivity());
@@ -180,9 +179,10 @@ public class TrackFragment extends ListFragment implements LoaderCallbacks<Curso
 						int X = new PreferencesEditor(getActivity()).getIntPref(PREF_KEY_NUMWEEKS,
 								2) * (3600 * 24 * 7);
 						where = new StringBuilder();
-						where.append(MediaStore.Audio.Media.TITLE + " != ''");
-						where.append(" AND " + MediaStore.MediaColumns.DATE_ADDED + ">");
-						where.append(System.currentTimeMillis() / 1000 - X);
+						where.append(Audio.Media.TITLE + " != ''");
+						where.append(" AND " + Audio.Media.IS_MUSIC + "=1");
+						where.append(" AND " + MediaStore.MediaColumns.DATE_ADDED + ">"
+								+ (System.currentTimeMillis() / 1000 - X));
 						sort_order = Audio.Media.DATE_ADDED;
 						break;
 					case (int) PLAYLIST_PODCASTS:
@@ -201,6 +201,16 @@ public class TrackFragment extends ListFragment implements LoaderCallbacks<Curso
 						sort_order = Playlists.Members.DEFAULT_SORT_ORDER;
 						break;
 				}
+
+			} else if (Audio.Genres.CONTENT_TYPE.equals(mimetype)) {
+				long genre_id = getArguments().getLong(Audio.Genres._ID);
+				uri = Genres.Members.getContentUri(EXTERNAL_VOLUME, genre_id);
+				cols = new String[] { Genres.Members._ID, Genres.Members.TITLE,
+						Genres.Members.ALBUM, Genres.Members.ARTIST, Genres.Members.DURATION };
+				where = new StringBuilder();
+				where.append(Genres.Members.IS_MUSIC + "=1");
+				where.append(" AND " + Genres.Members.TITLE + " != ''");
+				sort_order = Genres.Members.DEFAULT_SORT_ORDER;
 
 			} else {
 
@@ -236,11 +246,19 @@ public class TrackFragment extends ListFragment implements LoaderCallbacks<Curso
 				&& Playlists.CONTENT_TYPE.equals(getArguments().getString(INTENT_KEY_TYPE))
 				&& (getArguments().getLong(Playlists._ID) >= 0 || getArguments().getLong(
 						Playlists._ID) == PLAYLIST_FAVORITES)) {
+
 			mIdIdx = data.getColumnIndexOrThrow(Playlists.Members.AUDIO_ID);
 			mTrackIdx = data.getColumnIndexOrThrow(Playlists.Members.TITLE);
 			mAlbumIdx = data.getColumnIndexOrThrow(Playlists.Members.ALBUM);
 			mArtistIdx = data.getColumnIndexOrThrow(Playlists.Members.ARTIST);
 			mDurationIdx = data.getColumnIndexOrThrow(Playlists.Members.DURATION);
+		} else if (getArguments() != null
+				&& Genres.CONTENT_TYPE.equals(getArguments().getString(INTENT_KEY_TYPE))) {
+			mIdIdx = data.getColumnIndexOrThrow(Genres.Members._ID);
+			mTrackIdx = data.getColumnIndexOrThrow(Genres.Members.TITLE);
+			mAlbumIdx = data.getColumnIndexOrThrow(Genres.Members.ALBUM);
+			mArtistIdx = data.getColumnIndexOrThrow(Genres.Members.ARTIST);
+			mDurationIdx = data.getColumnIndexOrThrow(Genres.Members.DURATION);
 		} else {
 			mIdIdx = data.getColumnIndexOrThrow(Audio.Media._ID);
 			mTrackIdx = data.getColumnIndexOrThrow(Audio.Media.TITLE);
@@ -274,7 +292,7 @@ public class TrackFragment extends ListFragment implements LoaderCallbacks<Curso
 		// dropping out of party shuffle.
 
 		if (mPlaylistId == PLAYLIST_QUEUE) {
-			MusicUtils.setQueuePosition(position);
+			MusicUtils.setQueueId(id);
 			return;
 		}
 		MusicUtils.playAll(getActivity(), mCursor, position);
@@ -313,10 +331,8 @@ public class TrackFragment extends ListFragment implements LoaderCallbacks<Curso
 		switch (item.getItemId()) {
 			case PLAY_SELECTION:
 				int position = mSelectedPosition;
-				long[] list_for_cursor = MusicUtils.getSongListForCursor(mCursor);
-				long[] queue = MusicUtils.getQueue();
 
-				if (Arrays.equals(list_for_cursor, queue)) {
+				if (mPlaylistId == PLAYLIST_QUEUE) {
 					MusicUtils.setQueuePosition(position);
 					return true;
 				}

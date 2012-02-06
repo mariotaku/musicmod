@@ -2,6 +2,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
 	<item
+		android:id="@id/menu_star"
+		android:showAsAction="always"
+		android:title="@string/add_to_favorites"/>
+	<item
 		android:id="@id/add_to_playlist"
 		android:icon="@android:drawable/ic_menu_add"
 		android:title="@string/add_to_playlist"/>

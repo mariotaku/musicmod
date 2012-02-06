@@ -23,15 +23,15 @@ import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.MediaStore.Audio;
-import android.support.v4.app.FragmentActivity;
 import android.view.MenuItem;
 
+import org.mariotaku.actionbarcompat.ActionBarActivity;
 import org.musicmod.android.Constants;
 import org.musicmod.android.R;
 import org.musicmod.android.util.MusicUtils;
 import org.musicmod.android.util.ServiceToken;
 
-public class TrackBrowserActivity extends FragmentActivity implements Constants, ServiceConnection {
+public class TrackBrowserActivity extends ActionBarActivity implements Constants, ServiceConnection {
 
 	private ServiceToken mToken;
 	private Intent intent;
@@ -137,6 +137,9 @@ public class TrackBrowserActivity extends FragmentActivity implements Constants,
 		} else if (Audio.Albums.CONTENT_TYPE.equals(mimeType)) {
 			id = bundle.getLong(Audio.Albums._ID);
 			name = MusicUtils.getAlbumName(getApplicationContext(), id, true);
+		} else if (Audio.Genres.CONTENT_TYPE.equals(mimeType)) {
+			id = bundle.getLong(Audio.Genres._ID);
+			name = MusicUtils.parseGenreName(MusicUtils.getGenreName(getApplicationContext(), id, true));
 		} else {
 			setTitle(R.string.music_library);
 			return;

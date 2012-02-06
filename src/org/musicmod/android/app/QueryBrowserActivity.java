@@ -22,25 +22,23 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 
 import android.media.AudioManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.provider.MediaStore;
-import android.support.v4.app.FragmentActivity;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
-import android.view.Window;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 
+import org.mariotaku.actionbarcompat.ActionBarActivity;
 import org.musicmod.android.Constants;
 import org.musicmod.android.R;
 import org.musicmod.android.util.MusicUtils;
 import org.musicmod.android.util.ServiceToken;
 
-public class QueryBrowserActivity extends FragmentActivity implements Constants, ServiceConnection,
-		TextWatcher {
+public class QueryBrowserActivity extends ActionBarActivity implements Constants,
+		ServiceConnection, TextWatcher {
 
 	private ServiceToken mToken;
 	private Intent intent;
@@ -143,19 +141,10 @@ public class QueryBrowserActivity extends FragmentActivity implements Constants,
 
 		View mCustomView;
 
-		if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB)
-			requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
-
 		setContentView(new FrameLayout(this));
 
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-			getActionBar().setCustomView(R.layout.actionbar_query_browser);
-			mCustomView = getActionBar().getCustomView();
-		} else {
-			getWindow()
-					.setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.actionbar_query_browser);
-			mCustomView = findViewById(R.id.actionbar_view);
-		}
+		getActionBarCompat().setCustomView(R.layout.actionbar_query_browser);
+		mCustomView = getActionBarCompat().getCustomView();
 
 		if (mCustomView != null) {
 			((EditText) mCustomView.findViewById(R.id.query_editor)).addTextChangedListener(this);

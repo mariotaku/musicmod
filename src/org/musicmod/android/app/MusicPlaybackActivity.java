@@ -29,7 +29,6 @@ import org.musicmod.android.util.PreferencesEditor;
 import org.musicmod.android.util.VisualizerWrapper;
 import org.musicmod.android.util.VisualizerWrapper.OnDataChangedListener;
 import org.musicmod.android.view.VisualizerViewFftSpectrum;
-import org.musicmod.android.view.VisualizerViewWaveForm;
 import org.musicmod.android.view.VisualizerViewWaveForm22;
 import org.musicmod.android.widget.RepeatingImageButton;
 import org.musicmod.android.widget.RepeatingImageButton.RepeatListener;
@@ -135,9 +134,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 	private boolean mShowFadeAnimation = false;
 	private boolean mLyricsWakelock = DEFAULT_LYRICS_WAKELOCK;
 
-	private TextView mTrackNameView, mTrackDetailView;
-	private CheckBox mFavoriteButton;
-
 	private ImageView mAlbum;
 	private TextView mCurrentTime, mTotalTime;
 	private ProgressBar mProgress;
@@ -211,16 +207,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		ActionBarCompat mActionBar = getActionBarCompat();
 
 		mActionBar.setCustomView(R.layout.actionbar_music_playback);
-
-		View mCustomView = mActionBar.getCustomView();
-
-		mActionBar.setDisplayShowTitleEnabled(false);
-		mActionBar.setDisplayShowCustomEnabled(true);
-
-		mTrackNameView = (TextView) mCustomView.findViewById(R.id.track_name);
-		mTrackDetailView = (TextView) mCustomView.findViewById(R.id.track_detail);
-		mFavoriteButton = (CheckBox) mCustomView.findViewById(R.id.favorite_button);
-		mFavoriteButton.setOnClickListener(mFavoriteListener);
 
 		mCurrentTime = (TextView) findViewById(R.id.currenttime);
 		mTotalTime = (TextView) findViewById(R.id.totaltime);
@@ -549,20 +535,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		}
 	};
 
-	private View.OnClickListener mFavoriteListener = new View.OnClickListener() {
-
-		@Override
-		public void onClick(View v) {
-
-			try {
-				mService.toggleFavorite();
-			} catch (RemoteException e) {
-				e.printStackTrace();
-			}
-
-		}
-	};
-
 	private View.OnClickListener mPrevListener = new View.OnClickListener() {
 
 		@Override
@@ -763,6 +735,9 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
 				startActivity(intent);
 				finish();
+				break;
+			case ADD_TO_FAVORITES:
+				toggleFavorite();
 				break;
 		}
 
@@ -1281,7 +1256,7 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		if (mService == null) return;
 
 		try {
-			mFavoriteButton.setChecked(mService.isFavorite(mService.getAudioId()));
+			getActionBarCompat().setStarActionItemState(mService.isFavorite(mService.getAudioId()));
 		} catch (RemoteException e) {
 			e.printStackTrace();
 		}
@@ -1293,6 +1268,16 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 			Message msg = mHandler.obtainMessage(REFRESH);
 			mHandler.removeMessages(REFRESH);
 			mHandler.sendMessageDelayed(msg, delay);
+		}
+	}
+
+	private void toggleFavorite() {
+
+		if (mService == null) return;
+		try {
+			mService.toggleFavorite();
+		} catch (RemoteException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -1427,16 +1412,16 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 			return;
 		}
 		try {
-			mTrackNameView.setText(mService.getTrackName());
+			setTitle(mService.getTrackName());
 
 			if (mService.getArtistName() != null
 					&& !MediaStore.UNKNOWN_STRING.equals(mService.getArtistName())) {
-				mTrackDetailView.setText(mService.getArtistName());
+				getActionBarCompat().setSubtitle(mService.getArtistName());
 			} else if (mService.getAlbumName() != null
 					&& !MediaStore.UNKNOWN_STRING.equals(mService.getAlbumName())) {
-				mTrackDetailView.setText(mService.getAlbumName());
+				getActionBarCompat().setSubtitle(mService.getAlbumName());
 			} else {
-				mTrackDetailView.setText(R.string.unknown_artist);
+				getActionBarCompat().setSubtitle(R.string.unknown_artist);
 			}
 
 			if (mAlbumArtLoader != null) mAlbumArtLoader.cancel(true);

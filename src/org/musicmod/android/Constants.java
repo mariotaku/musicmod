@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *            http://www.apache.org/licenses/LICENSE-2.0
+ *            http:www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -105,11 +105,11 @@ public interface Constants {
 	public final static String SHAREDPREFS_EQUALIZER = "equalizer";
 	public final static String SHAREDPREFS_STATES = "states";
 
-	public final static String MEDIASTORE_EXTERNAL_AUDIO_ALBUMART_URI = "content://media/external/audio/albumart";
-	public final static String MEDIASTORE_EXTERNAL_AUDIO_MEDIA_URI = "content://media/external/audio/media/";
-	public final static String MEDIASTORE_EXTERNAL_AUDIO_ALBUMS_URI = "content://media/external/audio/albums/";
-	public final static String MEDIASTORE_EXTERNAL_AUDIO_ARTISTS_URI = "content://media/external/audio/artists/";
-	public final static String MEDIASTORE_EXTERNAL_AUDIO_SEARCH_FANCY_URI = "content://media/external/audio/search/fancy/";
+	public final static String MEDIASTORE_EXTERNAL_AUDIO_ALBUMART_URI = "content:media/external/audio/albumart";
+	public final static String MEDIASTORE_EXTERNAL_AUDIO_MEDIA_URI = "content:media/external/audio/media/";
+	public final static String MEDIASTORE_EXTERNAL_AUDIO_ALBUMS_URI = "content:media/external/audio/albums/";
+	public final static String MEDIASTORE_EXTERNAL_AUDIO_ARTISTS_URI = "content:media/external/audio/artists/";
+	public final static String MEDIASTORE_EXTERNAL_AUDIO_SEARCH_FANCY_URI = "content:media/external/audio/search/fancy/";
 
 	public final static String LASTFM_APIKEY = "e682ad43038e19de1e33f583b191f5b2";
 
@@ -252,6 +252,7 @@ public interface Constants {
 	public final static int PLAY_SELECTION = R.id.play_selection;
 	public final static int GOTO_PLAYBACK = R.id.goto_playback;
 	public final static int GOTO_HOME = android.R.id.home;
+	public final static int ADD_TO_FAVORITES = R.id.menu_star;
 	public final static int PARTY_SHUFFLE = R.id.party_shuffle;
 	public final static int SHUFFLE_ALL = R.id.shuffle_all;
 	public final static int PLAY_ALL = R.id.play_all;
@@ -267,6 +268,32 @@ public interface Constants {
 	public final static int CHILD_MENU_BASE = 15; // this should be the last
 
 	public final static String[] HIDE_PLAYLISTS = new String[] { "Sony Ericsson play queue",
-			"Sony Ericsson played tracks", "Sony Ericsson temporary playlist" };
+			"Sony Ericsson played tracks", "Sony Ericsson temporary playlist", "$$miui" };
+
+	/**
+	 * Following genres data is copied from from id3lib 3.8.3
+	 */
+	public final static String[] GENRES_DB = { "Blues", "Classic Rock", "Country", "Dance",
+			"Disco", "Funk", "Grunge", "Hip-Hop", "Jazz", "Metal", "New Age", "Oldies", "Other",
+			"Pop", "R&B", "Rap", "Reggae", "Rock", "Techno", "Industrial", "Alternative", "Ska",
+			"Death Metal", "Pranks", "Soundtrack", "Euro-Techno", "Ambient", "Trip-Hop", "Vocal",
+			"Jazz+Funk", "Fusion", "Trance", "Classical", "Instrumental", "Acid", "House", "Game",
+			"Sound Clip", "Gospel", "Noise", "AlternRock", "Bass", "Soul", "Punk", "Space",
+			"Meditative", "Instrumental Pop", "Instrumental Rock", "Ethnic", "Gothic", "Darkwave",
+			"Techno-Industrial", "Electronic", "Pop-Folk", "Eurodance", "Dream", "Southern Rock",
+			"Comedy", "Cult", "Gangsta", "Top 40", "Christian Rap", "Pop/Funk", "Jungle",
+			"Native American", "Cabaret", "New Wave", "Psychedelic", "Rave", "Showtunes",
+			"Trailer", "Lo-Fi", "Tribal", "Acid Punk", "Acid Jazz", "Polka", "Retro", "Musical",
+			"Rock & Roll", "Hard Rock", "Folk", "Folk-Rock", "National Folk", "Swing",
+			"Fast Fusion", "Bebob", "Latin", "Revival", "Celtic", "Bluegrass", "Avantgarde",
+			"Gothic Rock", "Progressive Rock", "Psychedelic Rock", "Symphonic Rock", "Slow Rock",
+			"Big Band", "Chorus", "Easy Listening", "Acoustic", "Humour", "Speech", "Chanson",
+			"Opera", "Chamber Music", "Sonata", "Symphony", "Booty Bass", "Primus", "Porn Groove",
+			"Satire", "Slow Jam", "Club", "Tango", "Samba", "Folklore", "Ballad", "Power Ballad",
+			"Rhythmic Soul", "Freestyle", "Duet", "Punk Rock", "Drum Solo", "A capella",
+			"Euro-House", "Dance Hall", "Goa", "Drum & Bass", "Club-House", "Hardcore", "Terror",
+			"Indie", "Britpop", "Negerpunk", "Polsk Punk", "Beat", "Christian Gangsta Rap",
+			"Heavy Metal", "Black Metal", "Crossover", "Contemporary Christian", "Christian Rock ",
+			"Merengue", "Salsa", "Thrash Metal", "Anime", "JPop", "Synthpop" };
 
 }

@@ -81,7 +81,7 @@
 		android:layout_width="@dimen/actionbar_control_button_width"
 		android:layout_height="match_parent"
 		android:layout_weight="0"
-		android:background="@drawable/appwidget_button_center"
+		android:background="@drawable/actionbarcompat_menu_button"
 		android:gravity="center_vertical"
 		android:src="@drawable/ic_action_media_play"/>
 
@@ -90,7 +90,7 @@
 		android:layout_width="@dimen/actionbar_control_button_width"
 		android:layout_height="match_parent"
 		android:layout_weight="0"
-		android:background="@drawable/appwidget_button_center"
+		android:background="@drawable/actionbarcompat_menu_button"
 		android:gravity="center_vertical"
 		android:src="@drawable/ic_action_media_next"/>
 

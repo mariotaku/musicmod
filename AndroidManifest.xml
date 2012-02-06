@@ -23,9 +23,7 @@
 
 	<original-package android:name="com.android.music"/>
 
-	<uses-sdk
-		android:minSdkVersion="8"
-		android:targetSdkVersion="15"/>
+	<uses-sdk android:minSdkVersion="8"/>
 
 	<uses-permission android:name="android.permission.WAKE_LOCK"/>
 	<uses-permission android:name="android.permission.INTERNET"/>
@@ -111,7 +109,7 @@
 		</activity>
 		<activity
 			android:name=".dialog.ScanningProgress"
-			android:theme="@android:style/Theme.Dialog"/>
+			android:theme="@android:style/Theme.NoDisplay"/>
 		<activity
 			android:name=".app.MusicSettingsActivity"
 			android:label="@string/settings">

@@ -55,6 +55,7 @@
 	<string name="sdcard_error_nosdcard">An error was encountered on your USB storage.</string>
 	<string name="unknown_artist">Unknown artist</string>
 	<string name="unknown_album">Unknown album</string>
+	<string name="unknown_genre">Unknown genre</string>
 	<string name="shuffle_on_notif">Shuffle is on.</string>
 	<string name="shuffle_off_notif">Shuffle is off.</string>
 	<string name="repeat_off_notif">Repeat is off.</string>
@@ -119,12 +120,15 @@
 	<string name="albums">Albums</string>
 	<string name="tracks">Songs</string>
 	<string name="playlists">Playlists</string>
+	<string name="genres">Genres</string>
 	<string name="artist">Artist</string>
 	<string name="album">Album</string>
 	<string name="track">Song</string>
 	<string name="playlist">Playlist</string>
+	<string name="genre">Genre</string>
 	<string name="recently_added">Recently added</string>
 	<string name="error_bad_parameters">You called this activity in wrong way! Maybe you should see application documents on my project page.</string>
+	<string name="add_to_favorites">Add to favorites</string>
 	<string name="added_to_favorites">Added to favorites.</string>
 	<string name="removed_from_favorites">Removed from favorites.</string>
 	<string name="sleep_timer">Sleep timer</string>
@@ -216,5 +220,12 @@
 	<string name="special_thanks_to">Speical thanks to</string>
 	<string name="special_thanks_to_summary">\@JavranC: Testing\n\@oliver661: Testing\n\@leytwit: Japanese translation</string>
 	<string name="default_time_format">--:--</string>
+	<string name="media_storage_error_title">Can\'t launch application</string>
+	<string name="media_storage_error_checking">Checking storage device.</string>
+	<string name="media_storage_error_removed">Storage device removed.</string>
+	<string name="media_storage_error_corrupted">File system of storage device corrupted.</string>
+	<string name="media_storage_error_shared">Storage device is shared via USB storage.</string>
+	<string name="media_storage_error_unmounted">Storage device unmounted.</string>
+	<string name="media_storage_error_unknown">Unknown error.</string>
 
 </resources>

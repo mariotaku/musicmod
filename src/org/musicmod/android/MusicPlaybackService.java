@@ -752,7 +752,9 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 								mHistory.clear();
 								break;
 							}
-							mHistory.add(n);
+							if (!isFavorite()) {
+								mHistory.add(n);
+							}
 							n = 0;
 							shift = 0;
 						} else {
@@ -1679,7 +1681,7 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 			}
 
 			if (mShuffleMode == SHUFFLE_NORMAL) {
-				if (mPlayPos >= 0) {
+				if (mPlayPos >= 0 & !isFavorite()) {
 					mHistory.add(mPlayPos);
 				}
 				if (mHistory.size() > MAX_HISTORY_SIZE) {
@@ -2113,6 +2115,23 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 		}
 	}
 
+	/**
+	 * Starts playing the track at the given id in the queue.
+	 * 
+	 * @param id
+	 *            The id in the queue of the track that will be played.
+	 */
+	public void setQueueId(long id) {
+		int pos = -1;
+
+		for (int i = 0; i < mPlayList.length; i++) {
+			if (id == mPlayList[i]) pos = i;
+		}
+		if (pos < 0) return;
+
+		setQueuePosition(pos);
+	}
+
 	public String getArtistName() {
 
 		synchronized (this) {
@@ -2441,6 +2460,11 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 		public void setQueuePosition(int index) {
 
 			mService.get().setQueuePosition(index);
+		}
+
+		@Override
+		public void setQueueId(long id) {
+			mService.get().setQueueId(id);
 		}
 
 		@Override

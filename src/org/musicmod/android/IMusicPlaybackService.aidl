@@ -48,6 +48,7 @@ interface IMusicPlaybackService {
 	long [] getQueue();
 	void moveQueueItem(int from, int to);
 	void setQueuePosition(int index);
+	void setQueueId(long id);
 	String getPath();
 	long getAudioId();
 	Bitmap getAlbumArt();

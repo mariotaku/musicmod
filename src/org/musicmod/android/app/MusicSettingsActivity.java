@@ -20,9 +20,10 @@ import org.musicmod.android.Constants;
 import org.musicmod.android.R;
 
 import android.os.Bundle;
-import android.preference.PreferenceActivity;
 
-public class MusicSettingsActivity extends PreferenceActivity implements Constants {
+import org.mariotaku.actionbarcompat.ActionBarPreferenceActivity;
+
+public class MusicSettingsActivity extends ActionBarPreferenceActivity implements Constants {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
