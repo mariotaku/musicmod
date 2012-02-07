@@ -27,6 +27,7 @@ import android.os.IBinder;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -106,6 +107,21 @@ public class QueryBrowserActivity extends ActionBarActivity implements Constants
 	}
 
 	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+
+		Intent intent;
+		switch (item.getItemId()) {
+			case GOTO_HOME:
+				intent = new Intent(INTENT_MUSIC_BROWSER);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+				startActivity(intent);
+				finish();
+				break;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
+	@Override
 	public void onServiceConnected(ComponentName name, IBinder service) {
 
 	}
@@ -144,6 +160,8 @@ public class QueryBrowserActivity extends ActionBarActivity implements Constants
 		setContentView(new FrameLayout(this));
 
 		getActionBarCompat().setCustomView(R.layout.actionbar_query_browser);
+		getActionBarCompat().setDisplayShowTitleEnabled(false);
+		getActionBarCompat().setDisplayShowCustomEnabled(true);
 		mCustomView = getActionBarCompat().getCustomView();
 
 		if (mCustomView != null) {

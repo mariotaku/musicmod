@@ -84,7 +84,6 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 	private static final int FOCUSCHANGE = 4;
 	private static final int FADEDOWN = 5;
 	private static final int FADEUP = 6;
-	private static final int MAX_HISTORY_SIZE = 100;
 
 	private static final int NEW_LYRICS_LOADED = 1;
 	private static final int POSITION_CHANGED = 2;
@@ -103,10 +102,10 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 	private int mMediaMountedCount = 0;
 	private long[] mPlayList = null;
 	private int mPlayListLen = 0;
-	private Vector<Integer> mHistory = new Vector<Integer>(MAX_HISTORY_SIZE);
+	private Vector<Integer> mHistory = new Vector<Integer>();
 	private Cursor mCursor;
 	private int mPlayPos = -1;
-	private final Shuffler mRand = new Shuffler();
+	private final Shuffler mShuffler = new Shuffler();
 	private int mOpenFailedCounter = 0;
 	private String[] mCursorCols = new String[] { "audio._id AS _id",
 			MediaStore.Audio.Media.ARTIST, MediaStore.Audio.Media.ALBUM,
@@ -752,8 +751,8 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 								mHistory.clear();
 								break;
 							}
-							if (!isFavorite()) {
-								mHistory.add(n);
+							if (!mHistory.contains(mPlayPos)) {
+								mHistory.add(mPlayPos);
 							}
 							n = 0;
 							shift = 0;
@@ -1270,7 +1269,7 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 			if (position >= 0) {
 				mPlayPos = position;
 			} else {
-				mPlayPos = mRand.nextInt(mPlayListLen);
+				mPlayPos = mShuffler.shuffle(mPlayListLen);
 			}
 			mHistory.clear();
 
@@ -1681,11 +1680,10 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 			}
 
 			if (mShuffleMode == SHUFFLE_NORMAL) {
-				if (mPlayPos >= 0 & !isFavorite()) {
-					mHistory.add(mPlayPos);
-				}
-				if (mHistory.size() > MAX_HISTORY_SIZE) {
-					mHistory.removeElementAt(0);
+				if (mPlayPos >= 0) {
+					if (!mHistory.contains(mPlayPos)) {
+						mHistory.add(mPlayPos);
+					}
 				}
 
 				int numTracks = mPlayListLen;
@@ -1725,7 +1723,7 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 						return;
 					}
 				}
-				int skip = mRand.nextInt(numUnplayed);
+				int skip = mShuffler.shuffle(numUnplayed);
 				int cnt = -1;
 				while (true) {
 					while (tracks[++cnt] < 0)
@@ -1826,44 +1824,24 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 		}
 	}
 
-	// check that the specified idx is not in the history (but only look at at
-	// most lookbacksize entries in the history)
-	private boolean wasRecentlyUsed(int idx, int lookbacksize) {
-
-		// early exit to prevent infinite loops in case idx == mPlayPos
-		if (lookbacksize == 0) {
-			return false;
-		}
-
-		int histsize = mHistory.size();
-		if (histsize < lookbacksize) {
-			Log.d(LOGTAG_SERVICE, "lookback too big");
-			lookbacksize = histsize;
-		}
-		int maxidx = histsize - 1;
-		for (int i = 0; i < lookbacksize; i++) {
-			long entry = mHistory.get(maxidx - i);
-			if (entry == idx) {
-				return true;
-			}
-		}
-		return false;
-	}
-
 	// A simple variation of Random that makes sure that the
 	// value it returns is not equal to the value it returned
 	// previously, unless the interval is 1.
-	private static class Shuffler {
+	private class Shuffler {
 
 		private int mPrevious;
 		private Random mRandom = new Random();
 
-		public int nextInt(int interval) {
+		public int shuffle(int interval) {
 
 			int ret;
+			long ret_id;
 			do {
 				ret = mRandom.nextInt(interval);
-			} while (ret == mPrevious && interval > 1);
+				ret_id = mPlayList[ret];
+			} while ((ret == mPrevious && interval > 1)
+					|| (!isFavorite(ret_id) && mHistory.contains(ret_id)));
+
 			mPrevious = ret;
 			return ret;
 		}
@@ -1964,6 +1942,7 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 			if (mShuffleMode == shufflemode && mPlayListLen > 0) {
 				return;
 			}
+			if (mRepeatMode == REPEAT_CURRENT) mRepeatMode = REPEAT_NONE;
 			mShuffleMode = shufflemode;
 			notifyChange(BROADCAST_SHUFFLEMODE_CHANGED);
 			saveQueue(false);

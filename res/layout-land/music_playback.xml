@@ -27,39 +27,76 @@
 		android:orientation="horizontal">
 
 		<FrameLayout
+			android:id="@+id/album_buttons_view"
 			android:layout_width="@dimen/album_art_width"
 			android:layout_height="@dimen/album_art_height"
-			android:layout_gravity="left|center"
-			android:gravity="center">
+			android:gravity="top|center"
+			android:orientation="horizontal">
 
-			<ImageButton
-				android:id="@+id/curplaylist"
+			<FrameLayout
+				android:id="@+id/album_art_view"
 				android:layout_width="match_parent"
 				android:layout_height="match_parent"
-				android:layout_gravity="center"
-				android:adjustViewBounds="true"
-				android:background="@drawable/ic_mp_albumart_border"
-				android:src="@drawable/ic_mp_albumart_empty"/>
+				android:layout_gravity="left|center"
+				android:gravity="center">
 
-			<ImageView
-				android:id="@+id/album"
-				android:layout_width="match_parent"
-				android:layout_height="match_parent"
-				android:layout_gravity="center"
-				android:adjustViewBounds="true"
-				android:background="@drawable/ic_mp_albumart_placeholder"
-				android:src="@drawable/ic_mp_albumart_unknown"/>
+				<ImageView
+					android:layout_width="match_parent"
+					android:layout_height="match_parent"
+					android:layout_gravity="center"
+					android:adjustViewBounds="true"
+					android:background="@drawable/ic_mp_albumart_border"
+					android:src="@drawable/ic_mp_albumart_empty"/>
 
-			<ImageView
-				android:layout_width="match_parent"
+				<ImageView
+					android:id="@+id/album_art"
+					android:layout_width="match_parent"
+					android:layout_height="match_parent"
+					android:layout_gravity="center"
+					android:adjustViewBounds="true"
+					android:background="@drawable/ic_mp_albumart_placeholder"
+					android:src="@drawable/ic_mp_albumart_unknown"/>
+
+				<ImageView
+					android:layout_width="match_parent"
+					android:layout_height="match_parent"
+					android:layout_gravity="center"
+					android:adjustViewBounds="true"
+					android:background="@drawable/ic_mp_albumart_mask"
+					android:src="@drawable/ic_mp_albumart_empty"/>
+			</FrameLayout>
+
+			<LinearLayout
+				android:id="@+id/option_buttons"
+				android:layout_width="wrap_content"
 				android:layout_height="match_parent"
-				android:layout_gravity="center"
-				android:adjustViewBounds="true"
-				android:background="@drawable/ic_mp_albumart_mask"
-				android:src="@drawable/ic_mp_albumart_empty"/>
+				android:layout_gravity="right"
+				android:orientation="horizontal"
+				android:visibility="gone">
+
+				<LinearLayout
+					android:layout_width="wrap_content"
+					android:layout_height="wrap_content"
+					android:layout_gravity="right"
+					android:orientation="vertical">
+
+					<ImageButton
+						android:id="@+id/toggle_shuffle"
+						android:layout_width="48dip"
+						android:layout_height="48dip"
+						android:src="@drawable/ic_mp_shuffle_off_btn"/>
+
+					<ImageButton
+						android:id="@+id/toggle_repeat"
+						android:layout_width="48dip"
+						android:layout_height="48dip"
+						android:src="@drawable/ic_mp_repeat_off_btn"/>
+				</LinearLayout>
+			</LinearLayout>
 		</FrameLayout>
 
 		<FrameLayout
+			android:id="@+id/queue_frame"
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
 			android:layout_gravity="right"
@@ -67,6 +104,7 @@
 			android:orientation="vertical">
 
 			<FrameLayout
+				android:id="@+id/lyrics_frame"
 				android:layout_width="match_parent"
 				android:layout_height="match_parent"
 				android:layout_gravity="bottom"
@@ -97,6 +135,7 @@
 	</LinearLayout>
 
 	<LinearLayout
+		android:id="@+id/control_buttons"
 		android:layout_width="match_parent"
 		android:layout_height="wrap_content"
 		android:layout_weight="0"

@@ -19,7 +19,9 @@ package org.musicmod.android.app;
 import org.musicmod.android.Constants;
 import org.musicmod.android.R;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.MenuItem;
 
 import org.mariotaku.actionbarcompat.ActionBarPreferenceActivity;
 
@@ -33,4 +35,18 @@ public class MusicSettingsActivity extends ActionBarPreferenceActivity implement
 		addPreferencesFromResource(R.xml.music_settings);
 	}
 
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+
+		Intent intent;
+		switch (item.getItemId()) {
+			case GOTO_HOME:
+				intent = new Intent(INTENT_MUSIC_BROWSER);
+				intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+				startActivity(intent);
+				finish();
+				break;
+		}
+		return super.onOptionsItemSelected(item);
+	}
 }

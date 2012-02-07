@@ -139,7 +139,8 @@ public class TrackBrowserActivity extends ActionBarActivity implements Constants
 			name = MusicUtils.getAlbumName(getApplicationContext(), id, true);
 		} else if (Audio.Genres.CONTENT_TYPE.equals(mimeType)) {
 			id = bundle.getLong(Audio.Genres._ID);
-			name = MusicUtils.parseGenreName(MusicUtils.getGenreName(getApplicationContext(), id, true));
+			name = MusicUtils.parseGenreName(MusicUtils.getGenreName(getApplicationContext(), id,
+					true));
 		} else {
 			setTitle(R.string.music_library);
 			return;

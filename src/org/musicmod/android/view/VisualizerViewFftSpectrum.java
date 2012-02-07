@@ -70,7 +70,16 @@ public class VisualizerViewFftSpectrum extends View {
 	}
 
 	public void updateVisualizer(byte[] bytes) {
-		mBytes = bytes;
+		byte[] model = new byte[bytes.length / 2 + 1];
+		model[0] = (byte) Math.abs(bytes[1]);
+		int j = 1;
+		for (int i = 2; i <= mFftSamples * 2;) {
+			model[j] = (byte) Math.hypot(bytes[i], bytes[i + 1]);
+			i += 2;
+			j++;
+
+		}
+		mBytes = model;
 		invalidate();
 	}
 

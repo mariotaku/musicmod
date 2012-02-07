@@ -46,7 +46,8 @@
 			android:ellipsize="marquee"
 			android:singleLine="true"
 			android:text="@string/album"
-			android:textAppearance="?android:attr/textAppearanceMedium"/>
+			android:textAppearance="?android:attr/textAppearanceMedium"
+			android:textColor="@android:color/white"/>
 
 		<TextView
 			android:id="@+id/artist_name"

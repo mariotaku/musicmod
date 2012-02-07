@@ -26,10 +26,11 @@ import org.musicmod.android.util.ColorAnalyser;
 import org.musicmod.android.util.MusicUtils;
 import org.musicmod.android.util.ServiceToken;
 import org.musicmod.android.util.PreferencesEditor;
+import org.musicmod.android.util.VisualizerCompat;
 import org.musicmod.android.util.VisualizerWrapper;
 import org.musicmod.android.util.VisualizerWrapper.OnDataChangedListener;
 import org.musicmod.android.view.VisualizerViewFftSpectrum;
-import org.musicmod.android.view.VisualizerViewWaveForm22;
+import org.musicmod.android.view.VisualizerViewWaveForm;
 import org.musicmod.android.widget.RepeatingImageButton;
 import org.musicmod.android.widget.RepeatingImageButton.RepeatListener;
 import org.musicmod.android.widget.TextScrollView;
@@ -78,7 +79,6 @@ import android.view.View.OnTouchListener;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.WindowManager.LayoutParams;
 import android.view.animation.AnimationUtils;
-import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -118,10 +118,11 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 	private View mVolumeSliderLeft, mVolumeSliderRight;
 	private AudioManager mAudioManager;
 	private VisualizerViewFftSpectrum mVisualizerViewFftSpectrum;
-	private VisualizerViewWaveForm22 mVisualizerViewWaveForm22;
+	private VisualizerViewWaveForm mVisualizerViewWaveForm;
+	private boolean mDisplayVisualizer = true;
 	private FrameLayout mVisualizerView;
 
-	private VisualizerWrapper mVisualizer;
+	private VisualizerCompat mVisualizer;
 
 	private static final int RESULT_ALBUMART_DOWNLOADED = 1;
 
@@ -165,37 +166,18 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 	private OnDataChangedListener mDataChangedListener = new OnDataChangedListener() {
 
 		@Override
-		public void onFftDataChanged(short[] data, int len) {
-
-			if (mVisualizerViewFftSpectrum != null) {
-				// mVisualizerViewFftSpectrum.updateVisualizer(data);
-			}
-		}
-
-		@Override
 		public void onFftDataChanged(byte[] data, int len) {
-
 			if (mVisualizerViewFftSpectrum != null) {
-				// mVisualizerViewFftSpectrum.updateVisualizer(data);
+				mVisualizerViewFftSpectrum.updateVisualizer(data);
 			}
 		}
 
 		@Override
-		public void onWaveDataChanged(short[] data, int len) {
+		public void onWaveDataChanged(byte[] data, int len, boolean scoop) {
 
-			if (mVisualizerViewWaveForm22 != null) {
-				mVisualizerViewWaveForm22.updateVisualizer(data);
+			if (mVisualizerViewWaveForm != null) {
+				mVisualizerViewWaveForm.updateVisualizer(data, scoop);
 			}
-
-		}
-
-		@Override
-		public void onWaveDataChanged(byte[] data, int len) {
-
-			if (mVisualizerViewWaveForm22 != null) {
-				// mVisualizerViewWaveForm.updateVisualizer(data);
-			}
-
 		}
 
 	};
@@ -253,21 +235,19 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 
 		mDeviceHasDpad = (getResources().getConfiguration().navigation == Configuration.NAVIGATION_DPAD);
 
-		mShuffleButton = new ImageButton(this);
+		mShuffleButton = (ImageButton) findViewById(R.id.toggle_shuffle);
 		mShuffleButton.setBackgroundDrawable(new ButtonStateDrawable(
 				new Drawable[] { getResources().getDrawable(R.drawable.btn_mp_playback) }));
 		mShuffleButton.setOnClickListener(mShuffleListener);
 
-		mRepeatButton = new ImageButton(this);
+		mRepeatButton = (ImageButton) findViewById(R.id.toggle_repeat);
 		mRepeatButton.setBackgroundDrawable(new ButtonStateDrawable(new Drawable[] { getResources()
 				.getDrawable(R.drawable.btn_mp_playback) }));
 		mRepeatButton.setOnClickListener(mRepeatListener);
 
 		mVisualizerViewFftSpectrum = new VisualizerViewFftSpectrum(this);
-		mVisualizerViewWaveForm22 = new VisualizerViewWaveForm22(this);
+		mVisualizerViewWaveForm = new VisualizerViewWaveForm(this);
 		mVisualizerView = (FrameLayout) findViewById(R.id.visualizer_view);
-		mVisualizerView.addView(mVisualizerViewFftSpectrum);
-		mVisualizerView.addView(mVisualizerViewWaveForm22);
 
 		mOptionButtons = findViewById(R.id.option_buttons);
 		mAlbumArtView = findViewById(R.id.album_art_view);
@@ -320,7 +300,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		@Override
 		public boolean onSingleTapUp(MotionEvent e) {
 
-			// nothing to do here.
 			return false;
 		}
 
@@ -346,6 +325,7 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		public void onLongPress(MotionEvent e) {
 
 			delta = 0;
+			toggleVisualizer();
 		}
 
 		@Override
@@ -557,7 +537,7 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		@Override
 		public boolean onLongClick(View v) {
 
-			// TODO toggle visualizer
+			toggleVisualizer();
 			return true;
 		}
 	};
@@ -685,6 +665,7 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		if (mIntentDeRegistered) {
 			paused = false;
 		}
+
 		setPauseButtonImage();
 	}
 
@@ -856,8 +837,8 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 					try {
 						mService.next();
 						return true;
-					} catch (RemoteException ex) {
-						// ex.printStackTrace();
+					} catch (RemoteException e) {
+						e.printStackTrace();
 					}
 				} else {
 					return false;
@@ -868,8 +849,8 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 					try {
 						mService.prev();
 						return true;
-					} catch (RemoteException ex) {
-						// ex.printStackTrace();
+					} catch (RemoteException e) {
+						e.printStackTrace();
 					}
 				} else {
 					return false;
@@ -951,6 +932,93 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 			e.printStackTrace();
 		}
 	}
+
+	private void setVisualizerView() {
+		try {
+			if (mService != null && mService.isPlaying() && mDisplayVisualizer) {
+				enableVisualizer();
+			} else {
+				disableVisualizer(false);
+			}
+		} catch (RemoteException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void toggleVisualizer() {
+
+		boolean isPlaying = false;
+		if (mService != null) {
+			try {
+				isPlaying = mService.isPlaying();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+
+		if (isPlaying) {
+			if (mDisplayVisualizer) {
+				disableVisualizer(true);
+				mDisplayVisualizer = false;
+			} else {
+				enableVisualizer();
+				mDisplayVisualizer = true;
+			}
+			mPrefs.setBooleanState(KEY_DISPLAY_VISUALIZER, mDisplayVisualizer);
+		}
+	}
+
+	private void enableVisualizer() {
+		if (mVisualizer != null) {
+			if (mVisualizerView.getVisibility() != View.VISIBLE) {
+				mVisualizerView.setVisibility(View.VISIBLE);
+				mVisualizerHandler.sendEmptyMessage(ENABLE_VISUALIZER);
+				if (mShowFadeAnimation) {
+					mVisualizerView.startAnimation(AnimationUtils.loadAnimation(this,
+							android.R.anim.fade_in));
+				}
+			}
+		}
+	}
+
+	private void disableVisualizer(boolean animation) {
+		if (mVisualizer != null) {
+			if (mVisualizerView.getVisibility() == View.VISIBLE) {
+				mVisualizerView.setVisibility(View.INVISIBLE);
+				if (mShowFadeAnimation) {
+					mVisualizerView.startAnimation(AnimationUtils.loadAnimation(this,
+							android.R.anim.fade_out));
+				}
+				if (animation) {
+					mVisualizerHandler.sendEmptyMessageDelayed(DISABLE_VISUALIZER, AnimationUtils
+							.loadAnimation(this, android.R.anim.fade_out).getDuration());
+				} else {
+					mVisualizerHandler.sendEmptyMessage(DISABLE_VISUALIZER);
+				}
+
+			}
+		}
+
+	}
+
+	private final static int DISABLE_VISUALIZER = 0;
+	private final static int ENABLE_VISUALIZER = 1;
+
+	Handler mVisualizerHandler = new Handler() {
+
+		@Override
+		public void handleMessage(Message msg) {
+			mVisualizerHandler.removeCallbacksAndMessages(null);
+			switch (msg.what) {
+				case DISABLE_VISUALIZER:
+					mVisualizer.setEnabled(false);
+					break;
+				case ENABLE_VISUALIZER:
+					mVisualizer.setEnabled(true);
+					break;
+			}
+		}
+	};
 
 	private void scrollLyrics(boolean force) {
 
@@ -1165,6 +1233,7 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 
 		try {
 			if (mService.getAudioId() >= 0 || mService.isPlaying() || mService.getPath() != null) {
+
 				updateTrackInfo(false);
 				loadLyricsToView();
 				scrollLyrics(true);
@@ -1174,6 +1243,25 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 				setShuffleButtonImage();
 				setPauseButtonImage();
 				setFavoriteButton();
+
+				mVisualizer = VisualizerWrapper.getInstance(mService.getAudioSessionId(), 50);
+				mDisplayVisualizer = mPrefs.getBooleanState(KEY_DISPLAY_VISUALIZER, true);
+				boolean mFftEnabled = String.valueOf(VISUALIZER_TYPE_FFT_SPECTRUM).equals(
+						mPrefs.getStringPref(KEY_VISUALIZER_TYPE, "1"));
+				boolean mWaveEnabled = String.valueOf(VISUALIZER_TYPE_WAVE_FORM).equals(
+						mPrefs.getStringPref(KEY_VISUALIZER_TYPE, "1"));
+
+				mVisualizerView.removeAllViews();
+
+				if (mFftEnabled) mVisualizerView.addView(mVisualizerViewFftSpectrum);
+				if (mWaveEnabled) mVisualizerView.addView(mVisualizerViewWaveForm);
+
+				mVisualizer.setFftEnabled(mFftEnabled);
+				mVisualizer.setWaveFormEnabled(mWaveEnabled);
+				mVisualizer.setOnDataChangedListener(mDataChangedListener);
+
+				setVisualizerView();
+
 			} else {
 				Intent intent = new Intent(Intent.ACTION_MAIN);
 				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -1181,15 +1269,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 				startActivity(intent);
 				finish();
 			}
-
-			if (VisualizerWrapper.isAudioFXSupported()) {
-				mVisualizer = new VisualizerWrapper(50, true, false, mService.getAudioSessionId());
-			} else {
-				mVisualizer = new VisualizerWrapper(50, true, false);
-			}
-
-			mVisualizer.setOnDataChangedListener(mDataChangedListener);
-			mVisualizer.start();
 
 		} catch (RemoteException e) {
 			e.printStackTrace();
@@ -1199,8 +1278,7 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 
 	@Override
 	public void onServiceDisconnected(ComponentName classname) {
-
-		mVisualizer.stop();
+		mVisualizer.release();
 		mService = null;
 	}
 
@@ -1360,6 +1438,7 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 				queueNextRefresh(1);
 			} else if (BROADCAST_PLAYSTATE_CHANGED.equals(action)) {
 				setPauseButtonImage();
+				setVisualizerView();
 			} else if (BROADCAST_NEW_LYRICS_LOADED.equals(action)) {
 				loadLyricsToView();
 			} else if (BROADCAST_LYRICS_REFRESHED.equals(action)) {
@@ -1389,12 +1468,13 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 				updateTrackInfo(false);
 				loadLyricsToView();
 				scrollLyrics(true);
+				enableVisualizer();
 				long next = refreshNow();
 				queueNextRefresh(next);
 				setFavoriteButton();
 			} else if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
 				paused = true;
-
+				disableVisualizer(true);
 				if (!mIntentDeRegistered) {
 					mHandler.removeMessages(REFRESH);
 					unregisterReceiver(mStatusListener);
@@ -1404,7 +1484,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		}
 	};
 
-	// TODO update track info with animation
 	private void updateTrackInfo(boolean animation) {
 
 		if (mService == null) {
@@ -1520,10 +1599,12 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 
 	private void setUIColor(int color) {
 
-		LayerDrawable mLayerDrawableProgress = (LayerDrawable) mProgress.getProgressDrawable();
-		mLayerDrawableProgress.getDrawable(mLayerDrawableProgress.getNumberOfLayers() - 1)
-				.setColorFilter(mUIColor, Mode.MULTIPLY);
+		LayerDrawable mProgressLayer = (LayerDrawable) mProgress.getProgressDrawable();
+		mProgressLayer.getDrawable(mProgressLayer.getNumberOfLayers() - 1).setColorFilter(mUIColor,
+				Mode.MULTIPLY);
 		mProgress.invalidate();
+		mVisualizerViewFftSpectrum.setColor(color);
+		mVisualizerViewWaveForm.setColor(color);
 	}
 
 	private class ButtonStateDrawable extends LayerDrawable {

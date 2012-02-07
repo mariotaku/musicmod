@@ -461,6 +461,11 @@ public class MusicUtils implements Constants {
 
 	public static String parseGenreName(String orig) {
 		int genre_id = -1;
+
+		if (orig == null || orig.trim().length() <= 0) {
+			return "Unknown";
+		}
+
 		try {
 			genre_id = Integer.parseInt(orig);
 		} catch (NumberFormatException e) {
@@ -1289,7 +1294,7 @@ public class MusicUtils implements Constants {
 		}
 		try {
 			if (force_shuffle) {
-				mService.setShuffleMode(MusicPlaybackService.SHUFFLE_NORMAL);
+				mService.setShuffleMode(SHUFFLE_NORMAL);
 			}
 			long curid = mService.getAudioId();
 			int curpos = mService.getQueuePosition();

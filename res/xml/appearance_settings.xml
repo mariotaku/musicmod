@@ -27,6 +27,7 @@
 			android:title="@string/ui_color">
 			<CheckBoxPreference
 				android:defaultValue="true"
+				android:disableDependentsState="true"
 				android:key="auto_color"
 				android:summaryOff="@string/ui_color_auto_summaryoff"
 				android:summaryOn="@string/ui_color_auto_summaryon"
@@ -34,6 +35,7 @@
 
 			<net.margaritov.preference.colorpicker.ColorPickerPreference
 				android:defaultValue="@android:color/white"
+				android:dependency="auto_color"
 				android:key="customized_color"
 				android:summary="@string/ui_color_customize_summary"
 				android:title="@string/ui_color_customize"/>

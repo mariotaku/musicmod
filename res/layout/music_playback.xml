@@ -107,18 +107,19 @@
 			android:visibility="gone">
 
 			<LinearLayout
-				android:id="@+id/option_buttons"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:layout_gravity="right"
 				android:orientation="horizontal">
 
 				<ImageButton
+					android:id="@+id/toggle_shuffle"
 					android:layout_width="48dip"
 					android:layout_height="48dip"
 					android:src="@drawable/ic_mp_shuffle_off_btn"/>
 
 				<ImageButton
+					android:id="@+id/toggle_repeat"
 					android:layout_width="48dip"
 					android:layout_height="48dip"
 					android:src="@drawable/ic_mp_repeat_off_btn"/>
