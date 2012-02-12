@@ -29,6 +29,8 @@ import org.musicmod.android.util.PreferencesEditor;
 import org.musicmod.android.util.VisualizerCompat;
 import org.musicmod.android.util.VisualizerWrapper;
 import org.musicmod.android.util.VisualizerWrapper.OnDataChangedListener;
+import org.musicmod.android.view.TouchPaintView;
+import org.musicmod.android.view.TouchPaintView.EventListener;
 import org.musicmod.android.view.VisualizerViewFftSpectrum;
 import org.musicmod.android.view.VisualizerViewWaveForm;
 import org.musicmod.android.widget.RepeatingImageButton;
@@ -136,8 +138,9 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 	private boolean mLyricsWakelock = DEFAULT_LYRICS_WAKELOCK;
 
 	private ImageView mAlbum;
-	private TextView mCurrentTime, mTotalTime;
 	private ProgressBar mProgress;
+	private TextView mTrackName, mTrackDetail;
+	private TouchPaintView mTouchPaintView;
 	private long mPosOverride = -1;
 	private boolean mFromTouch = false;
 	private long mDuration;
@@ -189,11 +192,17 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		ActionBarCompat mActionBar = getActionBarCompat();
 
 		mActionBar.setCustomView(R.layout.actionbar_music_playback);
+		mActionBar.setDisplayShowCustomEnabled(true);
+		mActionBar.setDisplayShowTitleEnabled(false);
 
-		mCurrentTime = (TextView) findViewById(R.id.currenttime);
-		mTotalTime = (TextView) findViewById(R.id.totaltime);
+		View mCustomView = mActionBar.getCustomView();
 
-		mProgress = (ProgressBar) findViewById(android.R.id.progress);
+		mProgress = (ProgressBar) mCustomView.findViewById(android.R.id.progress);
+		mTouchPaintView =(TouchPaintView) mCustomView.findViewById(R.id.touch_paint);
+		mTouchPaintView.setEventListener(mTouchPaintEventListener);
+
+		mTrackName = (TextView) mCustomView.findViewById(R.id.track_name);
+		mTrackDetail = (TextView) mCustomView.findViewById(R.id.track_detail);
 
 		mAlbum = (ImageView) findViewById(R.id.album_art);
 		mAlbum.setOnClickListener(mQueueListener);
@@ -429,6 +438,20 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		}
 	};
 
+	private EventListener mTouchPaintEventListener = new EventListener() {
+		@Override
+		public boolean onTouchEvent(MotionEvent event) {
+			mProgress.onTouchEvent(event);
+			return true;
+		}
+
+		@Override
+		public boolean onTrackballEvent(MotionEvent event) {
+			mProgress.onTrackballEvent(event);
+			return true;
+		}
+	};
+	
 	// TODO show queue
 	private View.OnClickListener mQueueListener = new View.OnClickListener() {
 
@@ -1366,29 +1389,8 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 			long pos = mPosOverride < 0 ? mService.position() : mPosOverride;
 			long remaining = 1000 - (pos % 1000);
 			if ((pos >= 0) && (mDuration > 0)) {
-				mCurrentTime.setText(MusicUtils.makeTimeString(this, pos / 1000));
-
-				if (mService.isPlaying()) {
-					mCurrentTime.setVisibility(View.VISIBLE);
-				} else {
-					// blink the counter
-					// If the progress bar is still been dragged, then we do not
-					// want to blink the
-					// currentTime. It would cause flickering due to change in
-					// the visibility.
-					if (mFromTouch) {
-						mCurrentTime.setVisibility(View.VISIBLE);
-					} else {
-						int vis = mCurrentTime.getVisibility();
-						mCurrentTime.setVisibility(vis == View.INVISIBLE ? View.VISIBLE
-								: View.INVISIBLE);
-					}
-					remaining = 500;
-				}
-
 				mProgress.setProgress((int) (1000 * pos / mDuration));
 			} else {
-				mCurrentTime.setText(R.string.default_time_format);
 				mProgress.setProgress(1000);
 			}
 			// return the number of milliseconds until the next full second, so
@@ -1491,16 +1493,16 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 			return;
 		}
 		try {
-			setTitle(mService.getTrackName());
+			mTrackName.setText(mService.getTrackName());
 
 			if (mService.getArtistName() != null
 					&& !MediaStore.UNKNOWN_STRING.equals(mService.getArtistName())) {
-				getActionBarCompat().setSubtitle(mService.getArtistName());
+				mTrackDetail.setText(mService.getArtistName());
 			} else if (mService.getAlbumName() != null
 					&& !MediaStore.UNKNOWN_STRING.equals(mService.getAlbumName())) {
-				getActionBarCompat().setSubtitle(mService.getAlbumName());
+				mTrackDetail.setText(mService.getAlbumName());
 			} else {
-				getActionBarCompat().setSubtitle(R.string.unknown_artist);
+				mTrackDetail.setText(R.string.unknown_artist);
 			}
 
 			if (mAlbumArtLoader != null) mAlbumArtLoader.cancel(true);
@@ -1512,7 +1514,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 			mColorAnalyser.execute();
 
 			mDuration = mService.duration();
-			mTotalTime.setText(MusicUtils.makeTimeString(this, mDuration / 1000));
 
 		} catch (RemoteException e) {
 			e.printStackTrace();
@@ -1605,6 +1606,7 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		mProgress.invalidate();
 		mVisualizerViewFftSpectrum.setColor(color);
 		mVisualizerViewWaveForm.setColor(color);
+		mTouchPaintView.setColor(color);
 	}
 
 	private class ButtonStateDrawable extends LayerDrawable {

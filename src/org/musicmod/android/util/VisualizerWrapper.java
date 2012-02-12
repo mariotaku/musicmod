@@ -2,11 +2,11 @@ package org.musicmod.android.util;
 
 public class VisualizerWrapper {
 
-	public static VisualizerCompat getInstance(int audioSessionId, long duration) {
+	public static VisualizerCompat getInstance(int audioSessionId, int fps) {
 		if (isAudioFXSupported()) {
-			return new VisualizerCompatAudioFX(audioSessionId, duration);
+			return new VisualizerCompatAudioFX(audioSessionId, fps);
 		} else if (isScoopSupported()) {
-			return new VisualizerCompatScoop(audioSessionId, duration);
+			return new VisualizerCompatScoop(audioSessionId, fps);
 		}
 		return null;
 	}

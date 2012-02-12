@@ -42,7 +42,7 @@ public class VisualizerViewFftSpectrum extends View {
 	private final int mColor;
 	private int mFftSamples = 48;
 
-	private byte[] mBytes = null;
+	private byte[] mData = null;
 	private float[] mPoints;
 	private Rect mRect = new Rect();
 	private Paint mForePaint = new Paint();
@@ -60,7 +60,6 @@ public class VisualizerViewFftSpectrum extends View {
 	public VisualizerViewFftSpectrum(Context context, AttributeSet attrs) {
 		super(context, attrs);
 
-		// Read parameters from attributes
 		mAntiAlias = attrs.getAttributeBooleanValue(VISUALIZER_NS, ATTR_ANTIALIAS,
 				DEFAULT_ANTIALIAS);
 		mColor = attrs.getAttributeIntValue(VISUALIZER_NS, ATTR_COLOR, DEFAULT_COLOR);
@@ -69,17 +68,14 @@ public class VisualizerViewFftSpectrum extends View {
 		setColor(mColor);
 	}
 
-	public void updateVisualizer(byte[] bytes) {
-		byte[] model = new byte[bytes.length / 2 + 1];
-		model[0] = (byte) Math.abs(bytes[1]);
-		int j = 1;
-		for (int i = 2; i <= mFftSamples * 2;) {
-			model[j] = (byte) Math.hypot(bytes[i], bytes[i + 1]);
-			i += 2;
+	public void updateVisualizer(byte[] data) {
+		byte[] model = new byte[data.length / 2 + 1];
+		int j = 0;
+		for (int i = 0; i <= mFftSamples * 2; i += 2) {
+			model[j] = (byte) Math.hypot(data[i], data[i + 1]);
 			j++;
-
 		}
-		mBytes = model;
+		mData = model;
 		invalidate();
 	}
 
@@ -107,24 +103,24 @@ public class VisualizerViewFftSpectrum extends View {
 	protected void onDraw(Canvas canvas) {
 		super.onDraw(canvas);
 
-		if (mBytes == null) {
+		if (mData == null) {
 			return;
 		}
 
-		if (mPoints == null || mPoints.length < mBytes.length * 4) {
-			mPoints = new float[mBytes.length * 4];
+		if (mPoints == null || mPoints.length < mData.length * 4) {
+			mPoints = new float[mData.length * 4];
 		}
 		mRect.set(0, 0, getWidth(), getHeight() * 2);
 
 		for (int i = 0; i <= mFftSamples; i++) {
-			if (mBytes[i] < 0) {
-				mBytes[i] = 127;
+			if (mData[i] < 0) {
+				mData[i] = 127;
 			}
 			mPoints[i * 4] = mRect.width() * i / mFftSamples + (getWidth() / mFftSamples / 2.0f);
 			mPoints[i * 4 + 1] = mRect.height() / 2;
 			mPoints[i * 4 + 2] = mRect.width() * i / mFftSamples
 					+ (getWidth() / mFftSamples / 2.0f);
-			mPoints[i * 4 + 3] = mRect.height() / 2 - 2 - mBytes[i] * 2;
+			mPoints[i * 4 + 3] = mRect.height() / 2 - 2 - mData[i] * 2;
 		}
 		canvas.drawLines(mPoints, mForePaint);
 

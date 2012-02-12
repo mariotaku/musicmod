@@ -111,6 +111,11 @@ public class TextScrollView extends ScrollView implements OnLongClickListener {
 			mContentContainer.addView(mTextView, new LayoutParams(LayoutParams.WRAP_CONTENT,
 					LayoutParams.WRAP_CONTENT, Gravity.CENTER));
 		}
+		if (mSmoothScrolling) {
+			smoothScrollTo(0, 0);
+		} else {
+			scrollTo(0, 0);
+		}
 
 	}
 

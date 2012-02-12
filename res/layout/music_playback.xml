@@ -36,8 +36,6 @@
 			<include layout="@layout/visualizer_view"/>
 
 			<include layout="@layout/lyrics_view"/>
-
-			<include layout="@layout/music_playback_progress"/>
 		</FrameLayout>
 
 		<LinearLayout

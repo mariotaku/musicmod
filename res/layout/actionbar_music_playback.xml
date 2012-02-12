@@ -14,17 +14,28 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:id="@+id/actionbar_view"
 	android:layout_width="match_parent"
 	android:layout_height="match_parent"
-	android:gravity="center_vertical"
-	android:orientation="horizontal">
+	android:gravity="center_vertical">
+
+	<SeekBar
+		android:id="@android:id/progress"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:layout_gravity="bottom"
+		android:progressDrawable="@drawable/seekbar_horizontal"
+		android:thumb="@null"/>
+
+	<org.musicmod.android.view.TouchPaintView
+		android:id="@+id/touch_paint"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"/>
 
 	<LinearLayout
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
-		android:layout_weight="1"
 		android:gravity="center_vertical|left"
 		android:orientation="vertical"
 		android:paddingLeft="@dimen/default_element_spacing">
@@ -46,12 +57,4 @@
 			android:textAppearance="?android:attr/textAppearanceSmall"/>
 	</LinearLayout>
 
-	<CheckBox
-		android:id="@+id/favorite_button"
-		android:layout_width="@dimen/actionbar_control_button_width"
-		android:layout_height="match_parent"
-		android:layout_weight="0"
-		android:button="@android:drawable/btn_star"
-		android:gravity="center_vertical|right"/>
-
-</LinearLayout>
+</FrameLayout>

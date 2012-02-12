@@ -4,7 +4,12 @@ import org.musicmod.android.util.VisualizerWrapper.OnDataChangedListener;
 
 public abstract class VisualizerCompat {
 
-	public VisualizerCompat(final int audioSessionId, final long duration) {
+	public final static int WAVE_CHANGED = 0;
+	public final static int FFT_CHANGED = 1;
+	public float accuracy = 1.0f;
+	public long duration = 50;
+
+	public VisualizerCompat(int audioSessionId, int fps) {
 
 	}
 
@@ -20,6 +25,6 @@ public abstract class VisualizerCompat {
 
 	public abstract void release();
 
-	public abstract void setAccuracy(int accuracy);
+	public abstract void setAccuracy(float accuracy);
 
 }

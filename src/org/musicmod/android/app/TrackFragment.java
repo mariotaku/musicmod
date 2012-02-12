@@ -214,11 +214,12 @@ public class TrackFragment extends ListFragment implements LoaderCallbacks<Curso
 
 			} else {
 
-				sort_order = Audio.Media.TITLE;
 				if (Audio.Albums.CONTENT_TYPE.equals(mimetype)) {
+					sort_order = Audio.Media.TRACK;
 					long album_id = getArguments().getLong(Audio.Albums._ID);
 					where.append(" AND " + Audio.Media.ALBUM_ID + "=" + album_id);
 				} else if (Audio.Artists.CONTENT_TYPE.equals(mimetype)) {
+					sort_order = Audio.Media.TITLE;
 					long artist_id = getArguments().getLong(Audio.Artists._ID);
 					where.append(" AND " + Audio.Media.ARTIST_ID + "=" + artist_id);
 				}

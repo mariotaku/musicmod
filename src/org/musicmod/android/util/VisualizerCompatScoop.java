@@ -1,52 +1,26 @@
 package org.musicmod.android.util;
 
 import java.lang.reflect.Method;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.musicmod.android.util.VisualizerWrapper.OnDataChangedListener;
 
-import android.os.CountDownTimer;
+import android.os.Handler;
+import android.os.Message;
 
 public class VisualizerCompatScoop extends VisualizerCompat {
 
 	private OnDataChangedListener mListener;
-	private CountDownTimer mCountDownTimer;
 	private boolean mWaveEnabled, mFftEnabled;
 	private boolean mVisualizerEnabled;
-	private int mAccuracy = 1024;
+	private Timer mTimer;
 
-	public VisualizerCompatScoop(final int audioSessionId, final long duration) {
-		super(audioSessionId, duration);
-		mCountDownTimer = new CountDownTimer(60000, duration) {
+	public VisualizerCompatScoop(int audioSessionId, int fps) {
+		super(audioSessionId, fps);
+		duration = 1000 / fps;
+		mTimer = new Timer();
 
-			@Override
-			public void onTick(long millisUntilFinished) {
-
-				short[] wave_data = new short[1024];
-				short[] fft_data = new short[1024];
-				if (mListener != null) {
-					if (mWaveEnabled) {
-						int len = snoop(wave_data, 0);
-						if (len != 0) {
-							mListener.onWaveDataChanged(transform(wave_data, 64),
-									(int) (((float) len / 1024) * mAccuracy), true);
-						}
-					}
-					if (mFftEnabled) {
-						int len = snoop(fft_data, 1);
-						if (len != 0) {
-							mListener.onFftDataChanged(transform(fft_data, 16),
-									(int) (((float) len / 1024) * mAccuracy));
-						}
-					}
-				}
-			}
-
-			@Override
-			public void onFinish() {
-
-				start();
-			}
-		};
 	}
 
 	@Override
@@ -69,11 +43,12 @@ public class VisualizerCompatScoop extends VisualizerCompat {
 
 	@Override
 	public void setEnabled(boolean enabled) {
-		if (mCountDownTimer != null) {
+		if (mTimer != null) {
 			if (enabled) {
-				mCountDownTimer.start();
+				mTimer = new Timer();
+				mTimer.scheduleAtFixedRate(new VisualizerTimer(), 0, duration);
 			} else {
-				mCountDownTimer.cancel();
+				mTimer.cancel();
 			}
 		}
 		mVisualizerEnabled = enabled;
@@ -113,9 +88,65 @@ public class VisualizerCompatScoop extends VisualizerCompat {
 	}
 
 	@Override
-	public void setAccuracy(int accuracy) {
-		mAccuracy = accuracy;
+	public void setAccuracy(float accuracy) {
+		if (accuracy > 1.0f || accuracy <= 0.0f)
+			throw new IllegalArgumentException(
+					"Invalid accuracy value! Allowed value range is \"0 < accuracy <= 1.0\"!");
+		this.accuracy = accuracy;
 
 	}
+
+	private class VisualizerTimer extends TimerTask {
+
+		@Override
+		public void run() {
+			short[] wave_data = new short[1024];
+			short[] fft_data = new short[1024];
+			if (mWaveEnabled) {
+				int len = snoop(wave_data, 0);
+				if (len != 0) {
+					Message msg = new Message();
+					msg.what = WAVE_CHANGED;
+					msg.obj = new Object[] { wave_data, len };
+					mVisualizerHandler.sendMessage(msg);
+				}
+			}
+			if (mFftEnabled) {
+				int len = snoop(fft_data, 1);
+				if (len != 0) {
+					Message msg = new Message();
+					msg.what = FFT_CHANGED;
+					msg.obj = new Object[] { fft_data, len };
+					mVisualizerHandler.sendMessage(msg);
+				}
+			}
+
+		}
+
+	}
+
+	private Handler mVisualizerHandler = new Handler() {
+
+		@Override
+		public void handleMessage(Message msg) {
+			switch (msg.what) {
+				case WAVE_CHANGED:
+					if (mListener != null) {
+						short[] wave_data = (short[]) ((Object[]) msg.obj)[0];
+						int len = (Integer) ((Object[]) msg.obj)[1];
+						mListener.onWaveDataChanged(transform(wave_data, 128),
+								(int) (len * accuracy), true);
+					}
+					break;
+				case FFT_CHANGED:
+					if (mListener != null) {
+						short[] fft_data = (short[]) ((Object[]) msg.obj)[0];
+						int len = (Integer) ((Object[]) msg.obj)[1];
+						mListener.onFftDataChanged(transform(fft_data, 32), (int) (len * accuracy));
+					}
+					break;
+			}
+		}
+	};
 
 }
