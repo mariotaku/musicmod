@@ -124,13 +124,6 @@
 
 				<include layout="@layout/volume_slider"/>
 			</LinearLayout>
-
-			<LinearLayout
-				android:layout_width="match_parent"
-				android:layout_height="match_parent">
-
-				<include layout="@layout/music_playback_progress"/>
-			</LinearLayout>
 		</FrameLayout>
 	</LinearLayout>
 
