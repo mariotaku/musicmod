@@ -69,7 +69,6 @@ import android.provider.Settings.SettingNotFoundException;
 import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.GestureDetector;
-import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -149,6 +148,8 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 	TrackFragment mQueueFragment;
 
 	private View mOptionButtons, mAlbumArtView, mQueueFrame, mLyricsFrame, mControlButtons;
+	
+    private TextView mCurrentTime, mTotalTime;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -201,6 +202,9 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		mTrackName = (TextView) mCustomView.findViewById(R.id.track_name);
 		mTrackDetail = (TextView) mCustomView.findViewById(R.id.track_detail);
 
+		mCurrentTime = (TextView) mCustomView.findViewById(R.id.current_time);
+        mTotalTime = (TextView) mCustomView.findViewById(R.id.total_time);
+		
 		mAlbum = (ImageSwitcher) findViewById(R.id.album_art);
 		mAlbum.setFactory(this);
 		mAlbum.setOnClickListener(mQueueListener);
@@ -632,8 +636,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		}
 
 		try {
-			float mWindowAnimation = Settings.System.getFloat(this.getContentResolver(),
-					Settings.System.WINDOW_ANIMATION_SCALE);
 			float mTransitionAnimation = Settings.System.getFloat(this.getContentResolver(),
 					Settings.System.TRANSITION_ANIMATION_SCALE);
 			if (mTransitionAnimation > 0.0) {
@@ -1311,24 +1313,42 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 	}
 
 	private long refreshNow() {
+        if(mService == null)
+            return 500;
+        try {
+            long pos = mPosOverride < 0 ? mService.position() : mPosOverride;
+            long remaining = 1000 - (pos % 1000);
+            if ((pos >= 0) && (mDuration > 0)) {
+                mCurrentTime.setText(MusicUtils.makeTimeString(this, pos / 1000));
 
-		if (mService == null) return 500;
-		try {
-			long pos = mPosOverride < 0 ? mService.position() : mPosOverride;
-			long remaining = 1000 - (pos % 1000);
-			if ((pos >= 0) && (mDuration > 0)) {
-				mProgress.setProgress((int) (1000 * pos / mDuration));
-			} else {
-				mProgress.setProgress(1000);
-			}
-			// return the number of milliseconds until the next full second, so
-			// the counter can be updated at just the right time
-			return remaining;
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		}
-		return 500;
-	}
+                if (mService.isPlaying()) {
+                    mCurrentTime.setVisibility(View.VISIBLE);
+                } else {
+                    // blink the counter
+                    // If the progress bar is still been dragged, then we do not want to blink the
+                    // currentTime. It would cause flickering due to change in the visibility.
+                    if (mFromTouch) {
+                        mCurrentTime.setVisibility(View.VISIBLE);
+                    } else {
+                        int vis = mCurrentTime.getVisibility();
+                        mCurrentTime.setVisibility(vis == View.INVISIBLE ? View.VISIBLE : View.INVISIBLE);
+                    }
+                    remaining = 500;
+                }
+
+                mProgress.setProgress((int) (1000 * pos / mDuration));
+            } else {
+                mCurrentTime.setText("--:--");
+                mProgress.setProgress(1000);
+            }
+            // return the number of milliseconds until the next full second, so
+            // the counter can be updated at just the right time
+            return remaining;
+        } catch (RemoteException e) {
+        	e.printStackTrace();
+        }
+        return 500;
+    }
 
 	private final Handler mHandler = new Handler() {
 
@@ -1434,7 +1454,7 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 			mColorAnalyser.execute();
 
 			mDuration = mService.duration();
-
+			mTotalTime.setText(MusicUtils.makeTimeString(this, mDuration / 1000));
 		} catch (RemoteException e) {
 			e.printStackTrace();
 			finish();

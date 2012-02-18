@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2008 The Android Open Source Project
+ * Copyright (C) 2012 The MusicMod Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,19 +38,16 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
-import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Audio;
 import android.provider.MediaStore.Audio.Genres;
 import android.provider.MediaStore.Audio.Playlists;
-import android.text.TextUtils;
 import android.text.format.Time;
 import android.util.Log;
 import android.view.View;
 import android.view.Window;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -70,7 +67,6 @@ import org.musicmod.android.Constants;
 import org.musicmod.android.IMusicPlaybackService;
 import org.musicmod.android.MusicPlaybackService;
 import org.musicmod.android.R;
-import org.musicmod.android.dialog.ScanningProgress;
 
 public class MusicUtils implements Constants {
 
@@ -1139,76 +1135,6 @@ public class MusicUtils implements Constants {
 			// stop the progress spinner
 			a.getWindow().setFeatureInt(Window.FEATURE_INDETERMINATE_PROGRESS,
 					Window.PROGRESS_VISIBILITY_OFF);
-		}
-	}
-
-	private static String mLastSdStatus;
-
-	public static void displayDatabaseError(Activity a) {
-
-		if (a.isFinishing()) {
-			// When switching tabs really fast, we can end up with a null
-			// cursor (not sure why), which will bring us here.
-			// Don't bother showing an error message in that case.
-			return;
-		}
-
-		String status = Environment.getExternalStorageState();
-		int title, message;
-
-		title = R.string.sdcard_error_title;
-		message = R.string.sdcard_error;
-
-		if (status.equals(Environment.MEDIA_SHARED) || status.equals(Environment.MEDIA_UNMOUNTED)) {
-			title = R.string.sdcard_busy_title;
-			message = R.string.sdcard_busy;
-		} else if (status.equals(Environment.MEDIA_REMOVED)) {
-			title = R.string.sdcard_missing_title;
-			message = R.string.sdcard_missing;
-		} else if (status.equals(Environment.MEDIA_MOUNTED)) {
-			// The card is mounted, but we didn't get a valid cursor.
-			// This probably means the mediascanner hasn't started scanning the
-			// card yet (there is a small window of time during boot where this
-			// will happen).
-			a.setTitle("");
-			Intent intent = new Intent();
-			intent.setClass(a, ScanningProgress.class);
-			a.startActivityForResult(intent, SCAN_DONE);
-		} else if (!TextUtils.equals(mLastSdStatus, status)) {
-			mLastSdStatus = status;
-			Log.d(LOGTAG_MUSICUTILS, "sd card: " + status);
-		}
-
-		a.setTitle(title);
-		View v = a.findViewById(R.id.sd_message);
-		if (v != null) {
-			v.setVisibility(View.VISIBLE);
-		}
-		v = a.findViewById(R.id.sd_icon);
-		if (v != null) {
-			v.setVisibility(View.VISIBLE);
-		}
-		v = a.findViewById(android.R.id.list);
-		if (v != null) {
-			v.setVisibility(View.GONE);
-		}
-		TextView tv = (TextView) a.findViewById(R.id.sd_message);
-		tv.setText(message);
-	}
-
-	public static void hideDatabaseError(Activity a) {
-
-		View v = a.findViewById(R.id.sd_message);
-		if (v != null) {
-			v.setVisibility(View.GONE);
-		}
-		v = a.findViewById(R.id.sd_icon);
-		if (v != null) {
-			v.setVisibility(View.GONE);
-		}
-		v = a.findViewById(android.R.id.list);
-		if (v != null) {
-			v.setVisibility(View.VISIBLE);
 		}
 	}
 

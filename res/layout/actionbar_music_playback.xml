@@ -33,11 +33,10 @@
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"/>
 
-	<LinearLayout
+	<RelativeLayout
 		android:layout_width="match_parent"
 		android:layout_height="match_parent"
 		android:gravity="center_vertical|left"
-		android:orientation="vertical"
 		android:paddingLeft="@dimen/default_element_spacing">
 
 		<TextView
@@ -52,9 +51,44 @@
 			android:id="@+id/track_detail"
 			android:layout_width="wrap_content"
 			android:layout_height="wrap_content"
+			android:layout_alignLeft="@+id/track_name"
+			android:layout_below="@+id/track_name"
 			android:ellipsize="marquee"
 			android:singleLine="true"
 			android:textAppearance="?android:attr/textAppearanceSmall"/>
-	</LinearLayout>
+
+		<TextView
+			android:id="@+id/total_time"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignBaseline="@+id/track_detail"
+			android:layout_alignBottom="@+id/track_detail"
+			android:layout_alignParentRight="true"
+			android:text="--:--"
+			android:textColor="?android:attr/textColorTertiary"
+			android:textSize="12sp"/>
+
+		<TextView
+			android:id="@+id/slash"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignBaseline="@+id/total_time"
+			android:layout_alignBottom="@+id/total_time"
+			android:layout_toLeftOf="@+id/total_time"
+			android:text="/"
+			android:textColor="?android:attr/textColorTertiary"
+			android:textSize="12sp"/>
+
+		<TextView
+			android:id="@+id/current_time"
+			android:layout_width="wrap_content"
+			android:layout_height="wrap_content"
+			android:layout_alignBaseline="@+id/slash"
+			android:layout_alignBottom="@+id/slash"
+			android:layout_toLeftOf="@+id/slash"
+			android:text="--:--"
+			android:textColor="?android:attr/textColorTertiary"
+			android:textSize="12sp"/>
+	</RelativeLayout>
 
 </FrameLayout>
