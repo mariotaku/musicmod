@@ -186,7 +186,6 @@
 	<string name="pause_toast">Pause</string>
 	<string name="next_toast">Next track</string>
 	<string name="prev_toast">Previous track</string>
-	<string name="fast_scroll_music_alphabet"> 0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ</string>
 	<string name="equalizer">Equalizer</string>
 	<string name="equalizer_presets">Presets</string>
 	<string name="equalizer_reset">Reset</string>
