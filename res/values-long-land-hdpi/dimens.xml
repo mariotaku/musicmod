@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-	<dimen name="album_art_height">208dip</dimen>
-	<dimen name="album_art_width">208dip</dimen>
+	<dimen name="album_art_height">192dip</dimen>
+	<dimen name="album_art_width">192dip</dimen>
 	<dimen name="gridview_item_height">184dip</dimen>
 	<dimen name="gridview_item_width">184dip</dimen>
 

@@ -147,7 +147,7 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 
 	TrackFragment mQueueFragment;
 
-	private View mOptionButtons, mAlbumArtView, mQueueFrame, mLyricsFrame, mControlButtons;
+	private View mOptionButtons, mQueueFrame, mLyricsFrame, mControlButtons;
 	
     private TextView mCurrentTime, mTotalTime;
 
@@ -255,7 +255,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		mVisualizerView = (FrameLayout) findViewById(R.id.visualizer_view);
 
 		mOptionButtons = findViewById(R.id.option_buttons);
-		mAlbumArtView = findViewById(R.id.album_art_view);
 		mQueueFrame = findViewById(R.id.queue_frame);
 		mLyricsFrame = findViewById(R.id.lyrics_frame);
 		mControlButtons = findViewById(R.id.control_buttons);
@@ -456,7 +455,7 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 	private View.OnClickListener mQueueListener = new View.OnClickListener() {
 
 		@Override
-		public void onClick(View v) {
+		public void onClick(View view) {
 
 			AnimatorSet set = new AnimatorSet().setDuration(150);
 			FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
@@ -469,12 +468,12 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 						(int) (mQueueFrame.getPaddingTop() * 0.75), mQueueFrame.getPaddingRight(),
 						mQueueFrame.getPaddingBottom());
 				set.playTogether(
-						ObjectAnimator.ofFloat(mAlbumArtView, "scaleX", 0.75f),
-						ObjectAnimator.ofFloat(mAlbumArtView, "scaleY", 0.75f),
-						ObjectAnimator.ofFloat(mAlbumArtView, "translationX",
-								-(mAlbumArtView.getLeft() + mAlbumArtView.getWidth() * 0.25f / 2)),
-						ObjectAnimator.ofFloat(mAlbumArtView, "translationY",
-								-mAlbumArtView.getHeight() * 0.25f / 2));
+						ObjectAnimator.ofFloat(view, "scaleX", 0.75f),
+						ObjectAnimator.ofFloat(view, "scaleY", 0.75f),
+						ObjectAnimator.ofFloat(view, "translationX",
+								-(view.getLeft() + view.getWidth() * 0.25f / 2)),
+						ObjectAnimator.ofFloat(view, "translationY",
+								-view.getHeight() * 0.25f / 2));
 				mVolumeSlider.setVisibility(View.GONE);
 				mLyricsFrame.setVisibility(View.GONE);
 				mLyricsFrame.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(),
@@ -493,10 +492,10 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 				mQueueFrame.setPadding(mQueueFrame.getPaddingLeft(), getResources()
 						.getDimensionPixelSize(R.dimen.album_art_height), mQueueFrame
 						.getPaddingRight(), mQueueFrame.getPaddingBottom());
-				set.playTogether(ObjectAnimator.ofFloat(mAlbumArtView, "scaleX", 1f),
-						ObjectAnimator.ofFloat(mAlbumArtView, "scaleY", 1f),
-						ObjectAnimator.ofFloat(mAlbumArtView, "translationX", 0),
-						ObjectAnimator.ofFloat(mAlbumArtView, "translationY", 0));
+				set.playTogether(ObjectAnimator.ofFloat(view, "scaleX", 1f),
+						ObjectAnimator.ofFloat(view, "scaleY", 1f),
+						ObjectAnimator.ofFloat(view, "translationX", 0),
+						ObjectAnimator.ofFloat(view, "translationY", 0));
 				mVolumeSlider.setVisibility(View.VISIBLE);
 				mLyricsFrame.setVisibility(View.VISIBLE);
 				mLyricsFrame.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(),
