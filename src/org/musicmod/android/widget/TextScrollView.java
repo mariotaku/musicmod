@@ -46,12 +46,7 @@ public class TextScrollView extends ScrollView implements OnLongClickListener {
 		void onLineSelected(int id);
 	}
 
-	public void registerLineSelectedListener(OnLineSelectedListener listener) {
-
-		mListener = listener;
-	}
-
-	public void unregisterLineSelectedListener(OnLineSelectedListener listener) {
+	public void setLineSelectedListener(OnLineSelectedListener listener) {
 
 		mListener = listener;
 	}

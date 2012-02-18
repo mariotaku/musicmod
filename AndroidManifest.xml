@@ -23,7 +23,9 @@
 
 	<original-package android:name="com.android.music"/>
 
-	<uses-sdk android:minSdkVersion="8"/>
+	<uses-sdk
+		android:minSdkVersion="8"
+		android:targetSdkVersion="15"/>
 
 	<uses-permission android:name="android.permission.WAKE_LOCK"/>
 	<uses-permission android:name="android.permission.INTERNET"/>
@@ -226,7 +228,8 @@
 
 		<service
 			android:name=".MusicPlaybackService"
-			android:label="@string/playback_service_name"/>
+			android:label="@string/playback_service_name"
+			android:process=":service"/>
 
 		<receiver android:name=".MediaButtonIntentReceiver">
 			<intent-filter>

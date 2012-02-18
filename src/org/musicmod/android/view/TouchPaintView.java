@@ -14,25 +14,22 @@ import android.view.MotionEvent;
 import android.view.View;
 
 public class TouchPaintView extends View {
-	
-	private EventListener mListener;
 
+	private static final int FADE_DELAY = 2;
 	private static final int FADE_ALPHA = 0x10;
-
-	/** How often to fade the contents of the window (in ms). */
-	private static final int FADE_DELAY = 10;
-	private static final int TRACKBALL_SCALE = 10;
 	private static final int MAX_FADE_STEPS = 256 / FADE_ALPHA * 2 + 8;
-	
-	private int mFadeSteps = 0;
-
 	private Bitmap mBitmap;
 	private Canvas mCanvas;
-	private final Rect mRect = new Rect();
+	private Rect mRect = new Rect();
 	private Paint mPaint;
-	private float mCurX;
-	private float mCurY;
+	private boolean mCurDown;
+	private int mCurX;
+	private int mCurY;
+	private float mCurSize;
+	private int mCurWidth;
+	private int mFadeSteps = 0;
 	private int mColor = Color.WHITE;
+	private EventListener mListener;
 
 	public TouchPaintView(Context c) {
 		super(c);
@@ -46,6 +43,7 @@ public class TouchPaintView extends View {
 
 	private void init() {
 		setFocusable(true);
+
 		mPaint = new Paint();
 		mPaint.setAntiAlias(true);
 		mPaint.setColor(Color.TRANSPARENT);
@@ -55,19 +53,15 @@ public class TouchPaintView extends View {
 		if (mCanvas != null && mFadeSteps < MAX_FADE_STEPS) {
 			mCanvas.drawColor(Color.argb(FADE_ALPHA, 0xFF, 0xFF, 0xFF), Mode.DST_OUT);
 			invalidate();
-			mFadeSteps ++;
+			mFadeSteps++;
 		} else if (mFadeSteps >= MAX_FADE_STEPS) {
 			mFadeSteps = 0;
 			mHandler.removeCallbacksAndMessages(null);
 		}
 	}
-	
-	public void setColor(int color) {
-		mColor = color;
-	}
 
 	@Override
-	public void onSizeChanged(int w, int h, int oldw, int oldh) {
+	protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 		int curW = mBitmap != null ? mBitmap.getWidth() : 0;
 		int curH = mBitmap != null ? mBitmap.getHeight() : 0;
 		if (curW >= w && curH >= h) {
@@ -85,10 +79,11 @@ public class TouchPaintView extends View {
 		}
 		mBitmap = newBitmap;
 		mCanvas = newCanvas;
+		mFadeSteps = MAX_FADE_STEPS;
 	}
 
 	@Override
-	public void onDraw(Canvas canvas) {
+	protected void onDraw(Canvas canvas) {
 		if (mBitmap != null) {
 			canvas.drawBitmap(mBitmap, 0, 0, null);
 		}
@@ -96,20 +91,21 @@ public class TouchPaintView extends View {
 
 	@Override
 	public boolean onTrackballEvent(MotionEvent event) {
-		
 		if (mListener != null) mListener.onTrackballEvent(event);
-		
+		boolean oldDown = mCurDown;
+		mCurDown = true;
 		int N = event.getHistorySize();
-		final float scaleX = event.getXPrecision() * TRACKBALL_SCALE;
-		final float scaleY = event.getYPrecision() * TRACKBALL_SCALE;
+		int baseX = mCurX;
+		int baseY = mCurY;
+		final float scaleX = event.getXPrecision();
+		final float scaleY = event.getYPrecision();
 		for (int i = 0; i < N; i++) {
-			mCurX += event.getHistoricalX(i) * scaleX;
-			mCurY += event.getHistoricalY(i) * scaleY;
-			drawPoint(mCurX, mCurY, 1.0f, 16.0f);
+			drawPoint(baseX + event.getHistoricalX(i) * scaleX, baseY + event.getHistoricalY(i)
+					* scaleY, event.getHistoricalPressure(i), event.getHistoricalSize(i));
 		}
-		mCurX += event.getX() * scaleX;
-		mCurY += event.getY() * scaleY;
-		drawPoint(mCurX, mCurY, 1.0f, 16.0f);
+		drawPoint(baseX + event.getX() * scaleX, baseY + event.getY() * scaleY,
+				event.getPressure(), event.getSize());
+		mCurDown = oldDown;
 		mFadeSteps = 0;
 		mHandler.sendEmptyMessageDelayed(0, FADE_DELAY);
 		return true;
@@ -117,54 +113,53 @@ public class TouchPaintView extends View {
 
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		
 		if (mListener != null) mListener.onTouchEvent(event);
-		
-		int action = event.getActionMasked();
-		if (action != MotionEvent.ACTION_UP && action != MotionEvent.ACTION_CANCEL) {
-			int N = event.getHistorySize();
-			int P = event.getPointerCount();
-			for (int i = 0; i < N; i++) {
-				for (int j = 0; j < P; j++) {
-					mCurX = event.getHistoricalX(j, i);
-					mCurY = event.getHistoricalY(j, i);
-					drawPoint(mCurX, mCurY, event.getHistoricalPressure(j, i),
-							event.getHistoricalTouchMajor(j, i));
-				}
-			}
-			for (int j = 0; j < P; j++) {
-				mCurX = event.getX(j);
-				mCurY = event.getY(j);
-				drawPoint(mCurX, mCurY, event.getPressure(j), event.getTouchMajor(j));
-			}
+		int action = event.getAction();
+		mCurDown = action == MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_MOVE;
+		int N = event.getHistorySize();
+		for (int i = 0; i < N; i++) {
+			drawPoint(event.getHistoricalX(i), event.getHistoricalY(i),
+					event.getHistoricalPressure(i), event.getHistoricalSize(i));
 		}
+		drawPoint(event.getX(), event.getY(), event.getPressure(), event.getSize());
 		mFadeSteps = 0;
 		mHandler.sendEmptyMessageDelayed(0, FADE_DELAY);
 		return true;
 	}
 
-	private void drawPoint(float x, float y, float pressure, float width) {
-		if (width < 1) width = 1;
-		if (mBitmap != null) {
-			float radius = width / 2;
+	private void drawPoint(float x, float y, float pressure, float size) {
+		mCurX = (int) x;
+		mCurY = (int) y;
+		mCurSize = size;
+		mCurWidth = (int) (mCurSize * (getWidth() / 3));
+		if (mCurWidth < 1) mCurWidth = 1;
+		if (mCurDown && mBitmap != null) {
 			int pressureLevel = (int) (Math.sqrt(pressure) * 128);
-			mPaint.setARGB(pressureLevel, Color.red(mColor), Color.green(mColor), Color.blue(mColor));
-			mCanvas.drawCircle(x, y, radius, mPaint);
-			mRect.set((int) (x - radius - 2), (int) (y - radius - 2), (int) (x + radius + 2),
-					(int) (y + radius + 2));
+			mPaint.setARGB(pressureLevel, Color.red(mColor), Color.green(mColor),
+					Color.blue(mColor));
+			mCanvas.drawCircle(mCurX, mCurY, mCurWidth, mPaint);
+			mRect.set(mCurX - mCurWidth - 2, mCurY - mCurWidth - 2, mCurX + mCurWidth + 2, mCurY
+					+ mCurWidth + 2);
 			invalidate(mRect);
 		}
+		mFadeSteps = 0;
+	}
+
+	public void setColor(int color) {
+		mColor = color;
 	}
 
 	public void setEventListener(EventListener listener) {
 		mListener = listener;
 	}
-	
+
 	public interface EventListener {
+
 		boolean onTouchEvent(MotionEvent event);
+
 		boolean onTrackballEvent(MotionEvent event);
 	}
-	
+
 	private Handler mHandler = new Handler() {
 
 		@Override

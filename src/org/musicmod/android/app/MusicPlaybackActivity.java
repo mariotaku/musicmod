@@ -35,8 +35,6 @@ import org.musicmod.android.view.VisualizerViewFftSpectrum;
 import org.musicmod.android.view.VisualizerViewWaveForm;
 import org.musicmod.android.widget.RepeatingImageButton;
 import org.musicmod.android.widget.RepeatingImageButton.RepeatListener;
-import org.musicmod.android.widget.TextScrollView;
-import org.musicmod.android.widget.TextScrollView.OnLineSelectedListener;
 
 import com.nineoldandroids.animation.AnimatorSet;
 import com.nineoldandroids.animation.ObjectAnimator;
@@ -53,6 +51,7 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.PorterDuff.Mode;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.media.AudioManager;
@@ -83,6 +82,7 @@ import android.view.WindowManager.LayoutParams;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.ImageSwitcher;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -90,9 +90,10 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.SeekBar.OnSeekBarChangeListener;
+import android.widget.ViewSwitcher;
 
 public class MusicPlaybackActivity extends ActionBarActivity implements Constants, OnTouchListener,
-		OnLongClickListener, OnLineSelectedListener, ServiceConnection {
+		OnLongClickListener, ViewSwitcher.ViewFactory, ServiceConnection {
 
 	private boolean mSeeking = false;
 	private boolean mDeviceHasDpad;
@@ -128,16 +129,12 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 
 	private static final int RESULT_ALBUMART_DOWNLOADED = 1;
 
-	// for lyrics displaying
-	private TextScrollView mLyricsScrollView;
-	private TextView mLyricsInfoMessage;
-
 	private LinearLayout mVolumeSlider;
 
 	private boolean mShowFadeAnimation = false;
 	private boolean mLyricsWakelock = DEFAULT_LYRICS_WAKELOCK;
 
-	private ImageView mAlbum;
+	private ImageSwitcher mAlbum;
 	private ProgressBar mProgress;
 	private TextView mTrackName, mTrackDetail;
 	private TouchPaintView mTouchPaintView;
@@ -198,21 +195,16 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		View mCustomView = mActionBar.getCustomView();
 
 		mProgress = (ProgressBar) mCustomView.findViewById(android.R.id.progress);
-		mTouchPaintView =(TouchPaintView) mCustomView.findViewById(R.id.touch_paint);
+		mTouchPaintView = (TouchPaintView) mCustomView.findViewById(R.id.touch_paint);
 		mTouchPaintView.setEventListener(mTouchPaintEventListener);
 
 		mTrackName = (TextView) mCustomView.findViewById(R.id.track_name);
 		mTrackDetail = (TextView) mCustomView.findViewById(R.id.track_detail);
 
-		mAlbum = (ImageView) findViewById(R.id.album_art);
+		mAlbum = (ImageSwitcher) findViewById(R.id.album_art);
+		mAlbum.setFactory(this);
 		mAlbum.setOnClickListener(mQueueListener);
 		mAlbum.setOnLongClickListener(mSearchAlbumArtListener);
-
-		mLyricsScrollView = (TextScrollView) findViewById(R.id.lyrics_scroll);
-		mLyricsScrollView.setContentGravity(Gravity.CENTER_HORIZONTAL);
-
-		mLyricsInfoMessage = (TextView) findViewById(R.id.message);
-		mLyricsInfoMessage.setOnLongClickListener(mSearchLyricsListener);
 
 		mVolumeSlider = (LinearLayout) findViewById(R.id.volume_layout);
 
@@ -271,6 +263,11 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		mProgress.setMax(1000);
 
 		mQueueFragment = new TrackFragment();
+
+		LyricsFragment fragment = new LyricsFragment();
+
+		getSupportFragmentManager().beginTransaction().replace(R.id.lyrics_frame, fragment)
+				.commit();
 	}
 
 	private void loadPreferences() {
@@ -390,14 +387,12 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 	}
 
 	@Override
-	public void onLineSelected(int id) {
-
-		try {
-			mService.seek(mService.getPositionByLyricsId(id));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
+	public View makeView() {
+		ImageView i = new ImageView(this);
+		i.setScaleType(ImageView.ScaleType.FIT_CENTER);
+		i.setLayoutParams(new ImageSwitcher.LayoutParams(LayoutParams.MATCH_PARENT,
+				LayoutParams.MATCH_PARENT));
+		return i;
 	}
 
 	private OnSeekBarChangeListener mSeekListener = new OnSeekBarChangeListener() {
@@ -439,6 +434,7 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 	};
 
 	private EventListener mTouchPaintEventListener = new EventListener() {
+
 		@Override
 		public boolean onTouchEvent(MotionEvent event) {
 			mProgress.onTouchEvent(event);
@@ -451,7 +447,7 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 			return true;
 		}
 	};
-	
+
 	// TODO show queue
 	private View.OnClickListener mQueueListener = new View.OnClickListener() {
 
@@ -565,16 +561,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		}
 	};
 
-	private View.OnLongClickListener mSearchLyricsListener = new View.OnLongClickListener() {
-
-		@Override
-		public boolean onLongClick(View v) {
-
-			searchLyrics();
-			return true;
-		}
-	};
-
 	private View.OnLongClickListener mSearchAlbumArtListener = new View.OnLongClickListener() {
 
 		@Override
@@ -611,7 +597,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 			mHandler.removeMessages(REFRESH);
 			unregisterReceiver(mStatusListener);
 		}
-		mLyricsScrollView.unregisterLineSelectedListener(this);
 		unregisterReceiver(mScreenTimeoutListener);
 		if (mAlbumArtLoader != null) mAlbumArtLoader.cancel(true);
 
@@ -633,7 +618,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 			mHandler.sendEmptyMessage(QUIT);
 		}
 		loadPreferences();
-		mLyricsScrollView.registerLineSelectedListener(this);
 
 		if (mBlurBackground) {
 			getWindow().addFlags(LayoutParams.FLAG_BLUR_BEHIND);
@@ -658,8 +642,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 				mShowFadeAnimation = false;
 			}
 
-			mLyricsScrollView.setSmoothScrollingEnabled(mWindowAnimation > 0.0);
-
 		} catch (SettingNotFoundException e) {
 			e.printStackTrace();
 		}
@@ -667,8 +649,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		IntentFilter f = new IntentFilter();
 		f.addAction(BROADCAST_PLAYSTATE_CHANGED);
 		f.addAction(BROADCAST_META_CHANGED);
-		f.addAction(BROADCAST_NEW_LYRICS_LOADED);
-		f.addAction(BROADCAST_LYRICS_REFRESHED);
 		f.addAction(BROADCAST_FAVORITESTATE_CHANGED);
 		registerReceiver(mStatusListener, new IntentFilter(f));
 
@@ -887,31 +867,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		return super.onKeyDown(keyCode, event);
 	}
 
-	private void searchLyrics() {
-
-		String artistName = "";
-		String trackName = "";
-		String mediaPath = "";
-		String lyricsPath = "";
-		try {
-			artistName = mService.getArtistName();
-			trackName = mService.getTrackName();
-			mediaPath = mService.getMediaPath();
-			lyricsPath = mediaPath.substring(0, mediaPath.lastIndexOf(".")) + ".lrc";
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		try {
-			Intent intent = new Intent(INTENT_SEARCH_LYRICS);
-			intent.putExtra(INTENT_KEY_ARTIST, artistName);
-			intent.putExtra(INTENT_KEY_TRACK, trackName);
-			intent.putExtra(INTENT_KEY_PATH, lyricsPath);
-			startActivity(intent);
-		} catch (ActivityNotFoundException e) {
-			// e.printStackTrace();
-		}
-	}
-
 	private void searchAlbumArt() {
 
 		String artistName = "";
@@ -937,23 +892,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 			// e.printStackTrace();
 		}
 
-	}
-
-	// TODO lyrics load animation
-	private void loadLyricsToView() {
-
-		if (mLyricsScrollView == null || mService == null) return;
-
-		try {
-			mLyricsScrollView.setTextContent(mService.getLyrics(), this);
-
-			if (mService.getLyricsStatus() == LYRICS_STATUS_OK) {
-			} else {
-			}
-
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		}
 	}
 
 	private void setVisualizerView() {
@@ -1042,15 +980,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 			}
 		}
 	};
-
-	private void scrollLyrics(boolean force) {
-
-		try {
-			mLyricsScrollView.setCurrentLine(mService.getCurrentLyricsId(), force);
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		}
-	}
 
 	private void adjustVolume(int value) {
 
@@ -1258,8 +1187,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 			if (mService.getAudioId() >= 0 || mService.isPlaying() || mService.getPath() != null) {
 
 				updateTrackInfo(false);
-				loadLyricsToView();
-				scrollLyrics(true);
 				long next = refreshNow();
 				queueNextRefresh(next);
 				setRepeatButtonImage();
@@ -1303,6 +1230,7 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 	public void onServiceDisconnected(ComponentName classname) {
 		mVisualizer.release();
 		mService = null;
+		finish();
 	}
 
 	private void setRepeatButtonImage() {
@@ -1441,10 +1369,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 			} else if (BROADCAST_PLAYSTATE_CHANGED.equals(action)) {
 				setPauseButtonImage();
 				setVisualizerView();
-			} else if (BROADCAST_NEW_LYRICS_LOADED.equals(action)) {
-				loadLyricsToView();
-			} else if (BROADCAST_LYRICS_REFRESHED.equals(action)) {
-				scrollLyrics(false);
 			} else if (BROADCAST_FAVORITESTATE_CHANGED.equals(action)) {
 				setFavoriteButton();
 			}
@@ -1461,15 +1385,11 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 					IntentFilter f = new IntentFilter();
 					f.addAction(BROADCAST_PLAYSTATE_CHANGED);
 					f.addAction(BROADCAST_META_CHANGED);
-					f.addAction(BROADCAST_NEW_LYRICS_LOADED);
-					f.addAction(BROADCAST_LYRICS_REFRESHED);
 					f.addAction(BROADCAST_FAVORITESTATE_CHANGED);
 					registerReceiver(mStatusListener, new IntentFilter(f));
 					mIntentDeRegistered = false;
 				}
 				updateTrackInfo(false);
-				loadLyricsToView();
-				scrollLyrics(true);
 				enableVisualizer();
 				long next = refreshNow();
 				queueNextRefresh(next);
@@ -1506,7 +1426,7 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 			}
 
 			if (mAlbumArtLoader != null) mAlbumArtLoader.cancel(true);
-			mAlbumArtLoader = new AsyncAlbumArtLoader(mAlbum, animation);
+			mAlbumArtLoader = new AsyncAlbumArtLoader();
 			mAlbumArtLoader.execute();
 
 			if (mColorAnalyser != null) mColorAnalyser.cancel(true);
@@ -1521,33 +1441,25 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		}
 	}
 
-	private class AsyncAlbumArtLoader extends AsyncTask<Void, Void, Bitmap> {
-
-		boolean enable_animation = false;
-		private ImageView mImageView;
-
-		public AsyncAlbumArtLoader(ImageView iv, boolean animation) {
-
-			mImageView = iv;
-			enable_animation = animation;
-		}
+	private class AsyncAlbumArtLoader extends AsyncTask<Void, Void, Drawable> {
 
 		@Override
-		protected void onPreExecute() {
-
-			if (enable_animation) {
-				mImageView.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(),
-						android.R.anim.fade_out));
-				mImageView.setVisibility(View.INVISIBLE);
-			}
-		}
-
-		@Override
-		protected Bitmap doInBackground(Void... params) {
+		public Drawable doInBackground(Void... params) {
 
 			if (mService != null) {
 				try {
-					return mService.getAlbumArt();
+					Bitmap bitmap = MusicUtils.getArtwork(getApplicationContext(),
+							mService.getAudioId(), mService.getAlbumId());
+					if (bitmap == null) return null;
+					int value = 0;
+					if (bitmap.getHeight() <= bitmap.getWidth()) {
+						value = bitmap.getHeight();
+					} else {
+						value = bitmap.getWidth();
+					}
+					Bitmap result = Bitmap.createBitmap(bitmap, (bitmap.getWidth() - value) / 2,
+							(bitmap.getHeight() - value) / 2, value, value);
+					return new BitmapDrawable(getResources(), result);
 				} catch (RemoteException e) {
 					e.printStackTrace();
 				}
@@ -1556,17 +1468,14 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		}
 
 		@Override
-		protected void onPostExecute(Bitmap result) {
+		public void onPostExecute(Drawable result) {
 
-			if (result != null) {
-				mImageView.setImageBitmap(result);
-			} else {
-				mImageView.setImageResource(R.drawable.ic_mp_albumart_unknown);
-			}
-			if (enable_animation) {
-				mImageView.setVisibility(View.VISIBLE);
-				mImageView.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(),
-						android.R.anim.fade_in));
+			if (mAlbum != null) {
+				if (result != null) {
+					mAlbum.setImageDrawable(result);
+				} else {
+					mAlbum.setImageResource(R.drawable.ic_mp_albumart_unknown);
+				}
 			}
 		}
 	}
@@ -1579,7 +1488,9 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 			if (mService != null) {
 				try {
 					if (mAutoColor) {
-						mUIColor = ColorAnalyser.analyse(mService.getAlbumArt());
+						mUIColor = ColorAnalyser.analyse(MusicUtils.getArtwork(
+								getApplicationContext(), mService.getAudioId(),
+								mService.getAlbumId()));
 					} else {
 						mUIColor = mPrefs.getIntPref(KEY_CUSTOMIZED_COLOR, Color.WHITE);
 					}

@@ -35,35 +35,20 @@
 
 			<FrameLayout
 				android:id="@+id/album_art_view"
-				android:layout_width="match_parent"
+				android:layout_width="@dimen/album_art_width"
 				android:layout_height="match_parent"
 				android:layout_gravity="left|center"
 				android:gravity="center">
 
-				<ImageView
-					android:layout_width="match_parent"
-					android:layout_height="match_parent"
-					android:layout_gravity="center"
-					android:adjustViewBounds="true"
-					android:background="@drawable/ic_mp_albumart_border"
-					android:src="@drawable/ic_mp_albumart_empty"/>
-
-				<ImageView
+				<ImageSwitcher
 					android:id="@+id/album_art"
 					android:layout_width="match_parent"
 					android:layout_height="match_parent"
 					android:layout_gravity="center"
 					android:adjustViewBounds="true"
-					android:background="@drawable/ic_mp_albumart_placeholder"
-					android:src="@drawable/ic_mp_albumart_unknown"/>
-
-				<ImageView
-					android:layout_width="match_parent"
-					android:layout_height="match_parent"
-					android:layout_gravity="center"
-					android:adjustViewBounds="true"
-					android:background="@drawable/ic_mp_albumart_mask"
-					android:src="@drawable/ic_mp_albumart_empty"/>
+					android:background="@drawable/image_shadow"
+					android:inAnimation="@android:anim/fade_in"
+					android:outAnimation="@android:anim/fade_out"/>
 			</FrameLayout>
 
 			<LinearLayout
@@ -114,8 +99,6 @@
 				<include layout="@layout/visualizer_view"/>
 
 				<include layout="@layout/info_view"/>
-
-				<include layout="@layout/lyrics_view"/>
 			</FrameLayout>
 
 			<LinearLayout

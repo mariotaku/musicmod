@@ -12,7 +12,6 @@ import android.content.IntentFilter;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Audio;
@@ -28,16 +27,17 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
 
-public class AlbumFragment extends Fragment implements Constants, OnItemClickListener,
-		LoaderCallbacks<Cursor> {
+public class AlbumFragment extends Fragment implements Constants, ListView.OnScrollListener,
+		OnItemClickListener, LoaderCallbacks<Cursor> {
 
 	private AlbumsAdapter mAdapter;
 	private GridView mGridView;
@@ -46,6 +46,7 @@ public class AlbumFragment extends Fragment implements Constants, OnItemClickLis
 	private long mSelectedId;
 	private String mCurrentAlbumName, mCurrentArtistNameForAlbum;
 	private int mIdIdx, mAlbumIdx, mArtistIdx;
+	private boolean mBusy = false;
 
 	public AlbumFragment() {
 
@@ -70,14 +71,15 @@ public class AlbumFragment extends Fragment implements Constants, OnItemClickLis
 		mGridView.setAdapter(mAdapter);
 		mGridView.setOnItemClickListener(this);
 		mGridView.setOnCreateContextMenuListener(this);
+		mGridView.setDrawingCacheEnabled(true);
+		mGridView.setDrawingCacheQuality(View.DRAWING_CACHE_QUALITY_AUTO);
 
 		getLoaderManager().initLoader(0, null, this);
 	}
 
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-		View view = inflater.inflate(R.layout.albums_browser, container, false);
-		return view;
+		return inflater.inflate(R.layout.albums_browser, container, false);
 	}
 
 	@Override
@@ -191,6 +193,27 @@ public class AlbumFragment extends Fragment implements Constants, OnItemClickLis
 				return true;
 		}
 		return super.onContextItemSelected(item);
+	}
+
+	@Override
+	public void onScrollStateChanged(AbsListView view, int state) {
+		switch (state) {
+			case SCROLL_STATE_IDLE:
+				mBusy = false;
+				break;
+			case SCROLL_STATE_TOUCH_SCROLL:
+				mBusy = true;
+				break;
+			case SCROLL_STATE_FLING:
+				mBusy = true;
+				break;
+		}
+
+	}
+
+	@Override
+	public void onScroll(AbsListView paramAbsListView, int paramInt1, int paramInt2, int paramInt3) {
+
 	}
 
 	private void doSearch() {
@@ -312,7 +335,15 @@ public class AlbumFragment extends Fragment implements Constants, OnItemClickLis
 			int width = getResources().getDimensionPixelSize(R.dimen.gridview_bitmap_width);
 			int height = getResources().getDimensionPixelSize(R.dimen.gridview_bitmap_height);
 
-			new AsyncAlbumArtLoader(viewholder, true).execute(aid, width, height);
+			Bitmap result = MusicUtils.getCachedArtwork(getActivity(), aid, width, height);
+
+			if (viewholder != null && viewholder.album_art != null && !mBusy) {
+				if (result != null) {
+					viewholder.album_art.setImageBitmap(result);
+				} else {
+					viewholder.album_art.setImageResource(R.drawable.ic_mp_albumart_unknown);
+				}
+			}
 
 			long currentalbumid = MusicUtils.getCurrentAlbumId();
 			if (currentalbumid == aid) {
@@ -322,53 +353,6 @@ public class AlbumFragment extends Fragment implements Constants, OnItemClickLis
 				viewholder.album_name.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
 			}
 
-		}
-
-		private class AsyncAlbumArtLoader extends AsyncTask<Object, Void, Bitmap> {
-
-			boolean enable_animation = false;
-			private ViewHolder viewholder;
-
-			public AsyncAlbumArtLoader(ViewHolder viewholder, Boolean animation) {
-
-				enable_animation = animation;
-				this.viewholder = viewholder;
-			}
-
-			@Override
-			protected void onPreExecute() {
-
-				if (enable_animation) {
-					viewholder.album_art.startAnimation(AnimationUtils.loadAnimation(getActivity(),
-							android.R.anim.fade_out));
-					viewholder.album_art.setVisibility(View.INVISIBLE);
-				}
-			}
-
-			@Override
-			protected Bitmap doInBackground(Object... params) {
-
-				return MusicUtils.getCachedArtwork(getActivity(), (Long) params[0],
-						(Integer) params[1], (Integer) params[2]);
-			}
-
-			@Override
-			protected void onPostExecute(Bitmap result) {
-				if (viewholder != null && viewholder.album_art != null) {
-					if (result != null) {
-						viewholder.album_art.setImageBitmap(result);
-					} else {
-						viewholder.album_art.setImageResource(R.drawable.ic_mp_albumart_unknown);
-					}
-					if (enable_animation) {
-						viewholder.album_art.setVisibility(View.VISIBLE);
-						if (getActivity() != null) {
-							viewholder.album_art.startAnimation(AnimationUtils.loadAnimation(
-									getActivity(), android.R.anim.fade_in));
-						}
-					}
-				}
-			}
 		}
 
 	}

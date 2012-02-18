@@ -38,6 +38,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -50,24 +52,26 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.view.animation.AnimationUtils;
+import android.view.WindowManager.LayoutParams;
 import android.widget.ImageButton;
+import android.widget.ImageSwitcher;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.ViewSwitcher;
 
-public class MusicBrowserActivity extends ActionBarActivity implements Constants, ServiceConnection {
+public class MusicBrowserActivity extends ActionBarActivity implements Constants,
+		ViewSwitcher.ViewFactory, ServiceConnection {
 
 	private ViewPager mViewPager;
 	private TabsAdapter mTabsAdapter;
 	private ServiceToken mToken;
 	private IMusicPlaybackService mService;
 	private PreferencesEditor mPrefs;
-	private ImageView mAlbumArt;
+	private ImageSwitcher mAlbumArt;
 	private TextView mTrackName, mTrackDetail;
 	private ImageButton mPlayPauseButton, mNextButton;
 	private AsyncAlbumArtLoader mAlbumArtLoader;
@@ -150,6 +154,27 @@ public class MusicBrowserActivity extends ActionBarActivity implements Constants
 		return super.onOptionsItemSelected(item);
 	}
 
+	@Override
+	public View makeView() {
+		ImageView i = new ImageView(this);
+		i.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+		i.setLayoutParams(new ImageSwitcher.LayoutParams(LayoutParams.WRAP_CONTENT,
+				LayoutParams.MATCH_PARENT));
+		return i;
+	}
+
+	@Override
+	public void onServiceConnected(ComponentName name, IBinder service) {
+		mService = IMusicPlaybackService.Stub.asInterface(service);
+		updateNowplaying();
+	}
+
+	@Override
+	public void onServiceDisconnected(ComponentName name) {
+		mService = null;
+		finish();
+	}
+
 	private BroadcastReceiver mMediaStatusReceiver = new BroadcastReceiver() {
 
 		@Override
@@ -164,18 +189,6 @@ public class MusicBrowserActivity extends ActionBarActivity implements Constants
 		}
 
 	};
-
-	@Override
-	public void onServiceConnected(ComponentName name, IBinder service) {
-		mService = IMusicPlaybackService.Stub.asInterface(service);
-		updateNowplaying();
-	}
-
-	@Override
-	public void onServiceDisconnected(ComponentName name) {
-		mService = null;
-		finish();
-	}
 
 	private void configureActivity() {
 
@@ -193,7 +206,8 @@ public class MusicBrowserActivity extends ActionBarActivity implements Constants
 
 		mCustomView.setOnClickListener(mActionBarClickListener);
 
-		mAlbumArt = (ImageView) mCustomView.findViewById(R.id.album_art);
+		mAlbumArt = (ImageSwitcher) mCustomView.findViewById(R.id.album_art);
+		mAlbumArt.setFactory(this);
 		mTrackName = (TextView) mCustomView.findViewById(R.id.track_name);
 		mTrackDetail = (TextView) mCustomView.findViewById(R.id.track_detail);
 		mPlayPauseButton = (ImageButton) mCustomView.findViewById(R.id.play_pause);
@@ -252,7 +266,7 @@ public class MusicBrowserActivity extends ActionBarActivity implements Constants
 				mTrackDetail.setText(R.string.touch_to_shuffle_all);
 			}
 			if (mAlbumArtLoader != null) mAlbumArtLoader.cancel(true);
-			mAlbumArtLoader = new AsyncAlbumArtLoader(mAlbumArt, true);
+			mAlbumArtLoader = new AsyncAlbumArtLoader();
 			mAlbumArtLoader.execute();
 		} catch (RemoteException e) {
 			e.printStackTrace();
@@ -376,33 +390,25 @@ public class MusicBrowserActivity extends ActionBarActivity implements Constants
 
 	}
 
-	private class AsyncAlbumArtLoader extends AsyncTask<Void, Void, Bitmap> {
-
-		boolean enable_animation = false;
-		private ImageView mImageView;
-
-		public AsyncAlbumArtLoader(ImageView iv, boolean animation) {
-
-			mImageView = iv;
-			enable_animation = animation;
-		}
+	private class AsyncAlbumArtLoader extends AsyncTask<Void, Void, Drawable> {
 
 		@Override
-		protected void onPreExecute() {
-
-			if (enable_animation) {
-				mImageView.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(),
-						android.R.anim.fade_out));
-				mImageView.setVisibility(View.INVISIBLE);
-			}
-		}
-
-		@Override
-		protected Bitmap doInBackground(Void... params) {
+		public Drawable doInBackground(Void... params) {
 
 			if (mService != null) {
 				try {
-					return mService.getAlbumArt();
+					Bitmap bitmap = MusicUtils.getArtwork(getApplicationContext(),
+							mService.getAudioId(), mService.getAlbumId());
+					if (bitmap == null) return null;
+					int value = 0;
+					if (bitmap.getHeight() <= bitmap.getWidth()) {
+						value = bitmap.getHeight();
+					} else {
+						value = bitmap.getWidth();
+					}
+					Bitmap result = Bitmap.createBitmap(bitmap, (bitmap.getWidth() - value) / 2,
+							(bitmap.getHeight() - value) / 2, value, value);
+					return new BitmapDrawable(getResources(), result);
 				} catch (RemoteException e) {
 					e.printStackTrace();
 				}
@@ -411,17 +417,13 @@ public class MusicBrowserActivity extends ActionBarActivity implements Constants
 		}
 
 		@Override
-		protected void onPostExecute(Bitmap result) {
-
-			if (result != null) {
-				mImageView.setImageBitmap(result);
-			} else {
-				mImageView.setImageResource(R.drawable.ic_mp_albumart_unknown);
-			}
-			if (enable_animation) {
-				mImageView.setVisibility(View.VISIBLE);
-				mImageView.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(),
-						android.R.anim.fade_in));
+		public void onPostExecute(Drawable result) {
+			if (mAlbumArt != null) {
+				if (result != null) {
+					mAlbumArt.setImageDrawable(result);
+				} else {
+					mAlbumArt.setImageResource(R.drawable.ic_mp_albumart_unknown);
+				}
 			}
 		}
 	}

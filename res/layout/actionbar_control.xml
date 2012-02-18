@@ -20,37 +20,16 @@
 	android:gravity="center_vertical"
 	android:orientation="horizontal">
 
-	<FrameLayout
-		android:layout_width="wrap_content"
-		android:layout_height="match_parent"
+	<ImageSwitcher
+		android:id="@+id/album_art"
+		android:layout_width="48dip"
+		android:layout_height="48dip"
+		android:layout_gravity="center_vertical|left"
 		android:layout_weight="0"
-		android:gravity="center_horizontal">
-
-		<ImageButton
-			android:layout_width="match_parent"
-			android:layout_height="match_parent"
-			android:layout_gravity="center"
-			android:adjustViewBounds="true"
-			android:background="@drawable/ic_mp_albumart_border"
-			android:src="@drawable/ic_mp_albumart_empty"/>
-
-		<ImageView
-			android:id="@+id/album_art"
-			android:layout_width="match_parent"
-			android:layout_height="match_parent"
-			android:layout_gravity="center"
-			android:adjustViewBounds="true"
-			android:background="@drawable/ic_mp_albumart_placeholder"
-			android:src="@drawable/ic_mp_albumart_unknown"/>
-
-		<ImageView
-			android:layout_width="match_parent"
-			android:layout_height="match_parent"
-			android:layout_gravity="center"
-			android:adjustViewBounds="true"
-			android:background="@drawable/ic_mp_albumart_mask"
-			android:src="@drawable/ic_mp_albumart_empty"/>
-	</FrameLayout>
+		android:adjustViewBounds="true"
+		android:background="@drawable/image_shadow"
+		android:inAnimation="@android:anim/fade_in"
+		android:outAnimation="@android:anim/fade_out"/>
 
 	<LinearLayout
 		android:layout_width="0dip"

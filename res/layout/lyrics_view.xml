@@ -15,8 +15,14 @@
  limitations under the License.
 -->
 
-<org.musicmod.android.widget.TextScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-	android:id="@+id/lyrics_scroll"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="match_parent"
-	android:layout_height="match_parent"
-	android:fadingEdgeLength="@dimen/lyrics_scroll_fading_edge"/>
+	android:layout_height="match_parent">
+
+	<org.musicmod.android.widget.TextScrollView
+		android:id="@+id/lyrics_scroll"
+		android:layout_width="match_parent"
+		android:layout_height="match_parent"
+		android:fadingEdgeLength="@dimen/lyrics_scroll_fading_edge"/>
+
+</FrameLayout>
