@@ -33,7 +33,7 @@
 				android:summaryOn="@string/ui_color_auto_summaryon"
 				android:title="@string/ui_color_auto"/>
 
-			<net.margaritov.preference.colorpicker.ColorPickerPreference
+			<org.mariotaku.preferences.ColorPickerPreference
 				android:defaultValue="@android:color/white"
 				android:dependency="auto_color"
 				android:key="customized_color"

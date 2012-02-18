@@ -1,6 +1,6 @@
- 									The MusicMod Project
+#The MusicMod Project#
 
-	This project used following open-source project.
+This project used following open-source project.
 
 * [CyanogenMod Project][cyangoenmod]
 * [Toralyrics][toralyrics]

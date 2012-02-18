@@ -2,6 +2,7 @@ package org.musicmod.android.view;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -131,12 +132,13 @@ public class TouchPaintView extends View {
 		mCurX = (int) x;
 		mCurY = (int) y;
 		mCurSize = size;
-		mCurWidth = (int) (mCurSize * (getWidth() / 3));
+		mCurWidth = (int) (mCurSize * 128);
 		if (mCurWidth < 1) mCurWidth = 1;
 		if (mCurDown && mBitmap != null) {
 			int pressureLevel = (int) (Math.sqrt(pressure) * 128);
 			mPaint.setARGB(pressureLevel, Color.red(mColor), Color.green(mColor),
 					Color.blue(mColor));
+			mPaint.setMaskFilter(new BlurMaskFilter(mCurWidth / 2, BlurMaskFilter.Blur.NORMAL));
 			mCanvas.drawCircle(mCurX, mCurY, mCurWidth, mPaint);
 			mRect.set(mCurX - mCurWidth - 2, mCurY - mCurWidth - 2, mCurX + mCurWidth + 2, mCurY
 					+ mCurWidth + 2);

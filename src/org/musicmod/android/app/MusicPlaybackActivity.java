@@ -16,6 +16,8 @@
 
 package org.musicmod.android.app;
 
+import java.util.ArrayList;
+
 import org.mariotaku.actionbarcompat.ActionBarActivity;
 import org.mariotaku.actionbarcompat.ActionBarCompat;
 import org.musicmod.android.Constants;
@@ -29,6 +31,8 @@ import org.musicmod.android.util.PreferencesEditor;
 import org.musicmod.android.util.VisualizerCompat;
 import org.musicmod.android.util.VisualizerWrapper;
 import org.musicmod.android.util.VisualizerWrapper.OnDataChangedListener;
+import org.musicmod.android.view.SliderView;
+import org.musicmod.android.view.SliderView.OnValueChangeListener;
 import org.musicmod.android.view.TouchPaintView;
 import org.musicmod.android.view.TouchPaintView.EventListener;
 import org.musicmod.android.view.VisualizerViewFftSpectrum;
@@ -66,24 +70,27 @@ import android.provider.MediaStore;
 import android.provider.MediaStore.Audio;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.view.ViewPager;
 import android.util.Log;
-import android.view.GestureDetector;
 import android.view.KeyEvent;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.View.OnLongClickListener;
-import android.view.View.OnTouchListener;
-import android.view.GestureDetector.OnGestureListener;
+import android.view.ViewGroup;
 import android.view.WindowManager.LayoutParams;
 import android.view.animation.AnimationUtils;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageSwitcher;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -91,8 +98,8 @@ import android.widget.Toast;
 import android.widget.SeekBar.OnSeekBarChangeListener;
 import android.widget.ViewSwitcher;
 
-public class MusicPlaybackActivity extends ActionBarActivity implements Constants, OnTouchListener,
-		OnLongClickListener, ViewSwitcher.ViewFactory, ServiceConnection {
+public class MusicPlaybackActivity extends ActionBarActivity implements Constants,
+		OnLongClickListener, ServiceConnection {
 
 	private boolean mSeeking = false;
 	private boolean mDeviceHasDpad;
@@ -102,10 +109,8 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 	private RepeatingImageButton mPrevButton;
 	private ImageButton mPauseButton;
 	private RepeatingImageButton mNextButton;
-	private ImageButton mRepeatButton, mShuffleButton;
-	private AsyncAlbumArtLoader mAlbumArtLoader;
+	
 	private AsyncColorAnalyser mColorAnalyser;
-	private Toast mToast;
 	private ServiceToken mToken;
 	private boolean mIntentDeRegistered = false;
 	private boolean mQueueShowed = false;
@@ -116,9 +121,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 	private boolean mAutoColor = true;
 	private boolean mBlurBackground = false;
 
-	private GestureDetector mGestureDetector;
-	private View mVolumeSliderLeft, mVolumeSliderRight;
-	private AudioManager mAudioManager;
 	private VisualizerViewFftSpectrum mVisualizerViewFftSpectrum;
 	private VisualizerViewWaveForm mVisualizerViewWaveForm;
 	private boolean mDisplayVisualizer = true;
@@ -128,12 +130,9 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 
 	private static final int RESULT_ALBUMART_DOWNLOADED = 1;
 
-	private LinearLayout mVolumeSlider;
-
 	private boolean mShowFadeAnimation = false;
 	private boolean mLyricsWakelock = DEFAULT_LYRICS_WAKELOCK;
 
-	private ImageSwitcher mAlbum;
 	private ProgressBar mProgress;
 	private TextView mTrackName, mTrackDetail;
 	private TouchPaintView mTouchPaintView;
@@ -145,11 +144,14 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 	private static final int REFRESH = 1;
 	private static final int QUIT = 2;
 
-	TrackFragment mQueueFragment;
+	private TrackFragment mQueueFragment;
 
-	private View mOptionButtons, mQueueFrame, mLyricsFrame, mControlButtons;
+	private View mOptionButtons;
 	
     private TextView mCurrentTime, mTotalTime;
+    
+    private ViewPager mViewPager;
+	private PagerAdapter mAdapter;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -157,8 +159,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 
 		super.onCreate(icicle);
 		setVolumeControlStream(AudioManager.STREAM_MUSIC);
-		mGestureDetector = new GestureDetector(getApplicationContext(), mVolumeSlideListener);
-		mAudioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
 		mPrefs = new PreferencesEditor(this);
 		configureActivity();
 
@@ -204,21 +204,12 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 
 		mCurrentTime = (TextView) mCustomView.findViewById(R.id.current_time);
         mTotalTime = (TextView) mCustomView.findViewById(R.id.total_time);
-		
-		mAlbum = (ImageSwitcher) findViewById(R.id.album_art);
-		mAlbum.setFactory(this);
+
+        /*
 		mAlbum.setOnClickListener(mQueueListener);
 		mAlbum.setOnLongClickListener(mSearchAlbumArtListener);
+         */
 
-		mVolumeSlider = (LinearLayout) findViewById(R.id.volume_layout);
-
-		mVolumeSliderLeft = findViewById(R.id.volume_slider_left);
-		mVolumeSliderLeft.setOnTouchListener(this);
-		mVolumeSliderLeft.setOnLongClickListener(mToggleVisualizerListener);
-
-		mVolumeSliderRight = findViewById(R.id.volume_slider_right);
-		mVolumeSliderRight.setOnTouchListener(this);
-		mVolumeSliderRight.setOnLongClickListener(mToggleVisualizerListener);
 
 		mPrevButton = (RepeatingImageButton) findViewById(R.id.prev);
 		mPrevButton.setBackgroundDrawable(new ButtonStateDrawable(new Drawable[] { getResources()
@@ -240,37 +231,35 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 
 		mDeviceHasDpad = (getResources().getConfiguration().navigation == Configuration.NAVIGATION_DPAD);
 
-		mShuffleButton = (ImageButton) findViewById(R.id.toggle_shuffle);
-		mShuffleButton.setBackgroundDrawable(new ButtonStateDrawable(
-				new Drawable[] { getResources().getDrawable(R.drawable.btn_mp_playback) }));
-		mShuffleButton.setOnClickListener(mShuffleListener);
-
-		mRepeatButton = (ImageButton) findViewById(R.id.toggle_repeat);
-		mRepeatButton.setBackgroundDrawable(new ButtonStateDrawable(new Drawable[] { getResources()
-				.getDrawable(R.drawable.btn_mp_playback) }));
-		mRepeatButton.setOnClickListener(mRepeatListener);
 
 		mVisualizerViewFftSpectrum = new VisualizerViewFftSpectrum(this);
 		mVisualizerViewWaveForm = new VisualizerViewWaveForm(this);
 		mVisualizerView = (FrameLayout) findViewById(R.id.visualizer_view);
-
-		mOptionButtons = findViewById(R.id.option_buttons);
-		mQueueFrame = findViewById(R.id.queue_frame);
-		mLyricsFrame = findViewById(R.id.lyrics_frame);
-		mControlButtons = findViewById(R.id.control_buttons);
 
 		if (mProgress instanceof SeekBar) {
 			SeekBar seeker = (SeekBar) mProgress;
 			seeker.setOnSeekBarChangeListener(mSeekListener);
 		}
 		mProgress.setMax(1000);
+		
+		if (findViewById(R.id.albumart_frame) != null) {
+			getSupportFragmentManager().beginTransaction().replace(R.id.albumart_frame, new AlbumArtFragment())
+			.commit();
+		}
 
 		mQueueFragment = new TrackFragment();
-
-		LyricsFragment fragment = new LyricsFragment();
-
-		getSupportFragmentManager().beginTransaction().replace(R.id.lyrics_frame, fragment)
-				.commit();
+		Bundle bundle = new Bundle();
+		bundle.putString(INTENT_KEY_TYPE, MediaStore.Audio.Playlists.CONTENT_TYPE);
+		bundle.putLong(MediaStore.Audio.Playlists._ID, PLAYLIST_QUEUE);
+		mQueueFragment.setArguments(bundle);
+		
+		mAdapter = new PagerAdapter(getSupportFragmentManager());
+		mAdapter.addFragment(new LyricsAndQueueFragment());
+		mAdapter.addFragment(mQueueFragment);
+		
+		mViewPager = (ViewPager) findViewById(R.id.playback_frame);
+		mViewPager.setAdapter(mAdapter);
+		
 	}
 
 	private void loadPreferences() {
@@ -285,73 +274,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 	int mTextWidth = 0;
 	int mViewWidth = 0;
 	boolean mDraggingLabel = false;
-
-	@Override
-	public boolean onTouch(View v, MotionEvent event) {
-
-		int action = event.getAction();
-		if (action == MotionEvent.ACTION_DOWN) {
-			v.setBackgroundColor(Color.argb(0x33, Color.red(mUIColor), Color.green(mUIColor),
-					Color.blue(mUIColor)));
-		} else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_CANCEL) {
-			v.setBackgroundColor(Color.TRANSPARENT);
-		}
-		mGestureDetector.onTouchEvent(event);
-		return true;
-	}
-
-	private OnGestureListener mVolumeSlideListener = new OnGestureListener() {
-
-		int view_height = 0;
-		int max_volume = 0;
-		float delta = 0;
-
-		@Override
-		public boolean onSingleTapUp(MotionEvent e) {
-
-			return false;
-		}
-
-		@Override
-		public void onShowPress(MotionEvent e) {
-
-		}
-
-		@Override
-		public boolean onScroll(MotionEvent event1, MotionEvent event2, float distanceX,
-				float distanceY) {
-
-			if (delta >= 1 || delta <= -1) {
-				adjustVolume((int) delta);
-				delta = 0;
-			} else {
-				delta += max_volume * distanceY / view_height * 2;
-			}
-			return false;
-		}
-
-		@Override
-		public void onLongPress(MotionEvent e) {
-
-			delta = 0;
-			toggleVisualizer();
-		}
-
-		@Override
-		public boolean onDown(MotionEvent e) {
-
-			max_volume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-			view_height = mVolumeSlider.getHeight();
-			delta = 0;
-			return false;
-		}
-
-		@Override
-		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-
-			return false;
-		}
-	};
 
 	@Override
 	public boolean onLongClick(View v) {
@@ -389,15 +311,7 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		return true;
 	}
 
-	@Override
-	public View makeView() {
-		ImageView i = new ImageView(this);
-		i.setScaleType(ImageView.ScaleType.FIT_CENTER);
-		i.setLayoutParams(new ImageSwitcher.LayoutParams(LayoutParams.MATCH_PARENT,
-				LayoutParams.MATCH_PARENT));
-		return i;
-	}
-
+	
 	private OnSeekBarChangeListener mSeekListener = new OnSeekBarChangeListener() {
 
 		@Override
@@ -464,9 +378,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 				mOptionButtons.setVisibility(View.VISIBLE);
 				mOptionButtons.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(),
 						android.R.anim.fade_in));
-				mQueueFrame.setPadding(mQueueFrame.getPaddingLeft(),
-						(int) (mQueueFrame.getPaddingTop() * 0.75), mQueueFrame.getPaddingRight(),
-						mQueueFrame.getPaddingBottom());
 				set.playTogether(
 						ObjectAnimator.ofFloat(view, "scaleX", 0.75f),
 						ObjectAnimator.ofFloat(view, "scaleY", 0.75f),
@@ -474,57 +385,26 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 								-(view.getLeft() + view.getWidth() * 0.25f / 2)),
 						ObjectAnimator.ofFloat(view, "translationY",
 								-view.getHeight() * 0.25f / 2));
-				mVolumeSlider.setVisibility(View.GONE);
-				mLyricsFrame.setVisibility(View.GONE);
-				mLyricsFrame.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(),
-						android.R.anim.fade_out));
-				mControlButtons.setVisibility(View.GONE);
 				Bundle bundle = new Bundle();
 				bundle.putString(INTENT_KEY_TYPE, MediaStore.Audio.Playlists.CONTENT_TYPE);
 				bundle.putLong(MediaStore.Audio.Playlists._ID, PLAYLIST_QUEUE);
 
 				mQueueFragment.setArguments(bundle);
-				ft.replace(R.id.queue_frame, mQueueFragment);
+				//ft.replace(R.id.queue_frame, mQueueFragment);
 			} else {
 				mOptionButtons.setVisibility(View.GONE);
 				mOptionButtons.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(),
 						android.R.anim.fade_out));
-				mQueueFrame.setPadding(mQueueFrame.getPaddingLeft(), getResources()
-						.getDimensionPixelSize(R.dimen.album_art_height), mQueueFrame
-						.getPaddingRight(), mQueueFrame.getPaddingBottom());
 				set.playTogether(ObjectAnimator.ofFloat(view, "scaleX", 1f),
 						ObjectAnimator.ofFloat(view, "scaleY", 1f),
 						ObjectAnimator.ofFloat(view, "translationX", 0),
 						ObjectAnimator.ofFloat(view, "translationY", 0));
-				mVolumeSlider.setVisibility(View.VISIBLE);
-				mLyricsFrame.setVisibility(View.VISIBLE);
-				mLyricsFrame.startAnimation(AnimationUtils.loadAnimation(getApplicationContext(),
-						android.R.anim.fade_in));
-				mControlButtons.setVisibility(View.VISIBLE);
 				ft.remove(mQueueFragment);
 			}
 			mQueueShowed = !mQueueShowed;
 			set.start();
 			ft.setTransitionStyle(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
 			ft.commit();
-		}
-	};
-
-	private View.OnClickListener mShuffleListener = new View.OnClickListener() {
-
-		@Override
-		public void onClick(View v) {
-
-			toggleShuffle();
-		}
-	};
-
-	private View.OnClickListener mRepeatListener = new View.OnClickListener() {
-
-		@Override
-		public void onClick(View v) {
-
-			toggleRepeat();
 		}
 	};
 
@@ -554,25 +434,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		}
 	};
 
-	private View.OnLongClickListener mToggleVisualizerListener = new View.OnLongClickListener() {
-
-		@Override
-		public boolean onLongClick(View v) {
-
-			toggleVisualizer();
-			return true;
-		}
-	};
-
-	private View.OnLongClickListener mSearchAlbumArtListener = new View.OnLongClickListener() {
-
-		@Override
-		public boolean onLongClick(View v) {
-
-			searchAlbumArt();
-			return true;
-		}
-	};
 
 	private RepeatListener mRewListener = new RepeatListener() {
 
@@ -601,7 +462,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 			unregisterReceiver(mStatusListener);
 		}
 		unregisterReceiver(mScreenTimeoutListener);
-		if (mAlbumArtLoader != null) mAlbumArtLoader.cancel(true);
 
 		getWindow().clearFlags(LayoutParams.FLAG_KEEP_SCREEN_ON);
 
@@ -828,13 +688,13 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 				scanForward(repcnt, event.getEventTime() - event.getDownTime());
 				return true;
 
-			case KeyEvent.KEYCODE_R:
-				toggleRepeat();
-				return true;
-
-			case KeyEvent.KEYCODE_S:
-				toggleShuffle();
-				return true;
+//			case KeyEvent.KEYCODE_R:
+//				toggleRepeat();
+//				return true;
+//
+//			case KeyEvent.KEYCODE_S:
+//				toggleShuffle();
+//				return true;
 
 			case KeyEvent.KEYCODE_N:
 				if (mService != null) {
@@ -868,32 +728,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		return super.onKeyDown(keyCode, event);
 	}
 
-	private void searchAlbumArt() {
-
-		String artistName = "";
-		String albumName = "";
-		String mediaPath = "";
-		String albumArtPath = "";
-		try {
-			artistName = mService.getArtistName();
-			albumName = mService.getAlbumName();
-			mediaPath = mService.getMediaPath();
-			albumArtPath = mediaPath.substring(0, mediaPath.lastIndexOf("/")) + "/AlbumArt.jpg";
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		try {
-			Intent intent = new Intent(INTENT_SEARCH_ALBUMART);
-			intent.putExtra(INTENT_KEY_ARTIST, artistName);
-			intent.putExtra(INTENT_KEY_ALBUM, albumName);
-			intent.putExtra(INTENT_KEY_PATH, albumArtPath);
-			startActivityForResult(intent, RESULT_ALBUMART_DOWNLOADED);
-		} catch (ActivityNotFoundException e) {
-			// e.printStackTrace();
-		}
-
-	}
 
 	private void setVisualizerView() {
 		try {
@@ -904,29 +738,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 			}
 		} catch (RemoteException e) {
 			e.printStackTrace();
-		}
-	}
-
-	private void toggleVisualizer() {
-
-		boolean isPlaying = false;
-		if (mService != null) {
-			try {
-				isPlaying = mService.isPlaying();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-
-		if (isPlaying) {
-			if (mDisplayVisualizer) {
-				disableVisualizer(true);
-				mDisplayVisualizer = false;
-			} else {
-				enableVisualizer();
-				mDisplayVisualizer = true;
-			}
-			mPrefs.setBooleanState(KEY_DISPLAY_VISUALIZER, mDisplayVisualizer);
 		}
 	}
 
@@ -982,22 +793,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		}
 	};
 
-	private void adjustVolume(int value) {
-
-		int max_volume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
-		int current_volume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
-
-		if ((value + current_volume) <= max_volume && (value + current_volume) >= 0) {
-			mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, value + current_volume,
-					AudioManager.FLAG_SHOW_UI);
-		} else if ((value + current_volume) > max_volume) {
-			mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, max_volume,
-					AudioManager.FLAG_SHOW_UI);
-		} else if ((value + current_volume) < 0) {
-			mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 0, AudioManager.FLAG_SHOW_UI);
-		}
-
-	}
 
 	private void scanBackward(int repcnt, long delta) {
 
@@ -1118,67 +913,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		}
 	}
 
-	private void toggleShuffle() {
-
-		if (mService == null) {
-			return;
-		}
-		try {
-			int shuffle = mService.getShuffleMode();
-			if (shuffle == SHUFFLE_NONE) {
-				mService.setShuffleMode(SHUFFLE_NORMAL);
-				if (mService.getRepeatMode() == REPEAT_CURRENT) {
-					mService.setRepeatMode(REPEAT_ALL);
-					setRepeatButtonImage();
-				}
-				showToast(R.string.shuffle_on_notif);
-			} else if (shuffle == SHUFFLE_NORMAL) {
-				mService.setShuffleMode(SHUFFLE_NONE);
-				showToast(R.string.shuffle_off_notif);
-			} else {
-				Log.e("MediaPlaybackActivity", "Invalid shuffle mode: " + shuffle);
-			}
-			setShuffleButtonImage();
-		} catch (RemoteException ex) {
-		}
-	}
-
-	private void toggleRepeat() {
-
-		if (mService == null) {
-			return;
-		}
-		try {
-			int mode = mService.getRepeatMode();
-			if (mode == MusicPlaybackService.REPEAT_NONE) {
-				mService.setRepeatMode(MusicPlaybackService.REPEAT_ALL);
-				showToast(R.string.repeat_all_notif);
-			} else if (mode == MusicPlaybackService.REPEAT_ALL) {
-				mService.setRepeatMode(MusicPlaybackService.REPEAT_CURRENT);
-				if (mService.getShuffleMode() != MusicPlaybackService.SHUFFLE_NONE) {
-					mService.setShuffleMode(MusicPlaybackService.SHUFFLE_NONE);
-					setShuffleButtonImage();
-				}
-				showToast(R.string.repeat_current_notif);
-			} else {
-				mService.setRepeatMode(MusicPlaybackService.REPEAT_NONE);
-				showToast(R.string.repeat_off_notif);
-			}
-			setRepeatButtonImage();
-		} catch (RemoteException ex) {
-		}
-
-	}
-
-	private void showToast(int resid) {
-
-		if (mToast == null) {
-			mToast = Toast.makeText(this, "", Toast.LENGTH_SHORT);
-		}
-		mToast.setText(resid);
-		mToast.show();
-	}
-
 	@Override
 	public void onServiceConnected(ComponentName classname, IBinder obj) {
 
@@ -1190,8 +924,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 				updateTrackInfo(false);
 				long next = refreshNow();
 				queueNextRefresh(next);
-				setRepeatButtonImage();
-				setShuffleButtonImage();
 				setPauseButtonImage();
 				setFavoriteButton();
 
@@ -1234,40 +966,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		finish();
 	}
 
-	private void setRepeatButtonImage() {
-
-		if (mService == null) return;
-		try {
-			switch (mService.getRepeatMode()) {
-				case REPEAT_ALL:
-					mRepeatButton.setImageResource(R.drawable.ic_mp_repeat_all_btn);
-					break;
-				case REPEAT_CURRENT:
-					mRepeatButton.setImageResource(R.drawable.ic_mp_repeat_once_btn);
-					break;
-				default:
-					mRepeatButton.setImageResource(R.drawable.ic_mp_repeat_off_btn);
-					break;
-			}
-		} catch (RemoteException ex) {
-		}
-	}
-
-	private void setShuffleButtonImage() {
-
-		if (mService == null) return;
-		try {
-			switch (mService.getShuffleMode()) {
-				case SHUFFLE_NONE:
-					mShuffleButton.setImageResource(R.drawable.ic_mp_shuffle_off_btn);
-					break;
-				default:
-					mShuffleButton.setImageResource(R.drawable.ic_mp_shuffle_on_btn);
-					break;
-			}
-		} catch (RemoteException ex) {
-		}
-	}
 
 	private void setPauseButtonImage() {
 
@@ -1409,7 +1107,9 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 					mIntentDeRegistered = false;
 				}
 				updateTrackInfo(false);
-				enableVisualizer();
+				if (mDisplayVisualizer) {
+					enableVisualizer();
+				}
 				long next = refreshNow();
 				queueNextRefresh(next);
 				setFavoriteButton();
@@ -1444,10 +1144,6 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 				mTrackDetail.setText(R.string.unknown_artist);
 			}
 
-			if (mAlbumArtLoader != null) mAlbumArtLoader.cancel(true);
-			mAlbumArtLoader = new AsyncAlbumArtLoader();
-			mAlbumArtLoader.execute();
-
 			if (mColorAnalyser != null) mColorAnalyser.cancel(true);
 			mColorAnalyser = new AsyncColorAnalyser();
 			mColorAnalyser.execute();
@@ -1460,44 +1156,7 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 		}
 	}
 
-	private class AsyncAlbumArtLoader extends AsyncTask<Void, Void, Drawable> {
-
-		@Override
-		public Drawable doInBackground(Void... params) {
-
-			if (mService != null) {
-				try {
-					Bitmap bitmap = MusicUtils.getArtwork(getApplicationContext(),
-							mService.getAudioId(), mService.getAlbumId());
-					if (bitmap == null) return null;
-					int value = 0;
-					if (bitmap.getHeight() <= bitmap.getWidth()) {
-						value = bitmap.getHeight();
-					} else {
-						value = bitmap.getWidth();
-					}
-					Bitmap result = Bitmap.createBitmap(bitmap, (bitmap.getWidth() - value) / 2,
-							(bitmap.getHeight() - value) / 2, value, value);
-					return new BitmapDrawable(getResources(), result);
-				} catch (RemoteException e) {
-					e.printStackTrace();
-				}
-			}
-			return null;
-		}
-
-		@Override
-		public void onPostExecute(Drawable result) {
-
-			if (mAlbum != null) {
-				if (result != null) {
-					mAlbum.setImageDrawable(result);
-				} else {
-					mAlbum.setImageResource(R.drawable.ic_mp_albumart_unknown);
-				}
-			}
-		}
-	}
+	
 
 	private class AsyncColorAnalyser extends AsyncTask<Void, Void, Integer> {
 
@@ -1564,9 +1223,409 @@ public class MusicPlaybackActivity extends ActionBarActivity implements Constant
 
 		@Override
 		public boolean isStateful() {
-
 			return super.isStateful();
 		}
 	}
+	
+	private class PagerAdapter extends FragmentPagerAdapter {
+
+		private final ArrayList<Fragment> mFragments = new ArrayList<Fragment>();
+
+		public PagerAdapter(FragmentManager manager) {
+			super(manager);
+		}
+
+		public void addFragment(Fragment fragment) {
+			mFragments.add(fragment);
+			notifyDataSetChanged();
+		}
+
+		@Override
+		public int getCount() {
+			return mFragments.size();
+		}
+
+		@Override
+		public Fragment getItem(int position) {
+			return mFragments.get(position);
+		}
+
+	}
+	
+	public static class LyricsAndQueueFragment extends Fragment implements OnValueChangeListener {
+		
+		private SliderView mVolumeSliderLeft, mVolumeSliderRight;
+		private AudioManager mAudioManager;
+		
+		@Override
+		public void onActivityCreated(Bundle savedInstanceState) {
+			super.onActivityCreated(savedInstanceState);
+			
+			mAudioManager = (AudioManager) getActivity().getSystemService(Context.AUDIO_SERVICE);
+			
+			View view = getView();
+			
+			mVolumeSliderLeft = (SliderView) view.findViewById(R.id.volume_slider_left);
+			mVolumeSliderLeft.setOnLongClickListener(mToggleVisualizerListener);
+			mVolumeSliderLeft.setOnValueChangeListener(this);
+			mVolumeSliderLeft.setMax(mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
+
+			mVolumeSliderRight = (SliderView) view.findViewById(R.id.volume_slider_right);
+			mVolumeSliderRight.setOnLongClickListener(mToggleVisualizerListener);
+			mVolumeSliderRight.setOnValueChangeListener(this);
+			mVolumeSliderRight.setMax(mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC));
+			
+			if (view.findViewById(R.id.albumart_frame) != null) {
+				getFragmentManager().beginTransaction().replace(R.id.albumart_frame, new AlbumArtFragment())
+				.commit();
+			}
+			
+			getFragmentManager().beginTransaction().replace(R.id.lyrics_frame, new LyricsFragment())
+			.commit();
+			
+		}
+		
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+			View view = inflater.inflate(R.layout.playback_info, container, false);
+			return view;
+		}
+		
+		@Override
+		public void onValueChanged(int value) {
+			adjustVolume(value);
+		}
+		
+		private View.OnLongClickListener mToggleVisualizerListener = new View.OnLongClickListener() {
+
+			@Override
+			public boolean onLongClick(View v) {
+
+				//toggleVisualizer();
+				return true;
+			}
+		};
+
+		private void setUIColor(int color) {
+			mVolumeSliderRight.setColor(color);
+			mVolumeSliderLeft.setColor(color);
+		}
+		
+		private void adjustVolume(int value) {
+
+			int max_volume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+			int current_volume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+
+			if ((value + current_volume) <= max_volume && (value + current_volume) >= 0) {
+				mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, value + current_volume,
+						AudioManager.FLAG_SHOW_UI);
+			} else if ((value + current_volume) > max_volume) {
+				mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, max_volume,
+						AudioManager.FLAG_SHOW_UI);
+			} else if ((value + current_volume) < 0) {
+				mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC, 0, AudioManager.FLAG_SHOW_UI);
+			}
+
+		}
+	}
+	
+	public static class AlbumArtFragment extends Fragment implements ViewSwitcher.ViewFactory, OnClickListener, ServiceConnection {
+		
+		private ImageSwitcher mAlbum;
+		private IMusicPlaybackService mService;
+		private ServiceToken mToken;
+		private AsyncAlbumArtLoader mAlbumArtLoader;
+		private ImageButton mRepeatButton, mShuffleButton;
+		private boolean mIntentDeRegistered = false;
+		
+		@Override
+		public void onActivityCreated(Bundle savedInstanceState) {
+			super.onActivityCreated(savedInstanceState);
+			
+			View view = getView();
+			
+			mAlbum = (ImageSwitcher) view.findViewById(R.id.album_art);
+			mAlbum.setFactory(this);
+			
+			mShuffleButton = (ImageButton) view.findViewById(R.id.toggle_shuffle);
+			mShuffleButton.setOnClickListener(this);
+
+			mRepeatButton = (ImageButton) view.findViewById(R.id.toggle_repeat);
+			mRepeatButton.setOnClickListener(this);
+			
+		}
+		
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+			View view = inflater.inflate(R.layout.playback_albumart, container, false);
+			return view;
+		}
+		
+		@Override
+		public void onStart() {
+			super.onStart();
+			mToken = MusicUtils.bindToService(getActivity(), this);
+			IntentFilter f = new IntentFilter();
+			f.addAction(BROADCAST_META_CHANGED);
+			getActivity().registerReceiver(mStatusListener, new IntentFilter(f));
+
+			IntentFilter s = new IntentFilter();
+			s.addAction(Intent.ACTION_SCREEN_ON);
+			s.addAction(Intent.ACTION_SCREEN_OFF);
+			getActivity().registerReceiver(mScreenTimeoutListener, new IntentFilter(s));
+			
+		}
+
+		@Override
+		public void onStop() {
+			if (mAlbumArtLoader != null) mAlbumArtLoader.cancel(true);
+			if (!mIntentDeRegistered) {
+				getActivity().unregisterReceiver(mStatusListener);
+			}
+			getActivity().unregisterReceiver(mScreenTimeoutListener);
+			
+			MusicUtils.unbindFromService(mToken);
+			super.onStop();
+		}
+		
+		@Override
+		public View makeView() {
+			ImageView view = new ImageView(getActivity());
+			view.setScaleType(ImageView.ScaleType.FIT_CENTER);
+			view.setLayoutParams(new ImageSwitcher.LayoutParams(LayoutParams.MATCH_PARENT,
+					LayoutParams.MATCH_PARENT));
+			return view;
+		}
+
+		@Override
+		public void onServiceConnected(ComponentName name, IBinder obj) {
+			mService = IMusicPlaybackService.Stub.asInterface(obj);
+			updateTrackInfo();
+			setRepeatButtonImage();
+			setShuffleButtonImage();
+		}
+
+		@Override
+		public void onServiceDisconnected(ComponentName name) {
+			getActivity().finish();
+			
+		}
+		
+		@Override
+		public void onClick(View view) {
+			if (view == mShuffleButton) {
+				toggleShuffle();
+			} else if (view == mRepeatButton) {
+				toggleRepeat();
+			}
+		}
+		
+		private BroadcastReceiver mStatusListener = new BroadcastReceiver() {
+
+			@Override
+			public void onReceive(Context context, Intent intent) {
+
+				String action = intent.getAction();
+				if (BROADCAST_META_CHANGED.equals(action)) {
+					updateTrackInfo();
+				}
+			}
+		};
+
+		private BroadcastReceiver mScreenTimeoutListener = new BroadcastReceiver() {
+
+			@Override
+			public void onReceive(Context context, Intent intent) {
+
+				if (Intent.ACTION_SCREEN_ON.equals(intent.getAction())) {
+					if (mIntentDeRegistered) {
+						IntentFilter f = new IntentFilter();
+						f.addAction(BROADCAST_META_CHANGED);
+						getActivity().registerReceiver(mStatusListener, new IntentFilter(f));
+						mIntentDeRegistered = false;
+					}
+					updateTrackInfo();
+				} else if (Intent.ACTION_SCREEN_OFF.equals(intent.getAction())) {
+					if (!mIntentDeRegistered) {
+						getActivity().unregisterReceiver(mStatusListener);
+						mIntentDeRegistered = true;
+					}
+				}
+			}
+		};
+		
+		private View.OnLongClickListener mSearchAlbumArtListener = new View.OnLongClickListener() {
+
+			@Override
+			public boolean onLongClick(View v) {
+
+				searchAlbumArt();
+				return true;
+			}
+		};
+		
+		private void searchAlbumArt() {
+
+			String artistName = "";
+			String albumName = "";
+			String mediaPath = "";
+			String albumArtPath = "";
+			try {
+				artistName = mService.getArtistName();
+				albumName = mService.getAlbumName();
+				mediaPath = mService.getMediaPath();
+				albumArtPath = mediaPath.substring(0, mediaPath.lastIndexOf("/")) + "/AlbumArt.jpg";
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			try {
+				Intent intent = new Intent(INTENT_SEARCH_ALBUMART);
+				intent.putExtra(INTENT_KEY_ARTIST, artistName);
+				intent.putExtra(INTENT_KEY_ALBUM, albumName);
+				intent.putExtra(INTENT_KEY_PATH, albumArtPath);
+				startActivityForResult(intent, RESULT_ALBUMART_DOWNLOADED);
+			} catch (ActivityNotFoundException e) {
+				// e.printStackTrace();
+			}
+
+		}
+		
+		private void updateTrackInfo() {
+			if (mAlbumArtLoader != null) mAlbumArtLoader.cancel(true);
+			mAlbumArtLoader = new AsyncAlbumArtLoader();
+			mAlbumArtLoader.execute();
+		}
+
+		private void setRepeatButtonImage() {
+
+			if (mService == null) return;
+			try {
+				switch (mService.getRepeatMode()) {
+					case REPEAT_ALL:
+						mRepeatButton.setImageResource(R.drawable.ic_mp_repeat_all_btn);
+						break;
+					case REPEAT_CURRENT:
+						mRepeatButton.setImageResource(R.drawable.ic_mp_repeat_once_btn);
+						break;
+					default:
+						mRepeatButton.setImageResource(R.drawable.ic_mp_repeat_off_btn);
+						break;
+				}
+			} catch (RemoteException ex) {
+				ex.printStackTrace();
+			}
+		}
+
+		private void setShuffleButtonImage() {
+
+			if (mService == null) return;
+			try {
+				switch (mService.getShuffleMode()) {
+					case SHUFFLE_NONE:
+						mShuffleButton.setImageResource(R.drawable.ic_mp_shuffle_off_btn);
+						break;
+					default:
+						mShuffleButton.setImageResource(R.drawable.ic_mp_shuffle_on_btn);
+						break;
+				}
+			} catch (RemoteException ex) {
+				ex.printStackTrace();
+			}
+		}
+		
+
+		private void toggleShuffle() {
+
+			if (mService == null) {
+				return;
+			}
+			try {
+				int shuffle = mService.getShuffleMode();
+				if (shuffle == SHUFFLE_NONE) {
+					mService.setShuffleMode(SHUFFLE_NORMAL);
+					if (mService.getRepeatMode() == REPEAT_CURRENT) {
+						mService.setRepeatMode(REPEAT_ALL);
+						setRepeatButtonImage();
+					}
+					Toast.makeText(getActivity(), R.string.shuffle_on_notif, Toast.LENGTH_SHORT);
+				} else if (shuffle == SHUFFLE_NORMAL) {
+					mService.setShuffleMode(SHUFFLE_NONE);
+					Toast.makeText(getActivity(), R.string.shuffle_off_notif, Toast.LENGTH_SHORT);
+				} else {
+					Log.e("MediaPlaybackActivity", "Invalid shuffle mode: " + shuffle);
+				}
+				setShuffleButtonImage();
+			} catch (RemoteException ex) {
+			}
+		}
+
+		private void toggleRepeat() {
+
+			if (mService == null) {
+				return;
+			}
+			try {
+				int mode = mService.getRepeatMode();
+				if (mode == MusicPlaybackService.REPEAT_NONE) {
+					mService.setRepeatMode(MusicPlaybackService.REPEAT_ALL);
+					Toast.makeText(getActivity(), R.string.repeat_all_notif, Toast.LENGTH_SHORT);
+				} else if (mode == MusicPlaybackService.REPEAT_ALL) {
+					mService.setRepeatMode(MusicPlaybackService.REPEAT_CURRENT);
+					if (mService.getShuffleMode() != MusicPlaybackService.SHUFFLE_NONE) {
+						mService.setShuffleMode(MusicPlaybackService.SHUFFLE_NONE);
+						setShuffleButtonImage();
+					}
+					Toast.makeText(getActivity(), R.string.repeat_current_notif, Toast.LENGTH_SHORT);
+				} else {
+					mService.setRepeatMode(MusicPlaybackService.REPEAT_NONE);
+					Toast.makeText(getActivity(), R.string.repeat_off_notif, Toast.LENGTH_SHORT);
+				}
+				setRepeatButtonImage();
+			} catch (RemoteException ex) {
+			}
+
+		}
+		
+		private class AsyncAlbumArtLoader extends AsyncTask<Void, Void, Drawable> {
+
+			@Override
+			public Drawable doInBackground(Void... params) {
+
+				if (mService != null) {
+					try {
+						Bitmap bitmap = MusicUtils.getArtwork(getActivity(),
+								mService.getAudioId(), mService.getAlbumId());
+						if (bitmap == null) return null;
+						int value = 0;
+						if (bitmap.getHeight() <= bitmap.getWidth()) {
+							value = bitmap.getHeight();
+						} else {
+							value = bitmap.getWidth();
+						}
+						Bitmap result = Bitmap.createBitmap(bitmap, (bitmap.getWidth() - value) / 2,
+								(bitmap.getHeight() - value) / 2, value, value);
+						return new BitmapDrawable(getResources(), result);
+					} catch (RemoteException e) {
+						e.printStackTrace();
+					}
+				}
+				return null;
+			}
+
+			@Override
+			public void onPostExecute(Drawable result) {
+
+				if (mAlbum != null) {
+					if (result != null) {
+						mAlbum.setImageDrawable(result);
+					} else {
+						mAlbum.setImageResource(R.drawable.ic_mp_albumart_unknown);
+					}
+				}
+			}
+		}
+	}
+
 
 }

@@ -22,7 +22,7 @@
 	android:gravity="center_vertical"
 	android:orientation="horizontal">
 
-	<View
+	<org.musicmod.android.view.SliderView
 		android:id="@+id/volume_slider_left"
 		android:layout_width="@dimen/actionbar_control_button_width"
 		android:layout_height="match_parent"
@@ -35,7 +35,7 @@
 		android:layout_gravity="center"
 		android:layout_weight="1"/>
 
-	<View
+	<org.musicmod.android.view.SliderView
 		android:id="@+id/volume_slider_right"
 		android:layout_width="@dimen/actionbar_control_button_width"
 		android:layout_height="match_parent"

@@ -28,6 +28,7 @@ public class TextScrollView extends ScrollView implements OnLongClickListener {
 	private String[] mContent;
 	private final int TIMEOUT = 1;
 	public OnLineSelectedListener mListener;
+	private Context mContext;
 
 	public TextScrollView(Context context) {
 
@@ -53,6 +54,8 @@ public class TextScrollView extends ScrollView implements OnLongClickListener {
 
 	private void init(Context context) {
 
+		mContext = context;
+		
 		setVerticalScrollBarEnabled(false);
 		mScrollContainer = new LinearLayout(context);
 		mScrollContainer.setOrientation(LinearLayout.VERTICAL);
@@ -71,7 +74,7 @@ public class TextScrollView extends ScrollView implements OnLongClickListener {
 				LayoutParams.WRAP_CONTENT, Gravity.CENTER));
 	}
 
-	public void setTextContent(String[] content, Context context) {
+	public void setTextContent(String[] content) {
 
 		mContent = content;
 		mLastLineId = -1;
@@ -90,7 +93,7 @@ public class TextScrollView extends ScrollView implements OnLongClickListener {
 		int content_id = 0;
 
 		for (String line : content) {
-			TextView mTextView = new TextView(context);
+			TextView mTextView = new TextView(mContext);
 			mTextView.setText(LyricsSplitter.split(line, mTextView.getTextSize()));
 			mTextView.setTextColor(Color.argb(0xD0, Color.red(mTextColor), Color.green(mTextColor),
 					Color.blue(mTextColor)));
@@ -121,17 +124,17 @@ public class TextScrollView extends ScrollView implements OnLongClickListener {
 		}
 	}
 
-	public void setTextColor(int color, Context context) {
+	public void setTextColor(int color) {
 
 		mTextColor = color;
-		setTextContent(mContent, context);
+		setTextContent(mContent);
 		setCurrentLine(mLastLineId, true);
 	}
 
-	public void setTextSize(float size, Context context) {
+	public void setTextSize(float size) {
 
 		mTextSize = size;
-		setTextContent(mContent, context);
+		setTextContent(mContent);
 		setCurrentLine(mLastLineId, true);
 	}
 

@@ -15,38 +15,20 @@
  limitations under the License.
 -->
 
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:layout_width="match_parent"
-	android:layout_height="match_parent"
-	android:baselineAligned="false"
-	android:orientation="vertical">
+	android:layout_height="match_parent">
 
 	<FrameLayout
+		android:id="@+id/lyrics_frame"
 		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:layout_weight="1">
-
-		<LinearLayout
-			android:layout_width="match_parent"
-			android:layout_height="match_parent"
-			android:layout_gravity="bottom">
-
-			<include layout="@layout/visualizer_view"/>
-		</LinearLayout>
-
-		<android.support.v4.view.ViewPager
-			android:id="@+id/playback_frame"
-			android:layout_width="match_parent"
-			android:layout_height="match_parent"/>
-	</FrameLayout>
+		android:layout_height="wrap_content"/>
 
 	<LinearLayout
 		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:layout_gravity="bottom"
-		android:layout_weight="0">
+		android:layout_height="match_parent">
 
-		<include layout="@layout/music_playback_control"/>
+		<include layout="@layout/volume_slider"/>
 	</LinearLayout>
 
-</LinearLayout>
+</FrameLayout>

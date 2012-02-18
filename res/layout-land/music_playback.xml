@@ -27,78 +27,28 @@
 		android:orientation="horizontal">
 
 		<FrameLayout
-			android:id="@+id/album_buttons_view"
+			android:id="@+id/albumart_frame"
 			android:layout_width="@dimen/album_art_width"
-			android:layout_height="match_parent"
-			android:gravity="top|center"
-			android:orientation="horizontal">
-
-			<ImageSwitcher
-				android:id="@+id/album_art"
-				android:layout_width="@dimen/album_art_width"
-				android:layout_height="match_parent"
-				android:layout_gravity="left|center"
-				android:adjustViewBounds="true"
-				android:background="@drawable/image_shadow"
-				android:inAnimation="@android:anim/fade_in"
-				android:outAnimation="@android:anim/fade_out"/>
-
-			<LinearLayout
-				android:id="@+id/option_buttons"
-				android:layout_width="wrap_content"
-				android:layout_height="match_parent"
-				android:layout_gravity="right"
-				android:orientation="horizontal"
-				android:visibility="gone">
-
-				<LinearLayout
-					android:layout_width="wrap_content"
-					android:layout_height="wrap_content"
-					android:layout_gravity="right"
-					android:orientation="vertical">
-
-					<ImageButton
-						android:id="@+id/toggle_shuffle"
-						android:layout_width="48dip"
-						android:layout_height="48dip"
-						android:src="@drawable/ic_mp_shuffle_off_btn"/>
-
-					<ImageButton
-						android:id="@+id/toggle_repeat"
-						android:layout_width="48dip"
-						android:layout_height="48dip"
-						android:src="@drawable/ic_mp_repeat_off_btn"/>
-				</LinearLayout>
-			</LinearLayout>
-		</FrameLayout>
+			android:layout_height="match_parent"/>
 
 		<FrameLayout
-			android:id="@+id/queue_frame"
 			android:layout_width="match_parent"
 			android:layout_height="match_parent"
 			android:layout_gravity="right"
-			android:gravity="center"
-			android:orientation="vertical">
-
-			<FrameLayout
-				android:id="@+id/lyrics_frame"
-				android:layout_width="match_parent"
-				android:layout_height="match_parent"
-				android:layout_gravity="bottom"
-				android:gravity="center"
-				android:orientation="vertical">
-
-				<include layout="@layout/visualizer_view"/>
-
-				<include layout="@layout/info_view"/>
-			</FrameLayout>
+			android:gravity="center">
 
 			<LinearLayout
 				android:layout_width="match_parent"
-				android:layout_height="match_parent">
+				android:layout_height="match_parent"
+				android:layout_gravity="bottom">
 
-				<include layout="@layout/volume_slider"/>
+				<include layout="@layout/visualizer_view"/>
 			</LinearLayout>
+
+			<android.support.v4.view.ViewPager
+				android:id="@+id/playback_frame"
+				android:layout_width="match_parent"
+				android:layout_height="match_parent"/>
 		</FrameLayout>
 	</LinearLayout>
 

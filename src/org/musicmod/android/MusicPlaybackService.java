@@ -989,7 +989,7 @@ public class MusicPlaybackService extends Service implements Constants, OnShakeL
 			i.putExtra(BROADCAST_KEY_LISTSIZE, Long.valueOf(mPlayList.length));
 		else
 			i.putExtra(BROADCAST_KEY_LISTSIZE, Long.valueOf(mPlayListLen));
-		sendStickyBroadcast(i);
+		sendBroadcast(i);
 
 		if (BROADCAST_META_CHANGED.equals(what)) {
 			mLyricsHandler.sendEmptyMessage(NEW_LYRICS_LOADED);

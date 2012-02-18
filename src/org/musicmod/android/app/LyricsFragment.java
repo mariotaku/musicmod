@@ -48,6 +48,7 @@ public class LyricsFragment extends Fragment implements Constants, OnLineSelecte
 
 		mLyricsInfoMessage = (TextView) fragmentView.findViewById(R.id.message);
 		mLyricsInfoMessage.setOnLongClickListener(this);
+
 	}
 
 	@Override
@@ -178,7 +179,7 @@ public class LyricsFragment extends Fragment implements Constants, OnLineSelecte
 		if (mLyricsScrollView == null || mService == null) return;
 
 		try {
-			mLyricsScrollView.setTextContent(mService.getLyrics(), getActivity());
+			mLyricsScrollView.setTextContent(mService.getLyrics());
 
 			if (mService.getLyricsStatus() == LYRICS_STATUS_OK) {
 			} else {
